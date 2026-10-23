@@ -112,10 +112,24 @@ func GetNavigationMenu(w http.ResponseWriter, r *http.Request) {
 			Children: []models.MenuItem{
 				{
 					ID:    "about-history",
-					Title: "ประวัติและวิสัยทัศน์",
-					Path:  "about",
+					Title: "ประวัติความเป็นมาและวิสัยทัศน์",
+					Path:  "history",
 					Type:  "route",
 					Order: 1,
+				},
+				{
+					ID:    "about-basic-info",
+					Title: "ข้อมูลพื้นฐานโรงเรียน",
+					Path:  "/page/basic-info",
+					Type:  "page",
+					Order: 2,
+				},
+				{
+					ID:    "about-personnel",
+					Title: "โครงสร้างและบุคลากร",
+					Path:  "about",
+					Type:  "route",
+					Order: 3,
 				},
 			},
 		},
@@ -167,7 +181,16 @@ func GetNavigationMenu(w http.ResponseWriter, r *http.Request) {
 		if p.MenuParent != "" {
 			for i := range menu {
 				if menu[i].ID == p.MenuParent {
-					menu[i].Children = append(menu[i].Children, item)
+					exists := false
+					for _, ch := range menu[i].Children {
+						if ch.Path == item.Path {
+							exists = true
+							break
+						}
+					}
+					if !exists {
+						menu[i].Children = append(menu[i].Children, item)
+					}
 					parentMatched = true
 					break
 				}

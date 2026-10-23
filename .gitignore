@@ -27,6 +27,11 @@ frontend/.vite/
 # Uploads directory
 uploads/*
 !uploads/.gitkeep
+handlers/uploads/
+
+# Screenshots and temporary renders
+render*.png
+render_*.png
 
 # OS & Editor files
 .DS_Store

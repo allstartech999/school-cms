@@ -102,3 +102,84 @@ export async function deletePost(id, token) {
   }
   return res.json();
 }
+
+export async function createPage(pageData, token) {
+  const res = await fetch(`${API_BASE}/pages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify(pageData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to create page');
+  }
+  return res.json();
+}
+
+export async function updatePage(id, pageData, token) {
+  const res = await fetch(`${API_BASE}/pages/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify(pageData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update page');
+  }
+  return res.json();
+}
+
+export async function deletePage(id, token) {
+  const res = await fetch(`${API_BASE}/pages/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete page');
+  }
+  return res.json();
+}
+
+export async function agentCreateOrUpdatePage(pageData, agentKey = 'agent-school-secret-key-2026') {
+  const res = await fetch(`${API_BASE}/agent/pages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Agent-Key': agentKey,
+    },
+    body: JSON.stringify(pageData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update page via agent');
+  }
+  return res.json();
+}
+
+/**
+ * Generate Next.js style optimized image URL
+ */
+export function getOptimizedImageUrl(src, { width, quality = 75, format } = {}) {
+  if (!src || typeof src !== 'string') return '';
+  if (src.endsWith('.svg') || src.startsWith('data:')) return src;
+  if (src.startsWith('http://') || src.startsWith('https://')) return src;
+
+  const params = new URLSearchParams();
+  params.set('url', src);
+  if (width && width > 0) params.set('w', String(Math.round(width)));
+  if (quality && quality > 0) params.set('q', String(quality));
+  if (format) params.set('format', format);
+
+  return `/api/v1/images?${params.toString()}`;
+}
+
+

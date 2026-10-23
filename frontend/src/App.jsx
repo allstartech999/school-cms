@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage } from './api';
 import BlockRenderer from './components/BlockRenderer';
+import OptimizedImage from './components/OptimizedImage';
 
 const INITIAL_POSTS = [
   {
@@ -146,7 +147,12 @@ export default function App() {
       if (hash.startsWith('page/')) {
         const slug = hash.replace('page/', '');
         loadDynamicPage(slug);
-      } else if (['home', 'about', 'eservice', 'news', 'contact'].includes(hash)) {
+      } else if (hash === 'basic-info') {
+        loadDynamicPage('basic-info');
+      } else if (hash === 'history' || hash === 'history-vision') {
+        setCurrentPage('history');
+        setActiveDynamicPage(null);
+      } else if (['home', 'about', 'history', 'eservice', 'news', 'contact'].includes(hash)) {
         setCurrentPage(hash);
         setActiveDynamicPage(null);
       }
@@ -166,6 +172,13 @@ export default function App() {
       const slug = target.replace(/^\/?page\//, '');
       window.location.hash = 'page/' + slug;
       loadDynamicPage(slug);
+    } else if (target === 'basic-info' || target === '/basic-info') {
+      window.location.hash = 'page/basic-info';
+      loadDynamicPage('basic-info');
+    } else if (target === 'history' || target === '/history' || target === 'history-vision' || target === '/history-vision') {
+      setCurrentPage('history');
+      window.location.hash = 'history';
+      setActiveDynamicPage(null);
     } else if (target.startsWith('http://') || target.startsWith('https://')) {
       window.open(target, '_blank');
     } else {
@@ -476,14 +489,9 @@ export default function App() {
               />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-base sm:text-lg text-[#0F172A] leading-tight tracking-tight group-hover:text-[#059669] transition whitespace-nowrap">
-                  {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
-                </span>
-                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] rounded-full whitespace-nowrap">
-                  พ.พ.ก.
-                </span>
-              </div>
+              <span className="font-bold text-base sm:text-lg text-[#0F172A] leading-tight tracking-tight group-hover:text-[#059669] transition whitespace-nowrap block">
+                {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
+              </span>
               <p className="text-xs text-[#64748B] font-medium whitespace-nowrap">
                 สพม.มหาสารคาม • อ.โกสุมพิสัย
               </p>
@@ -494,13 +502,26 @@ export default function App() {
           <nav className="hidden lg:flex items-center gap-1.5">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
-              { id: 'about', title: 'โครงสร้างและบุคลากร', path: 'about' },
+              { 
+                id: 'about', 
+                title: 'เกี่ยวกับโรงเรียน', 
+                path: 'about',
+                children: [
+                  { id: 'about-history', title: 'ประวัติความเป็นมาและวิสัยทัศน์', path: 'history' },
+                  { id: 'about-basic-info', title: 'ข้อมูลพื้นฐานโรงเรียน', path: '/page/basic-info' },
+                  { id: 'about-personnel', title: 'โครงสร้างและบุคลากร', path: 'about' },
+                ]
+              },
               { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
               { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
               { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
             ]).map((item) => {
               const active = currentPage === item.path || 
-                (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, ''));
+                (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, '')) ||
+                (item.children && item.children.some(child => 
+                  currentPage === child.path || 
+                  (currentPage === 'dynamic_page' && activeDynamicPage?.slug === child.path?.replace(/^\/?page\//, ''))
+                ));
 
               if (item.children && item.children.length > 0) {
                 return (
@@ -517,18 +538,26 @@ export default function App() {
                       <ChevronDown className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#059669] transition" />
                     </button>
                     {/* Dropdown Menu */}
-                    <div className="absolute left-0 top-full pt-2 hidden group-hover:block z-50 min-w-[200px] animate-in fade-in duration-100">
+                    <div className="absolute left-0 top-full pt-2 hidden group-hover:block z-50 min-w-[220px] animate-in fade-in duration-100">
                       <div className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-2 space-y-1">
-                        {item.children.map((child) => (
-                          <button
-                            key={child.id || child.path}
-                            onClick={() => navigateTo(child.path)}
-                            className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-[#ECFDF5] hover:text-[#065F46] text-[#334155] flex items-center gap-2 transition cursor-pointer font-semibold"
-                          >
-                            <ChevronRight className="w-3.5 h-3.5 text-[#059669] shrink-0" />
-                            <span className="truncate">{child.title}</span>
-                          </button>
-                        ))}
+                        {item.children.map((child) => {
+                          const childActive = currentPage === child.path || 
+                            (currentPage === 'dynamic_page' && activeDynamicPage?.slug === child.path?.replace(/^\/?page\//, ''));
+                          return (
+                            <button
+                              key={child.id || child.path}
+                              onClick={() => navigateTo(child.path)}
+                              className={`w-full text-left px-3 py-2 text-xs rounded-xl flex items-center gap-2 transition cursor-pointer font-semibold ${
+                                childActive
+                                  ? 'bg-[#ECFDF5] text-[#065F46]'
+                                  : 'text-[#334155] hover:bg-[#ECFDF5] hover:text-[#065F46]'
+                              }`}
+                            >
+                              <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${childActive ? 'text-[#059669]' : 'text-[#94A3B8]'}`} />
+                              <span className="truncate">{child.title}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
@@ -590,13 +619,26 @@ export default function App() {
           <div className="lg:hidden border-t border-[#E2E8F0] bg-white px-6 py-4 space-y-1.5 shadow-lg">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
-              { id: 'about', title: 'โครงสร้างและบุคลากร', path: 'about' },
+              { 
+                id: 'about', 
+                title: 'เกี่ยวกับโรงเรียน', 
+                path: 'about',
+                children: [
+                  { id: 'about-history', title: 'ประวัติความเป็นมาและวิสัยทัศน์', path: 'history' },
+                  { id: 'about-basic-info', title: 'ข้อมูลพื้นฐานโรงเรียน', path: '/page/basic-info' },
+                  { id: 'about-personnel', title: 'โครงสร้างและบุคลากร', path: 'about' },
+                ]
+              },
               { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
               { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
               { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
             ]).map((item) => {
               const active = currentPage === item.path || 
-                (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, ''));
+                (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, '')) ||
+                (item.children && item.children.some(child => 
+                  currentPage === child.path || 
+                  (currentPage === 'dynamic_page' && activeDynamicPage?.slug === child.path?.replace(/^\/?page\//, ''))
+                ));
               return (
                 <div key={item.id || item.path} className="space-y-1">
                   <button 
@@ -610,15 +652,23 @@ export default function App() {
                   </button>
                   {item.children && item.children.length > 0 && (
                     <div className="pl-4 space-y-1 border-l-2 border-[#10B981] ml-3 py-1">
-                      {item.children.map((child) => (
-                        <button
-                          key={child.id || child.path}
-                          onClick={() => navigateTo(child.path)}
-                          className="block w-full text-left py-1.5 px-2.5 text-xs text-[#334155] hover:text-[#059669] font-medium rounded-lg"
-                        >
-                          • {child.title}
-                        </button>
-                      ))}
+                      {item.children.map((child) => {
+                        const childActive = currentPage === child.path || 
+                          (currentPage === 'dynamic_page' && activeDynamicPage?.slug === child.path?.replace(/^\/?page\//, ''));
+                        return (
+                          <button
+                            key={child.id || child.path}
+                            onClick={() => navigateTo(child.path)}
+                            className={`block w-full text-left py-2 px-2.5 text-xs font-semibold rounded-lg transition ${
+                              childActive
+                                ? 'bg-[#ECFDF5] text-[#065F46]'
+                                : 'text-[#334155] hover:text-[#059669]'
+                            }`}
+                          >
+                            • {child.title}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -831,14 +881,13 @@ export default function App() {
                   <div className="lg:col-span-4 flex justify-center">
                     <div className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-white shadow-xl border border-[#E2E8F0] p-3">
                       <div className="rounded-[24px] overflow-hidden aspect-4/5 bg-[#F0FDF4]">
-                        <img 
+                        <OptimizedImage 
                           src="/images/director.jpg" 
                           alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการ"
+                          width={400}
+                          quality={80}
+                          fallbackSrc="/images/head-academic.jpg"
                           className="w-full h-full object-cover object-top"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = '/images/head-academic.jpg';
-                          }}
                         />
                       </div>
                       <div className="p-4 text-center">
@@ -995,9 +1044,12 @@ export default function App() {
                       className="akat-card overflow-hidden cursor-pointer flex flex-col justify-between group"
                     >
                       <div className="aspect-16/10 w-full overflow-hidden bg-[#F0FDF4]">
-                        <img 
+                        <OptimizedImage 
                           src={post.image_url || '/images/news-active-learning.jpg'} 
                           alt={post.title} 
+                          width={600}
+                          quality={75}
+                          responsive={true}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                       </div>
@@ -1057,6 +1109,20 @@ export default function App() {
                 
                 {/* Fast Anchor Navigation Bar */}
                 <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-6">
+                  <button
+                    onClick={() => navigateTo('history')}
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0] transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Compass className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>ประวัติ & วิสัยทัศน์</span>
+                  </button>
+                  <button
+                    onClick={() => navigateTo('page/basic-info')}
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#065F46] border border-[#A7F3D0] transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>ข้อมูลพื้นฐานโรงเรียน (ตรา/คำขวัญ)</span>
+                  </button>
                   <a
                     href="#director"
                     className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5"
@@ -1077,13 +1143,6 @@ export default function App() {
                   >
                     <GraduationCap className="w-3.5 h-3.5 text-[#059669]" />
                     <span>คณะครูและบุคลากร</span>
-                  </a>
-                  <a
-                    href="#history-vision"
-                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5"
-                  >
-                    <Compass className="w-3.5 h-3.5 text-[#059669]" />
-                    <span>ประวัติ & วิสัยทัศน์</span>
                   </a>
                 </div>
               </div>
@@ -1321,93 +1380,259 @@ export default function App() {
 
               </div>
 
-              {/* ======================================================== */}
-              {/* LEVEL 4: ข้อมูลประวัติและวิสัยทัศน์ (SAME PAGE INTEGRATION) */}
-              {/* ======================================================== */}
-              <div id="history-vision" className="mt-20 pt-12 border-t-2 border-[#E2E8F0] scroll-mt-24 space-y-8">
-                
-                <div className="text-center max-w-2xl mx-auto mb-8">
-                  <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] uppercase tracking-wider mb-2">
-                    ข้อมูลสถานศึกษา
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* PAGE: ประวัติความเป็นมาและวิสัยทัศน์ (HISTORY & VISION ROUTE) */}
+          {/* ========================================================= */}
+          {currentPage === 'history' && (
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
+              
+              {/* Header Title */}
+              <div className="text-center max-w-3xl mx-auto mb-10">
+                <span className="inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] uppercase tracking-wider mb-2.5 shadow-2xs">
+                  ข้อมูลสถานศึกษา • โรงเรียนโพนงามพิทยานุกูล
+                </span>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold site-emerald tracking-tight">
+                  ประวัติความเป็นมาและวิสัยทัศน์
+                </h1>
+                <p className="text-xs sm:text-sm text-[#64748B] mt-2.5 font-medium max-w-xl mx-auto">
+                  รากฐานการศึกษา ภารกิจ อัตลักษณ์ และทิศทางการพัฒนาโรงเรียนโพนงามพิทยานุกูล
+                </p>
+
+                {/* Sub Navigation Bar to related school info */}
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-6">
+                  <span className="px-4 py-1.5 rounded-full text-xs font-bold bg-[#059669] text-white shadow-xs flex items-center gap-1.5">
+                    <Compass className="w-3.5 h-3.5 text-white" />
+                    <span>ประวัติ & วิสัยทัศน์</span>
                   </span>
-                  <h3 className="text-2xl sm:text-3xl font-bold site-emerald">
-                    ประวัติความเป็นมาและวิสัยทัศน์
-                  </h3>
-                  <p className="text-xs sm:text-sm text-[#64748B] mt-1">
-                    รากฐานการศึกษาและทิศทางการพัฒนาโรงเรียนโพนงามพิทยานุกูล
-                  </p>
+                  <button
+                    onClick={() => navigateTo('page/basic-info')}
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>ข้อมูลพื้นฐานโรงเรียน (ตรา/คำขวัญ)</span>
+                  </button>
+                  <button
+                    onClick={() => navigateTo('about')}
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Users className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>โครงสร้างและบุคลากร</span>
+                  </button>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  
-                  {/* History Card */}
-                  <div className="akat-card p-8 sm:p-10 space-y-4 text-sm text-[#475569] leading-relaxed">
-                    <div className="flex items-center gap-2.5 pb-3 border-b border-[#E2E8F0]">
+              {/* Main Content Grid: 2 Columns */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                
+                {/* 1. History Section */}
+                <div className="akat-card p-6 sm:p-8 space-y-6">
+                  <div className="flex items-center gap-3 pb-4 border-b border-[#E2E8F0]">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
                       <Building2 className="w-5 h-5 text-[#059669]" />
-                      <h4 className="text-lg font-bold text-[#0F172A]">
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-[#0F172A]">
                         ประวัติการก่อตั้งสถานศึกษา
-                      </h4>
-                    </div>
-                    <p>
-                      โรงเรียนโพนงามพิทยานุกูล อำเภอโกสุมพิสัย จังหวัดมหาสารคาม สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม (สพม.มหาสารคาม) เดิมมีฐานะเป็น <strong>"สาขาโรงเรียนโกสุมวิทยาสรรค์"</strong>
-                    </p>
-                    <p>
-                      ก่อตั้งขึ้นเมื่อปี <strong>พ.ศ. 2534</strong> โดย <strong>นายณรงค์ จันทชุม</strong> ผู้อำนวยการโรงเรียนโกสุมวิทยาสรรค์ในขณะนั้น ได้ร่วมกับผู้นำชุมชน นำโดย <strong>นายวินัย สมศรีลัย</strong> กำนันตำบลโพนงาม พร้อมด้วยผู้ใหญ่บ้านทุกหมู่บ้าน มีมติเห็นชอบร่วมกันในการใช้พื้นที่ดินสาธารณประโยชน์ <strong>"โคกหนองเรือ"</strong> เนื้อที่ 32 ไร่ 3 งาน 72 ตารางวา เป็นสถานที่ตั้งโรงเรียนสาขา
-                    </p>
-                    <p>
-                      ต่อมาได้รับอนุมัติจากกรมสามัญศึกษาให้ยกฐานะเป็นโรงเรียนเอกเทศอย่างเป็นทางการ เมื่อวันที่ <strong>3 กุมภาพันธ์ พ.ศ. 2538</strong> (คำสั่งกรมสามัญศึกษาที่ 391/2538) และใช้ชื่อว่า <strong>"โรงเรียนโพนงามพิทยานุกูล"</strong> โดยมีอักษรย่อว่า <strong>"พ.พ.ก."</strong>
-                    </p>
-                    <div className="pt-2 flex flex-wrap gap-2 text-xs">
-                      <span className="px-3 py-1 bg-[#F1F5F9] rounded-lg font-semibold text-slate-700">ที่ดินโคกหนองเรือ 32 ไร่</span>
-                      <span className="px-3 py-1 bg-[#F1F5F9] rounded-lg font-semibold text-slate-700">ยกฐานะ 3 ก.พ. 2538</span>
-                      <span className="px-3 py-1 bg-[#ECFDF5] text-[#059669] rounded-lg font-bold">อักษรย่อ: พ.พ.ก.</span>
-                    </div>
-                  </div>
-
-                  {/* Vision & Motto Card */}
-                  <div className="akat-card p-8 sm:p-10 space-y-6">
-                    <div className="flex items-center gap-2.5 pb-3 border-b border-[#E2E8F0]">
-                      <Compass className="w-5 h-5 text-[#059669]" />
-                      <h4 className="text-lg font-bold text-[#0F172A]">
-                        วิสัยทัศน์ พันธกิจ และคำขวัญ
-                      </h4>
-                    </div>
-
-                    <div className="p-5 rounded-2xl bg-[#F0FDF4] border border-[#D1FAE5]">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#059669] block mb-1">
-                        วิสัยทัศน์ (Vision)
-                      </span>
-                      <h5 className="text-base font-bold text-[#065F46] leading-snug">
-                        “เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ”
-                      </h5>
-                      <p className="text-xs text-[#047857] mt-2 leading-relaxed">
-                        มุ่งเน้นการพัฒนาผู้เรียนให้มีสมรรถนะตามมาตรฐานสากล มีทักษะในศตวรรษที่ 21 ควบคู่คุณธรรมจริยธรรม และน้อมนำหลักปรัชญาของเศรษฐกิจพอเพียงมาปรับใช้
+                      </h2>
+                      <p className="text-xs text-[#64748B] mt-0.5">
+                        จุดเริ่มต้นและวิวัฒนาการของโรงเรียนโพนงามพิทยานุกูล
                       </p>
                     </div>
+                  </div>
 
-                    <div className="p-5 rounded-2xl bg-white border border-[#E2E8F0]">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] block mb-1">
-                        คำขวัญโรงเรียน (Motto)
-                      </span>
-                      <h5 className="text-base font-bold text-[#0F172A] leading-snug">
-                        “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”
-                      </h5>
-                    </div>
+                  <div className="space-y-4 text-sm text-[#334155] leading-relaxed">
+                    <p>
+                      โรงเรียนโพนงามพิทยานุกูล อำเภอโกสุมพิสัย จังหวัดมหาสารคาม สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม (สพม.มหาสารคาม) เดิมมีฐานะเป็น <strong className="text-[#0F172A]">"สาขาโรงเรียนโกสุมวิทยาสรรค์"</strong>
+                    </p>
+                    <p>
+                      ก่อตั้งขึ้นเมื่อปี <strong className="text-[#0F172A]">พ.ศ. 2534</strong> โดย <strong className="text-[#0F172A]">นายณรงค์ จันทชุม</strong> ผู้อำนวยการโรงเรียนโกสุมวิทยาสรรค์ในขณะนั้น ได้ร่วมกับผู้นำชุมชน นำโดย <strong className="text-[#0F172A]">นายวินัย สมศรีลัย</strong> กำนันตำบลโพนงาม พร้อมด้วยผู้ใหญ่บ้านทุกหมู่บ้าน มีมติเห็นชอบร่วมกันในการใช้พื้นที่ดินสาธารณประโยชน์ <strong className="text-[#059669]">"โคกหนองเรือ"</strong> เนื้อที่ 32 ไร่ 3 งาน 72 ตารางวา เป็นสถานที่ตั้งโรงเรียนสาขา
+                    </p>
+                    <p>
+                      ต่อมาได้รับอนุมัติจากกรมสามัญศึกษาให้ยกฐานะเป็นโรงเรียนเอกเทศอย่างเป็นทางการ เมื่อวันที่ <strong className="text-[#0F172A]">3 กุมภาพันธ์ พ.ศ. 2538</strong> (คำสั่งกรมสามัญศึกษาที่ 391/2538) และใช้ชื่อว่า <strong className="text-[#065F46]">"โรงเรียนโพนงามพิทยานุกูล"</strong> โดยมีอักษรย่อว่า <strong className="text-[#059669]">"พ.พ.ก."</strong>
+                    </p>
+                  </div>
 
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-[#475569] flex items-center justify-between">
-                      <div>
-                        <strong className="block text-[#0F172A]">รูปแบบการบริหารจัดการ</strong>
-                        <span>PPK SMART Model (4 ด้าน 12 ตัวชี้วัด)</span>
+                  {/* Founding Timeline Highlights */}
+                  <div className="pt-2 border-t border-[#F1F5F9] space-y-3">
+                    <h3 className="text-xs font-bold text-[#64748B] uppercase tracking-wider">
+                      หมุดหมายสำคัญ (Milestones)
+                    </h3>
+                    <div className="space-y-2.5">
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/70">
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-xs shrink-0 mt-0.5">
+                          2534
+                        </span>
+                        <div className="text-xs text-[#334155]">
+                          <strong className="text-[#0F172A] block font-semibold">จัดตั้งสาขาโรงเรียนโกสุมวิทยาสรรค์</strong>
+                          <span>ริเริ่มโดยผู้นำชุมชนกำนันตำบลโพนงามและผู้ใหญ่บ้าน ใช้พื้นที่โคกหนองเรือ 32 ไร่ 3 งาน 72 ตร.ว.</span>
+                        </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-md bg-[#059669] text-white font-bold text-[10px]">
-                        SMART
-                      </span>
-                    </div>
 
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-emerald-50/60 border border-emerald-200/70">
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-600 text-white font-bold text-xs shrink-0 mt-0.5">
+                          2538
+                        </span>
+                        <div className="text-xs text-[#334155]">
+                          <strong className="text-[#065F46] block font-semibold">ยกฐานะเป็นโรงเรียนเอกเทศ (3 ก.พ. 2538)</strong>
+                          <span>คำสั่งกรมสามัญศึกษาที่ 391/2538 นามพระราชทานโรงเรียนโพนงามพิทยานุกูล อักษรย่อ พ.พ.ก.</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary Badges */}
+                  <div className="pt-2 flex flex-wrap gap-2 text-xs">
+                    <span className="px-3 py-1.5 bg-[#F1F5F9] rounded-xl font-semibold text-slate-700 flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>ที่ดินโคกหนองเรือ 32 ไร่</span>
+                    </span>
+                    <span className="px-3 py-1.5 bg-[#F1F5F9] rounded-xl font-semibold text-slate-700 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>ยกฐานะ 3 ก.พ. 2538</span>
+                    </span>
+                    <span className="px-3 py-1.5 bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] rounded-xl font-bold flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>อักษรย่อ: พ.พ.ก.</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* 2. Vision, Mission & Motto Section */}
+                <div className="akat-card p-6 sm:p-8 space-y-6">
+                  <div className="flex items-center gap-3 pb-4 border-b border-[#E2E8F0]">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                      <Compass className="w-5 h-5 text-[#059669]" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-[#0F172A]">
+                        วิสัยทัศน์ พันธกิจ และคำขวัญ
+                      </h2>
+                      <p className="text-xs text-[#64748B] mt-0.5">
+                        ทิศทาง กลยุทธ์ และเป้าหมายการพัฒนาคุณภาพการศึกษา
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Vision Box */}
+                  <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white border border-[#D1FAE5] space-y-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                      วิสัยทัศน์ (Vision)
+                    </span>
+                    <h3 className="text-lg font-bold text-[#065F46] leading-snug">
+                      “เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ”
+                    </h3>
+                    <p className="text-xs text-[#047857] leading-relaxed">
+                      มุ่งเน้นการพัฒนาผู้เรียนให้มีสมรรถนะตามมาตรฐานสากล มีทักษะในศตวรรษที่ 21 ควบคู่คุณธรรมจริยธรรม และน้อมนำหลักปรัชญาของเศรษฐกิจพอเพียงมาปรับใช้
+                    </p>
+                  </div>
+
+                  {/* Mission Box */}
+                  <div className="p-5 rounded-2xl bg-white border border-[#E2E8F0] space-y-3">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700">
+                      พันธกิจหลัก (Mission)
+                    </span>
+                    <ul className="space-y-2 text-xs text-[#334155]">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                        <span>จัดการศึกษาเพื่อพัฒนาผู้เรียนให้มีคุณภาพตามมาตรฐานการศึกษาขั้นพื้นฐานและทักษะแห่งอนาคต</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                        <span>น้อมนำศาสตร์พระราชาและหลักปรัชญาของเศรษฐกิจพอเพียงมาบูรณาการในการจัดการเรียนรู้</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                        <span>ส่งเสริมคุณธรรม จริยธรรม ธรรมาภิบาล และการป้องกันการทุจริตในสถานศึกษา</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0 mt-0.5" />
+                        <span>พัฒนาระบบการบริหารจัดการด้วยนวัตกรรม PPK SMART Model และเทคโนโลยีดิจิทัล</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Motto Box */}
+                  <div className="p-5 rounded-2xl bg-white border border-[#E2E8F0] space-y-1.5">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200/60">
+                      คำขวัญโรงเรียน (Motto)
+                    </span>
+                    <h3 className="text-base font-bold text-[#0F172A] leading-snug">
+                      “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”
+                    </h3>
+                  </div>
+
+                  {/* Pali Motto Box */}
+                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] block">
+                      พุทธศาสนสุภาษิต / ปรัชญาโรงเรียน
+                    </span>
+                    <p className="text-sm font-bold text-emerald-800">
+                      “ปญฺญา นรานํ รตนํ”
+                    </p>
+                    <p className="text-xs text-[#64748B]">
+                      (ปัญญา คือ ดวงประทีปแก้วของนรชน)
+                    </p>
+                  </div>
+
+                  {/* Management Model */}
+                  <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200 text-xs text-[#334155] flex items-center justify-between">
+                    <div>
+                      <strong className="block text-[#065F46] font-bold">รูปแบบการบริหารจัดการสถานศึกษา</strong>
+                      <span>PPK SMART Model (4 ด้าน 12 ตัวชี้วัด)</span>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-md bg-[#059669] text-white font-bold text-[10px] shadow-2xs">
+                      SMART
+                    </span>
                   </div>
 
                 </div>
 
+              </div>
+
+              {/* Bottom Quick Navigation Cards */}
+              <div className="mt-12 pt-8 border-t border-[#E2E8F0] grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={() => navigateTo('page/basic-info')}
+                  className="p-5 rounded-2xl bg-white hover:bg-emerald-50/50 border border-[#E2E8F0] hover:border-emerald-300 text-left transition shadow-xs group cursor-pointer flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <Sparkles className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-[#0F172A] group-hover:text-emerald-700 transition">
+                        ข้อมูลพื้นฐานโรงเรียน
+                      </p>
+                      <p className="text-xs text-[#64748B]">
+                        ตราสัญลักษณ์ สีประจำโรงเรียน และข้อมูลทั่วไป
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#94A3B8] group-hover:text-emerald-600 group-hover:translate-x-0.5 transition" />
+                </button>
+
+                <button
+                  onClick={() => navigateTo('about')}
+                  className="p-5 rounded-2xl bg-white hover:bg-emerald-50/50 border border-[#E2E8F0] hover:border-emerald-300 text-left transition shadow-xs group cursor-pointer flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <Users className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-[#0F172A] group-hover:text-emerald-700 transition">
+                        โครงสร้างและทำเนียบบุคลากร
+                      </p>
+                      <p className="text-xs text-[#64748B]">
+                        แผนผังผู้บริหาร 4 กลุ่มบริหารงาน และคณะครูอาจารย์
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-[#94A3B8] group-hover:text-emerald-600 group-hover:translate-x-0.5 transition" />
+                </button>
               </div>
 
             </div>
@@ -1745,7 +1970,11 @@ export default function App() {
 
                   {/* Render Gutenberg Blocks if available */}
                   {activeDynamicPage.layout_type === 'blocks' && activeDynamicPage.layout_data ? (
-                    <BlockRenderer blocks={activeDynamicPage.layout_data} />
+                    <BlockRenderer
+                      blocks={activeDynamicPage.layout_data}
+                      pageId={activeDynamicPage.id}
+                      onPageUpdated={() => loadDynamicPage(activeDynamicPage.slug)}
+                    />
                   ) : (
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 bg-white rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
                       <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-950 mb-6 pb-4 border-b border-neutral-100">
@@ -1803,9 +2032,13 @@ export default function App() {
 
             {readingPost.image_url && (
               <div className="w-full max-h-[360px] sm:max-h-[440px] md:max-h-[480px] overflow-hidden bg-neutral-100 flex items-center justify-center">
-                <img 
+                <OptimizedImage 
                   src={readingPost.image_url} 
                   alt={readingPost.title} 
+                  width={1200}
+                  quality={85}
+                  priority={true}
+                  responsive={true}
                   className="w-full h-full object-cover object-center"
                 />
               </div>
@@ -1873,6 +2106,8 @@ export default function App() {
 
             <div className="flex flex-wrap items-center gap-6 text-xs text-[#ECFDF5]/80 font-medium">
               <button onClick={() => navigateTo('home')} className="hover:text-[#34D399] transition cursor-pointer">หน้าแรก</button>
+              <button onClick={() => navigateTo('history')} className="hover:text-[#34D399] transition cursor-pointer">ประวัติและวิสัยทัศน์</button>
+              <button onClick={() => navigateTo('page/basic-info')} className="hover:text-[#34D399] transition cursor-pointer">ข้อมูลพื้นฐาน</button>
               <button onClick={() => navigateTo('about')} className="hover:text-[#34D399] transition cursor-pointer">โครงสร้างและบุคลากร</button>
               <button onClick={() => navigateTo('eservice')} className="hover:text-[#34D399] transition cursor-pointer">ระบบ E-Service</button>
               <button onClick={() => navigateTo('news')} className="hover:text-[#34D399] transition cursor-pointer">บทความ & ข่าวสาร</button>

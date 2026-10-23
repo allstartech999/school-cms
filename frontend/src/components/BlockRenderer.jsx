@@ -7,6 +7,7 @@ import AccordionFaqBlock from './blocks/AccordionFaqBlock';
 import PersonCardsBlock from './blocks/PersonCardsBlock';
 import RichTextBlock from './blocks/RichTextBlock';
 import ImageGalleryBlock from './blocks/ImageGalleryBlock';
+import SchoolBasicInfoBlock from './blocks/SchoolBasicInfoBlock';
 
 const BLOCK_COMPONENTS = {
   hero_banner: HeroBannerBlock,
@@ -17,9 +18,10 @@ const BLOCK_COMPONENTS = {
   person_cards: PersonCardsBlock,
   rich_text: RichTextBlock,
   image_gallery: ImageGalleryBlock,
+  school_basic_info: SchoolBasicInfoBlock,
 };
 
-export default function BlockRenderer({ blocks }) {
+export default function BlockRenderer({ blocks, pageId, onPageUpdated }) {
   if (!blocks) return null;
 
   let parsedBlocks = blocks;
@@ -45,7 +47,14 @@ export default function BlockRenderer({ blocks }) {
           return null;
         }
 
-        return <Component key={index} {...(block.props || {})} />;
+        return (
+          <Component
+            key={index}
+            pageId={pageId}
+            onUpdateSuccess={onPageUpdated}
+            {...(block.props || {})}
+          />
+        );
       })}
     </div>
   );

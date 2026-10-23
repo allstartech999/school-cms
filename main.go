@@ -60,7 +60,8 @@ func main() {
 
 	// --- Uploads Static Directory ---
 	handlers.EnsureUploadDir()
-	mux.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(handlers.UploadBaseDir))))
+	mux.HandleFunc("GET /uploads/", handlers.ServeOptimizedUpload)
+	mux.HandleFunc("GET /api/v1/images", handlers.OptimizeImageEndpoint)
 
 	// --- Public APIs ---
 	mux.HandleFunc("GET /api/v1/posts", handlers.ListPosts)
@@ -108,8 +109,15 @@ func main() {
 	mux.HandleFunc("/mcp/messages", middleware.AgentAuth(sseServer.MessageHandler().ServeHTTP))
 
 	// 3. Static Web Handler (SPA Fallback + Static files with Cache-Control)
-	distFS, err := fs.Sub(embeddedFS, "dist")
-	hasEmbedded := err == nil
+	var distFS fs.FS
+	hasEmbedded := false
+	if _, err := os.Stat("dist/index.html"); err == nil {
+		distFS = os.DirFS("dist")
+		hasEmbedded = true
+	} else if sub, err := fs.Sub(embeddedFS, "dist"); err == nil {
+		distFS = sub
+		hasEmbedded = true
+	}
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		path := r.URL.Path

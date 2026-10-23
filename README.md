@@ -99,6 +99,8 @@ go build -o school-cms .
 - `GET /api/v1/pages` - ดึงรายการหน้าเพจทั้งหมด
 - `GET /api/v1/pages/{slug}` - ดึงเนื้อหาหน้าเพจตาม Slug (เช่น `about`, `contact`)
 - `GET /api/v1/stats` - ข้อมูลสรุปจำนวนข่าว, หน้าเพจ, และข่าวที่สร้างโดย AI
+- `GET /api/v1/images` - **Next.js-style On-demand Image Optimizer** (Query: `url`, `w`, `q`, `format`)
+- `GET /uploads/{path}?w=...&q=...` - เสิร์ฟไฟล์อัปโหลด พร้อมรองรับการ optimize ปรับขนาดและแปลง WebP แบบ On-the-fly ในตัว
 
 ### ระบบแอดมิน (Admin APIs - Header: `X-Admin-Token`)
 - `POST /api/v1/admin/login` - ยืนยันรหัสผ่านเพื่อรับ Token

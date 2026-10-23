@@ -30,16 +30,86 @@ import {
 import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage } from './api';
 import BlockRenderer from './components/BlockRenderer';
 
+const INITIAL_POSTS = [
+  {
+    id: 1,
+    title: "โรงเรียนโพนงามพิทยานุกูล คว้ารางวัลระดับดีเด่น การขับเคลื่อนหลักสูตร ต้านทุจริตศึกษา ปีการศึกษา 2568",
+    slug: "anti-corruption-curriculum-award-2568",
+    category: "วิชาการ",
+    summary: "โรงเรียนโพนงามพิทยานุกูล ได้รับการคัดเลือกและรับรางวัลระดับดีเด่น ในการขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ประจำปีการศึกษา 2568 สพม.มหาสารคาม",
+    content: "โรงเรียนโพนงามพิทยานุกูล สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม มุ่งมั่นปลูกฝังคุณธรรมและความซื่อสัตย์สุจริตให้แก่นักเรียนอย่างต่อเนื่อง ล่าสุดทางโรงเรียนได้รับรางวัลระดับดีเด่น ในโครงการขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ประจำปีการศึกษา 2568 สะท้อนถึงความมุ่งมั่นของคณะผู้บริหาร คณะครู และนักเรียนในการร่วมกันสร้างสังคมคุณธรรมและโปร่งใส",
+    image_url: "/images/news-active-learning.jpg",
+    author: "กลุ่มบริหารงานวิชาการ",
+    created_at: "2026-10-20T08:30:00Z",
+    views: 320
+  },
+  {
+    id: 2,
+    title: "การบริหารสถานศึกษาแบบมีส่วนร่วมเพื่อยกระดับคุณภาพการศึกษา โดยใช้ PPK SMART Model",
+    slug: "ppk-smart-model-management",
+    category: "วิชาการ",
+    summary: "โรงเรียนโพนงามพิทยานุกูล พัฒนานวัตกรรมการบริหารสถานศึกษาด้วยรูปแบบ PPK SMART Model เพื่อเสริมสร้างประสิทธิภาพการเรียนรู้รอบด้าน",
+    content: "เพื่อการพัฒนาคุณภาพการศึกษาที่ยั่งยืน โรงเรียนโพนงามพิทยานุกูล ได้นำนวัตกรรมการบริหารแบบมีส่วนร่วม 'PPK SMART Model' มาขับเคลื่อนงานทั้ง 4 กลุ่มงาน (วิชาการ, บุคคล, งบประมาณ, บริหารทั่วไป) สอดคล้องกับวิสัยทัศน์ 'เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ'",
+    image_url: "/images/news-smart-model.jpg",
+    author: "นายวัชรินทร์ ติดวงษา ผู้อำนวยการ",
+    created_at: "2026-10-18T09:00:00Z",
+    views: 450
+  },
+  {
+    id: 3,
+    title: "การพัฒนาการจัดการเรียนรู้เชิงรุก (Active Learning) ด้วยเกมเป็นฐาน รูปแบบ PM SMART MODEL",
+    slug: "active-learning-pm-smart-model",
+    category: "กิจกรรม",
+    summary: "กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ ขับเคลื่อนการเรียนรู้เชิงรุกโดยใช้เกมเป็นฐาน ส่งเสริมทักษะภาษาอังกฤษของนักเรียน",
+    content: "คณะครูกลุ่มสาระการเรียนรู้ภาษาต่างประเทศ โรงเรียนโพนงามพิทยานุกูล ได้ดำเนินการพัฒนาการจัดกิจกรรมการเรียนรู้ภาษาอังกฤษเชิงรุก (Active Learning) ด้วยเกมเป็นฐาน ผ่านโมเดล 'PM SMART MODEL' ส่งผลให้นักเรียนเกิดความสนุกสนาน กล้าแสดงออก และมีเจตคติที่ดีต่อการสื่อสารภาษาอังกฤษ",
+    image_url: "/images/banner-semarak.png",
+    author: "กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ",
+    created_at: "2026-10-15T10:15:00Z",
+    views: 290
+  },
+  {
+    id: 4,
+    title: "ขอเชิญชวนศิษย์เก่าโรงเรียนโพนงามพิทยานุกูล ร่วมลงทะเบียนผ่านระบบ PPK Alumni",
+    slug: "ppk-alumni-network-invitation",
+    category: "กิจกรรม",
+    summary: "เปิดให้บริการระบบเครือข่ายทำเนียบศิษย์เก่าออนไลน์ เพื่อเชื่อมความสัมพันธ์และร่วมพัฒนาสถานศึกษา",
+    content: "โรงเรียนโพนงามพิทยานุกูล ขอเชิญชวนศิษย์เก่าทุกรุ่น ร่วมลงทะเบียนฐานข้อมูลศิษย์เก่าผ่านระบบ E-Service (PPK Alumni) ที่ https://alumni.ppks.ac.th เพื่อสร้างเครือข่ายความร่วมมือ อัพเดตข่าวสาร และร่วมเป็นพลังในการพัฒนาคุณภาพการศึกษาของน้องๆ รุ่นต่อไป",
+    image_url: "/images/banner-alumni.png",
+    author: "งานประชาสัมพันธ์และเครือข่ายศิษย์เก่า",
+    created_at: "2026-10-12T11:00:00Z",
+    views: 512
+  }
+];
+
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'about' | 'eservice' | 'news' | 'contact' | 'dynamic_page'
-  const [posts, setPosts] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [homepageConfig, setHomepageConfig] = useState(null);
+  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [stats, setStats] = useState({
+    school_name: "โรงเรียนโพนงามพิทยานุกูล",
+    school_name_en: "Phon-ngam Pittayanukun School",
+    total_posts: 4,
+    total_pages: 3
+  });
+  const [homepageConfig, setHomepageConfig] = useState({
+    hero: {
+      badge: "โรงเรียนคุณภาพมาตรฐานสากล • สพม.มหาสารคาม",
+      heading: "โรงเรียนโพนงามพิทยานุกูล",
+      subheading: "“ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”\nเป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ",
+      primary_cta: "บริการออนไลน์ (E-Service)",
+      primary_url: "eservice"
+    },
+    announcement: "ขอเชิญชวนศิษย์เก่าทุกท่านร่วมลงทะเบียนเครือข่ายศิษย์เก่าออนไลน์ (PPK Alumni) เพื่อร่วมพัฒนาโรงเรียน",
+    show_ticker: true,
+    show_slider: true,
+    show_eservices: true,
+    show_recent_news: true,
+    show_trending: true
+  });
   const [menuItems, setMenuItems] = useState([]);
   const [activeDynamicPage, setActiveDynamicPage] = useState(null);
   const [loadingDynamicPage, setLoadingDynamicPage] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
   const [searchQuery, setSearchQuery] = useState('');
   const [readingPost, setReadingPost] = useState(null);
@@ -159,7 +229,7 @@ export default function App() {
       category: 'วิชาการ & นักเรียน',
       desc: 'ระบบส่งเสริมและประเมินสมรรถนะความฉลาดรู้ PISA สำหรับนักเรียนมัธยมศึกษา สพม.มหาสารคาม',
       url: 'https://pisa.ppks.ac.th/',
-      image: '/images/hero-banner.jpg',
+      image: '/images/artboard-1.png',
       manualUrl: null,
       badge: 'สมรรถนะสากล'
     }
@@ -217,32 +287,30 @@ export default function App() {
     { name: 'นายบุญเรือง ดวงสุฤทธิ์', position: 'นักการภารโรง', department: 'ฝ่ายบริการและสนับสนุน', photo: '/images/staff-boonrueng.jpg' },
   ];
 
-  // Load initial data
+  // Load initial data from backend if available
   useEffect(() => {
     Promise.all([
-      fetchPosts({ limit: 50 }),
+      fetchPosts({ limit: 50 }).catch(() => null),
       fetchStats().catch(() => null),
       fetchHomepageConfig().catch(() => null),
       fetchMenu().catch(() => null)
     ])
       .then(([postsData, statsData, hpCfg, menuData]) => {
-        if (Array.isArray(postsData)) {
+        if (Array.isArray(postsData) && postsData.length > 0) {
           setPosts(postsData);
         }
         if (statsData) {
           setStats(statsData);
         }
         if (hpCfg) {
-          setHomepageConfig(hpCfg);
+          setHomepageConfig(prev => ({ ...prev, ...hpCfg }));
         }
         if (Array.isArray(menuData) && menuData.length > 0) {
           setMenuItems(menuData);
         }
-        setLoading(false);
       })
       .catch(err => {
         console.error('Error fetching data:', err);
-        setLoading(false);
       });
   }, []);
 
@@ -296,7 +364,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-800 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-white text-slate-800 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
       
       {/* 1. Header (Clean Minimalist with Official Logo) */}
       <header className="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
@@ -470,7 +538,7 @@ export default function App() {
       {loading ? (
         <div className="max-w-4xl mx-auto px-4 py-24 flex-1 w-full space-y-8 animate-pulse text-center">
           <div className="flex flex-col items-center justify-center">
-            <div className="w-12 h-12 rounded-full border-2 border-emerald-100 border-t-emerald-600 animate-spin mb-4"></div>
+            <div className="w-10 h-10 rounded-full border-2 border-emerald-100 border-t-emerald-600 animate-spin mb-4"></div>
             <p className="text-sm font-medium text-slate-600">กำลังโหลดข้อมูลโรงเรียนโพนงามพิทยานุกูล...</p>
           </div>
         </div>
@@ -510,73 +578,111 @@ export default function App() {
               )}
 
               {/* Ultra-Clean Minimal Hero */}
-              <section className="pt-14 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-100 bg-white">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
+              <section className="pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-100 bg-white">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6">
                   
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-50/80 rounded-full border border-emerald-200/60 shadow-2xs mb-6">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>{homepageConfig?.hero?.badge || 'โรงเรียนคุณภาพมาตรฐานสากล • สพม.มหาสารคาม'}</span>
+                  {/* Top Intro Tag */}
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-50/80 rounded-full border border-emerald-200/60 shadow-2xs mb-4">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>{homepageConfig?.hero?.badge || 'โรงเรียนคุณภาพมาตรฐานสากล • สพม.มหาสารคาม'}</span>
+                    </div>
+
+                    <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.25] sm:leading-[1.2] mb-5">
+                      {homepageConfig?.hero?.heading || 'โรงเรียนโพนงามพิทยานุกูล'}
+                    </h1>
+
+                    <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal whitespace-pre-line">
+                      {homepageConfig?.hero?.subheading || (
+                        <>
+                          “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์” <br className="hidden sm:inline" />
+                          เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
+                        </>
+                      )}
+                    </p>
+
+                    <div className="flex flex-wrap items-center justify-center gap-3.5 mt-8">
+                      <button 
+                        onClick={() => navigateTo(homepageConfig?.hero?.primary_url || 'eservice')}
+                        className="px-7 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition shadow-sm hover:shadow-md cursor-pointer flex items-center gap-2"
+                      >
+                        <Globe className="w-4 h-4" />
+                        {homepageConfig?.hero?.primary_cta || 'บริการออนไลน์ (E-Service)'}
+                      </button>
+                      <button 
+                        onClick={() => navigateTo('about')}
+                        className="px-7 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer shadow-2xs"
+                      >
+                        เกี่ยวกับโรงเรียน
+                      </button>
+                    </div>
                   </div>
 
-                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.25] sm:leading-[1.2] mb-6 whitespace-pre-line">
-                    {homepageConfig?.hero?.heading || 'โรงเรียนโพนงามพิทยานุกูล'}
-                  </h1>
-
-                  <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-normal whitespace-pre-line">
-                    {homepageConfig?.hero?.subheading || (
-                      <>
-                        “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์” <br className="hidden sm:inline" />
-                        เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
-                      </>
-                    )}
-                  </p>
-
-                  <div className="flex flex-wrap items-center justify-center gap-3.5 mb-14">
-                    <button 
-                      onClick={() => navigateTo(homepageConfig?.hero?.primary_url || 'eservice')}
-                      className="px-7 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition shadow-sm hover:shadow-md cursor-pointer flex items-center gap-2"
-                    >
-                      <Globe className="w-4 h-4" />
-                      {homepageConfig?.hero?.primary_cta || 'บริการออนไลน์ (E-Service)'}
-                    </button>
-                    <button 
-                      onClick={() => navigateTo('about')}
-                      className="px-7 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer shadow-2xs"
-                    >
-                      เกี่ยวกับโรงเรียน
-                    </button>
-                    <button 
-                      onClick={() => navigateTo('news')}
-                      className="px-7 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer shadow-2xs"
-                    >
-                      ข่าวสารและกิจกรรม
-                    </button>
-                  </div>
-
-                  {/* High Quality Minimal Campus Photo */}
-                  <div className="rounded-3xl overflow-hidden border border-slate-200/80 shadow-md aspect-21/9 bg-slate-100 relative group">
-                    <img 
-                      src={homepageConfig?.hero?.image_url || "https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80"} 
-                      alt="โรงเรียนโพนงามพิทยานุกูล" 
-                      className="w-full h-full object-cover group-hover:scale-102 transition duration-700"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = '/images/artboard-1.png';
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent flex items-end p-6 sm:p-10 text-left">
-                      <div className="text-white max-w-xl">
-                        <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-300 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-500/30 backdrop-blur-xs">
-                          อำเภอโกสุมพิสัย จังหวัดมหาสารคาม
-                        </span>
-                        <h3 className="text-xl sm:text-2xl font-bold mt-2 text-white drop-shadow-xs">
-                          {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'} (พ.พ.ก.)
-                        </h3>
-                        <p className="text-xs sm:text-sm text-slate-200 mt-1 font-light leading-relaxed">
-                          เปิดสอนระดับมัธยมศึกษาปีที่ 1 ถึงมัธยมศึกษาปีที่ 6 มุ่งสู่ความเป็นเลิศทางวิชาการและทักษะชีวิต บนเนื้อที่ 32 ไร่ โคกหนองเรือ
+                  {/* Clean School Showcase Grid (Vision & Director Greeting) */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-12 text-left">
+                    
+                    {/* Vision & Accreditation Card (8 cols) */}
+                    <div className="md:col-span-8 bg-gradient-to-br from-emerald-900 via-emerald-950 to-slate-900 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden shadow-sm flex flex-col justify-between min-h-[300px]">
+                      <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                      
+                      <div className="relative z-10">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/10 backdrop-blur-md text-emerald-300 text-xs font-semibold mb-4 border border-white/10">
+                          <Building2 className="w-3.5 h-3.5" />
+                          <span>รหัสสถานศึกษา 1044410591 • สพม.มหาสารคาม</span>
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
+                          มุ่งมั่นพัฒนาผู้เรียนสู่มาตรฐานสากล <br />
+                          บนรากฐานคุณธรรมและนวัตกรรม
+                        </h2>
+                        <p className="text-slate-300 text-xs sm:text-sm mt-3 leading-relaxed max-w-xl font-light">
+                          เปิดสอนระดับชั้นมัธยมศึกษาปีที่ 1 ถึงมัธยมศึกษาปีที่ 6 จัดการเรียนรู้เชิงรุก (Active Learning) มุ่งเสริมสร้างทักษะแห่งศตวรรษที่ 21 สู่การเป็นพลเมืองคุณภาพ
                         </p>
                       </div>
+
+                      <div className="relative z-10 pt-6 mt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-emerald-200">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <span>โคกหนองเรือ ต.โพนงาม อ.โกสุมพิสัย จ.มหาสารคาม</span>
+                        </div>
+                        <button 
+                          onClick={() => navigateTo('about')}
+                          className="font-semibold text-white hover:text-emerald-300 flex items-center gap-1 cursor-pointer transition"
+                        >
+                          ประวัติสถานศึกษา <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Director Message Card (4 cols) */}
+                    <div className="md:col-span-4 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col justify-between items-center text-center">
+                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 border-2 border-emerald-500/20 shadow-sm mb-4 shrink-0">
+                        <img 
+                          src="/images/director.jpg" 
+                          alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการ" 
+                          className="w-full h-full object-cover object-top"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/images/head-academic.jpg';
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-base leading-tight">
+                          นายวัชรินทร์ ติดวงษา
+                        </h3>
+                        <p className="text-xs text-emerald-700 font-semibold mt-1">
+                          ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล
+                        </p>
+                        <p className="text-xs text-slate-500 mt-2.5 leading-relaxed italic bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          “ยินดีต้อนรับสู่เว็บไซต์โรงเรียนโพนงามพิทยานุกูล เราพร้อมส่งเสริมเยาวชนให้เติบโตอย่างมีคุณภาพและรอบด้าน”
+                        </p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-100 w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>สารจากผู้บริหารสถานศึกษา</span>
+                      </div>
+                    </div>
+
                   </div>
 
                 </div>
@@ -584,7 +690,7 @@ export default function App() {
 
               {/* Minimal Clean Stats Cards */}
               <section className="py-12 bg-slate-50/70 border-b border-slate-100">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6">
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                     <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
                       <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">100%</div>
@@ -607,7 +713,7 @@ export default function App() {
               </section>
 
               {/* 4 Core Groups Section (Official Artboards) */}
-              <section className="py-16 max-w-5xl mx-auto px-4 sm:px-6">
+              <section className="py-16 max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="text-center max-w-xl mx-auto mb-10">
                   <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">
                     โครงสร้างการบริหารสถานศึกษา
@@ -649,8 +755,8 @@ export default function App() {
               </section>
 
               {/* E-Service Quick Hub */}
-              <section className="py-14 bg-white border-y border-slate-200/70">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6">
+              <section className="py-14 bg-white border-y border-slate-100">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6">
                   <div className="flex items-center justify-between mb-8">
                     <div>
                       <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">
@@ -672,9 +778,9 @@ export default function App() {
                     {eServices.slice(0, 3).map((srv) => (
                       <div 
                         key={srv.id}
-                        className="bg-slate-50/70 rounded-2xl border border-slate-200 overflow-hidden hover:border-emerald-300 hover:shadow-xs transition flex flex-col justify-between"
+                        className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden hover:border-emerald-300 hover:shadow-xs transition flex flex-col justify-between"
                       >
-                        <div className="aspect-16/7 w-full overflow-hidden bg-slate-200 border-b border-slate-100">
+                        <div className="aspect-16/7 w-full overflow-hidden bg-slate-100 border-b border-slate-100">
                           <img 
                             src={srv.image} 
                             alt={srv.title} 
@@ -693,12 +799,12 @@ export default function App() {
                               {srv.desc}
                             </p>
                           </div>
-                          <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
                             <a 
                               href={srv.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
+                              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
                             >
                               เข้าสู่ระบบ <ExternalLink className="w-3 h-3" />
                             </a>
@@ -730,7 +836,7 @@ export default function App() {
               </section>
 
               {/* Latest News Highlight (3 cards) */}
-              <section className="py-16 max-w-5xl mx-auto px-4 sm:px-6">
+              <section className="py-16 max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="flex items-center justify-between mb-8">
                   <div>
                     <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">
@@ -753,11 +859,11 @@ export default function App() {
                     <article 
                       key={post.id}
                       onClick={() => handleOpenPost(post)}
-                      className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-emerald-300 hover:shadow-xs transition cursor-pointer flex flex-col justify-between group"
+                      className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden hover:border-emerald-300 hover:shadow-xs transition cursor-pointer flex flex-col justify-between group"
                     >
                       <div className="aspect-16/10 w-full overflow-hidden bg-slate-100">
                         <img 
-                          src={post.image_url || '/images/hero-banner.jpg'} 
+                          src={post.image_url || '/images/news-active-learning.jpg'} 
                           alt={post.title} 
                           className="w-full h-full object-cover group-hover:scale-103 transition duration-300"
                         />
@@ -787,7 +893,7 @@ export default function App() {
 
               {/* Optional Custom Homepage Blocks Rendered from MCP / Site Editor */}
               {homepageConfig?.custom_blocks && (
-                <div className="py-6">
+                <div className="py-6 max-w-6xl mx-auto px-4 sm:px-6">
                   <BlockRenderer blocks={homepageConfig.custom_blocks} />
                 </div>
               )}
@@ -864,110 +970,78 @@ export default function App() {
 
               {/* Subtab 1: History */}
               {aboutActiveTab === 'history' && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 space-y-8 shadow-xs">
-                  <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-slate-100">
-                    <div className="w-24 h-24 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center p-2 shrink-0">
-                      <img src="/images/logo.png" alt="PPKS Logo" className="w-full h-full object-contain" />
-                    </div>
-                    <div className="text-center sm:text-left">
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900">
-                        ประวัติความเป็นมา โรงเรียนโพนงามพิทยานุกูล
-                      </h3>
-                      <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                        จุดเริ่มต้นจากการมีส่วนร่วมของชุมชนตำบลโพนงาม และกรมสามัญศึกษา
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 text-sm sm:text-base text-slate-700 leading-relaxed font-normal">
+                <div className="space-y-6">
+                  <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/80 shadow-xs space-y-5 text-slate-700 leading-relaxed text-sm sm:text-base">
+                    <h3 className="text-xl font-bold text-slate-900 pb-3 border-b border-slate-100 flex items-center gap-2.5">
+                      <span className="w-2 h-6 bg-emerald-600 rounded-full inline-block"></span>
+                      ประวัติการก่อตั้งสถานศึกษา
+                    </h3>
                     <p>
-                      <strong>จุดเริ่มต้น (พ.ศ. 2534):</strong> โรงเรียนโพนงามพิทยานุกูล เดิมมีฐานะเป็น <strong>“สาขาโรงเรียนโกสุมวิทยาสรรค์”</strong> จัดตั้งขึ้นตามนโยบายของกรมสามัญศึกษาในขณะนั้น ที่ต้องการขยายโอกาสทางการศึกษาไปสู่ตำบลห่างไกล เพื่อให้เด็กนักเรียนในชุมชนมีโรงเรียนมัธยมศึกษาประจำตำบล
+                      โรงเรียนโพนงามพิทยานุกูล อำเภอโกสุมพิสัย จังหวัดมหาสารคาม สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม (สพม.มหาสารคาม) เดิมมีฐานะเป็น <strong>"สาขาโรงเรียนโกสุมวิทยาสรรค์"</strong>
                     </p>
                     <p>
-                      โดยในปี พ.ศ. 2534 นายณรงค์ จันทชุม ผู้อำนวยการโรงเรียนโกสุมวิทยาสรรค์ในขณะนั้น ได้มอบหมายให้คณะครูประชุมร่วมกับผู้นำชุมชน นำโดย <strong>นายวินัย สมศรีลัย</strong> กำนันตำบลโพนงาม พร้อมด้วยผู้ใหญ่บ้าน มีมติเห็นชอบร่วมกันในการใช้พื้นที่ดินสาธารณประโยชน์ <strong>“โคกหนองเรือ”</strong> เนื้อที่รวม <strong>32 ไร่ 3 งาน 72 ตารางวา</strong> ตั้งอยู่เลขที่ 3 หมู่ที่ 2 ตำบลโพนงาม อำเภอโกสุมพิสัย จังหวัดมหาสารคาม เพื่อเป็นสถานที่ก่อตั้งโรงเรียน
+                      ก่อตั้งขึ้นเมื่อปี พ.ศ. 2534 โดย <strong>นายณรงค์ จันทชุม</strong> ผู้อำนวยการโรงเรียนโกสุมวิทยาสรรค์ในขณะนั้น ได้ร่วมกับผู้นำชุมชน นำโดย <strong>นายวินัย สมศรีลัย</strong> กำนันตำบลโพนงาม พร้อมด้วยผู้ใหญ่บ้านทุกหมู่บ้าน มีมติเห็นชอบร่วมกันในการใช้พื้นที่ดินสาธารณประโยชน์ <strong>"โคกหนองเรือ"</strong> เนื้อที่ 32 ไร่ 3 งาน 72 ตารางวา เป็นสถานที่ตั้งโรงเรียนสาขา
                     </p>
                     <p>
-                      <strong>ยกฐานะเป็นโรงเรียนเอกเทศ (3 กุมภาพันธ์ พ.ศ. 2538):</strong> ต่อมาได้รับอนุมัติจากกรมสามัญศึกษา กระทรวงศึกษาธิการ ให้ยกฐานะเป็นโรงเรียนเอกเทศอย่างเป็นทางการ เมื่อวันที่ <strong>3 กุมภาพันธ์ พ.ศ. 2538</strong> (ตามคำสั่งกรมสามัญศึกษาที่ 391/2538) และใช้ชื่อว่า <strong>“โรงเรียนโพนงามพิทยานุกูล”</strong> โดยมีอักษรย่อว่า <strong>“พ.พ.ก.”</strong> นับแต่นั้นเป็นต้นมา
+                      ต่อมาได้รับอนุมัติจากกรมสามัญศึกษาให้ยกฐานะเป็นโรงเรียนเอกเทศอย่างเป็นทางการ เมื่อวันที่ <strong>3 กุมภาพันธ์ พ.ศ. 2538</strong> (คำสั่งกรมสามัญศึกษาที่ 391/2538) และใช้ชื่อว่า <strong>"โรงเรียนโพนงามพิทยานุกูล"</strong> โดยมีอักษรย่อว่า <strong>"พ.พ.ก."</strong>
                     </p>
-                  </div>
-
-                  {/* Highlights Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100 text-center">
-                    <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                      <div className="text-2xl font-extrabold text-emerald-800">พ.ศ. 2534</div>
-                      <div className="text-xs text-slate-600 mt-1">เริ่มจัดตั้งสาขาโรงเรียน</div>
-                    </div>
-                    <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                      <div className="text-2xl font-extrabold text-emerald-800">3 ก.พ. 2538</div>
-                      <div className="text-xs text-slate-600 mt-1">ยกฐานะเป็นโรงเรียนเอกเทศ</div>
-                    </div>
-                    <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-100">
-                      <div className="text-2xl font-extrabold text-emerald-800">32 ไร่ 3 งาน</div>
-                      <div className="text-xs text-slate-600 mt-1">ที่ดินโคกหนองเรือ ต.โพนงาม</div>
-                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Subtab 2: Executive & Department Heads with REAL Photos */}
+              {/* Subtab 2: Admin */}
               {aboutActiveTab === 'admin' && (
                 <div className="space-y-8">
-                  {/* Director Card with REAL Photo */}
-                  <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-xs text-center sm:text-left">
-                    <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-emerald-600 shadow-sm shrink-0 bg-slate-100">
+                  {/* Director Card */}
+                  <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+                    <div className="w-32 h-40 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                       <img 
                         src="/images/director.jpg" 
-                        alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการโรงเรียน" 
-                        className="w-full h-full object-cover"
+                        alt="ผู้อำนวยการโรงเรียน" 
+                        className="w-full h-full object-cover object-top"
                       />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
-                        ผู้อำนวยการสถานศึกษา
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
+                        ผู้บริหารสูงสุดของสถานศึกษา
                       </span>
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-2">
+                      <h3 className="text-2xl font-bold text-slate-900 mt-2">
                         นายวัชรินทร์ ติดวงษา
                       </h3>
-                      <p className="text-sm text-emerald-700 font-medium mt-0.5">
+                      <p className="text-sm font-semibold text-slate-700 mt-0.5">
                         ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล
                       </p>
-                      <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                        วิทยฐานะชำนาญการพิเศษ • สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
+                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                        วิทยฐานะ: ผู้อำนวยการชำนาญการพิเศษ <br />
+                        มุ่งมั่นบริหารงานสถานศึกษาด้วยความโปร่งใส ตามหลักธรรมาภิบาล และการมีส่วนร่วมของชุมชน
                       </p>
                     </div>
                   </div>
 
-                  {/* 4 Department Heads with REAL Photos */}
+                  {/* 4 Group Heads */}
                   <div>
-                    <h4 className="font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
-                      <Users className="w-5 h-5 text-emerald-600" />
+                    <h4 className="font-bold text-lg text-slate-900 mb-4">
                       หัวหน้ากลุ่มบริหารงาน 4 ฝ่าย
                     </h4>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {administrators.map((adm, idx) => (
-                        <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-4 flex items-center gap-4 hover:border-emerald-300 transition shadow-2xs">
-                          <div className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {administrators.map((admin, idx) => (
+                        <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs text-center flex flex-col items-center">
+                          <div className="w-24 h-32 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mb-3 shrink-0">
                             <img 
-                              src={adm.photo} 
-                              alt={adm.name} 
-                              className="w-full h-full object-cover"
+                              src={admin.photo} 
+                              alt={admin.name} 
+                              className="w-full h-full object-cover object-top"
                             />
                           </div>
-                          <div>
-                            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                              {adm.group}
-                            </span>
-                            <h5 className="font-bold text-sm sm:text-base text-slate-900 mt-1">
-                              {adm.name}
-                            </h5>
-                            <p className="text-xs text-slate-600 mt-0.5 font-medium">
-                              {adm.role}
-                            </p>
-                            <p className="text-[11px] text-slate-400">
-                              {adm.position}
-                            </p>
-                          </div>
+                          <h5 className="font-bold text-sm text-slate-900 leading-tight">
+                            {admin.name}
+                          </h5>
+                          <p className="text-xs text-emerald-700 font-semibold mt-1">
+                            {admin.role}
+                          </p>
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            {admin.position}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -975,38 +1049,35 @@ export default function App() {
                 </div>
               )}
 
-              {/* Subtab 3: Teachers & Staff with REAL Photos */}
+              {/* Subtab 3: Teachers */}
               {aboutActiveTab === 'teachers' && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs">
-                  <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-                    <div>
-                      <h4 className="font-bold text-lg text-slate-900">คณะครูและบุคลากรทางการศึกษา</h4>
-                      <p className="text-xs text-slate-500">โรงเรียนโพนงามพิทยานุกูล อำเภอโกสุมพิสัย</p>
-                    </div>
-                    <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-md">
-                      รวม {teachers.length} ท่าน
-                    </span>
+                <div className="space-y-6">
+                  <div className="text-center mb-6">
+                    <h3 className="text-xl font-bold text-slate-900">
+                      ทำเนียบคณะครูและบุคลากรทางการศึกษา
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      คณะครูผู้สอนโรงเรียนโพนงามพิทยานุกูล สพม.มหาสารคาม
+                    </p>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                     {teachers.map((t, idx) => (
-                      <div key={idx} className="bg-slate-50/60 rounded-xl border border-slate-200/80 p-3.5 text-center hover:border-emerald-300 transition group flex flex-col justify-between">
-                        <div>
-                          <div className="w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-xl overflow-hidden bg-white border border-slate-200 mb-3 shadow-2xs">
-                            <img 
-                              src={t.photo} 
-                              alt={t.name} 
-                              className="w-full h-full object-cover group-hover:scale-103 transition"
-                            />
-                          </div>
-                          <h5 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-700 transition line-clamp-1">
-                            {t.name}
-                          </h5>
-                          <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
-                            {t.position}
-                          </p>
+                      <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs text-center flex flex-col items-center">
+                        <div className="w-20 h-28 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mb-2.5 shrink-0">
+                          <img 
+                            src={t.photo} 
+                            alt={t.name} 
+                            className="w-full h-full object-cover object-top"
+                          />
                         </div>
-                        <p className="text-[10px] text-slate-400 mt-2">
+                        <h5 className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
+                          {t.name}
+                        </h5>
+                        <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
+                          {t.position}
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
                           {t.department}
                         </p>
                       </div>
@@ -1015,56 +1086,32 @@ export default function App() {
                 </div>
               )}
 
-              {/* Subtab 4: Vision & PPK Team Model */}
+              {/* Subtab 4: Vision */}
               {aboutActiveTab === 'vision' && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white p-7 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                        <Compass className="w-5 h-5" />
-                      </div>
-                      <h4 className="font-bold text-lg text-slate-900">วิสัยทัศน์ (Vision)</h4>
-                      <p className="text-slate-800 text-sm leading-relaxed font-medium bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
-                        “เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ” <br />
-                        <span className="text-xs text-slate-500 mt-1 block font-mono font-normal">
-                          (Quality Organization to Excellent Education)
-                        </span>
-                      </p>
-                      <p className="text-xs text-slate-500 leading-relaxed font-normal">
-                        มุ่งเน้นการยกระดับผลสัมฤทธิ์ทางการศึกษาและการปลูกฝังคุณธรรม จริยธรรมตามศาสตร์พระราชา
+                    <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">
+                        วิสัยทัศน์ (Vision)
+                      </span>
+                      <h4 className="text-xl font-bold text-slate-900 leading-snug">
+                        เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
+                      </h4>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        มุ่งเน้นการพัฒนาผู้เรียนให้มีสมรรถนะตามมาตรฐานสากล มีทักษะในศตวรรษที่ 21 ควบคู่คุณธรรมจริยธรรม และน้อมนำหลักปรัชญาของเศรษฐกิจพอเพียงมาปรับใช้ในการดำเนินชีวิต
                       </p>
                     </div>
 
-                    <div className="bg-white p-7 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <h4 className="font-bold text-lg text-slate-900">คำขวัญ & เอกลักษณ์ประจำโรงเรียน</h4>
-                      <p className="text-slate-800 text-sm leading-relaxed font-medium bg-slate-50 p-4 rounded-xl border border-slate-200/80">
-                        “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”
+                    <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">
+                        คำขวัญโรงเรียน (Motto)
+                      </span>
+                      <h4 className="text-xl font-bold text-slate-900 leading-snug">
+                        ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์
+                      </h4>
+                      <p className="text-xs text-slate-600 leading-relaxed">
+                        ส่งเสริมการเรียนรู้ตลอดชีวิตของนักเรียน สร้างสรรค์ปัญญา พัฒนาตนเองและร่วมสร้างประโยชน์ให้แก่ชุมชนและสังคมอย่างยั่งยืน
                       </p>
-                      <div className="space-y-1.5 pt-2 text-xs text-slate-600">
-                        <p><strong>• อักษรย่อ:</strong> พ.พ.ก.</p>
-                        <p><strong>• การจัดการเรียนการสอน:</strong> ชั้นมัธยมศึกษาปีที่ 1 - 6</p>
-                        <p><strong>• สังกัด:</strong> สพม. มหาสารคาม</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* PPK Team Model Infographic with REAL asset */}
-                  <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs">
-                    <h4 className="font-bold text-base text-slate-900 mb-2">
-                      รูปแบบการบริหารสถานศึกษา: PPK TEAM MODEL
-                    </h4>
-                    <p className="text-xs text-slate-500 mb-6">
-                      นวัตกรรมการบริหารงานแบบมีส่วนร่วม โรงเรียนโพนงามพิทยานุกูล
-                    </p>
-                    <div className="rounded-xl overflow-hidden border border-slate-100 max-w-2xl mx-auto bg-slate-50">
-                      <img 
-                        src="/images/ppk-team-model.png" 
-                        alt="PPK Team Model" 
-                        className="w-full h-auto object-contain"
-                      />
                     </div>
                   </div>
                 </div>
@@ -1074,117 +1121,110 @@ export default function App() {
           )}
 
           {/* ========================================================= */}
-          {/* PAGE 3: ระบบสารสนเทศ E-SERVICE (DEDICATED PAGE)           */}
+          {/* PAGE 3: ระบบสารสนเทศ E-SERVICES                           */}
           {/* ========================================================= */}
           {currentPage === 'eservice' && (
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
               
               <div className="text-center max-w-2xl mx-auto mb-10">
                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
-                  ระบบสารสนเทศดิจิทัล
+                  ระบบสารสนเทศออนไลน์
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
-                  ระบบบริการอิเล็กทรอนิกส์ (E-Service)
+                  ระบบ E-Services โรงเรียนโพนงามพิทยานุกูล
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  บริการออนไลน์ครบวงจรสำหรับนักเรียน ครู ผู้ปกครอง ศิษย์เก่า และประชาชน
+                  ศูนย์รวมระบบสารสนเทศ การประเมินผลการเรียน และบริการอิเล็กทรอนิกส์
                 </p>
               </div>
 
-              {/* 6 E-Services Cards with REAL Banners */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {eServices.map((service) => (
                   <div 
-                    key={service.id}
-                    className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:border-emerald-300 hover:shadow-md transition duration-200 flex flex-col justify-between"
+                    key={service.id} 
+                    className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-xs hover:border-emerald-300 hover:shadow-md transition duration-300 flex flex-col justify-between"
                   >
-                    <div>
-                      {/* Real Banner Image */}
-                      <div className="aspect-16/7 w-full overflow-hidden bg-slate-100 border-b border-slate-100 relative">
-                        <img 
-                          src={service.image} 
-                          alt={service.title} 
-                          className="w-full h-full object-cover"
-                        />
-                        <span className="absolute top-3 right-3 text-[10px] font-semibold text-emerald-800 bg-white/95 px-2.5 py-1 rounded-md shadow-2xs">
-                          {service.badge}
-                        </span>
-                      </div>
-
-                      <div className="p-6">
-                        <span className="text-xs font-medium text-slate-400">
-                          {service.category}
-                        </span>
-                        <h3 className="font-bold text-base sm:text-lg text-slate-900 mt-1 leading-snug">
+                    <div className="aspect-16/8 w-full overflow-hidden bg-slate-100 border-b border-slate-100">
+                      <img 
+                        src={service.image} 
+                        alt={service.title} 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
+                            {service.badge}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            {service.category}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-base text-slate-900 leading-snug">
                           {service.title}
-                        </h3>
-                        <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed font-normal">
+                        </h4>
+                        <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                           {service.desc}
                         </p>
                       </div>
-                    </div>
 
-                    <div className="p-6 pt-0 flex items-center justify-between gap-3 border-t border-slate-100 mt-4 pt-4">
-                      <a 
-                        href={service.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
-                      >
-                        เข้าใช้งานระบบ
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-
-                      {service.manualUrl ? (
+                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                         <a 
-                          href={service.manualUrl}
+                          href={service.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-3.5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition cursor-pointer flex items-center gap-1.5"
+                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
                         >
-                          <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                          ดาวน์โหลดคู่มือ
+                          เข้าใช้งานระบบ <ExternalLink className="w-3.5 h-3.5" />
                         </a>
-                      ) : (
-                        <span className="text-xs text-slate-400">เปิดบริการ 24 ชม.</span>
-                      )}
+                        {service.manualUrl && (
+                          <a 
+                            href={service.manualUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-slate-600 hover:text-emerald-700 underline flex items-center gap-1 font-medium"
+                          >
+                            <FileText className="w-3.5 h-3.5" /> คู่มือการใช้งาน
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-
             </div>
           )}
 
           {/* ========================================================= */}
-          {/* PAGE 4: ข่าวและประกาศ (NEWS - DEDICATED PAGE)              */}
+          {/* PAGE 4: ข่าวสารและประกาศ (NEWS & ARTICLES)                */}
           {/* ========================================================= */}
           {currentPage === 'news' && (
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
               
               <div className="text-center max-w-2xl mx-auto mb-10">
                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
-                  ข่าวสารและกิจกรรม
+                  ข่าวประชาสัมพันธ์
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
-                  ข่าวและประกาศโรงเรียนโพนงามพิทยานุกูล
+                  ข่าวสารและกิจกรรมโรงเรียนโพนงามพิทยานุกูล
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  ติดตามผลงานวิชาการ ประกาศทางการ และกิจกรรมสำคัญ
+                  ติดตามประกาศ กิจกรรมวิชาการ และผลงานนักเรียนล่าสุด
                 </p>
               </div>
 
-              {/* Filter Tabs & Search */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs">
-                <div className="flex items-center gap-1.5 w-full sm:w-auto">
+              {/* Filters */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-slate-50/80 p-3 rounded-2xl border border-slate-200/70">
+                <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
                   {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                        selectedCategory === cat 
-                          ? 'bg-slate-900 text-white shadow-xs' 
-                          : 'text-slate-600 hover:bg-slate-100'
+                      className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer whitespace-nowrap ${
+                        selectedCategory === cat
+                          ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                          : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/60'
                       }`}
                     >
                       {cat}
@@ -1192,37 +1232,42 @@ export default function App() {
                   ))}
                 </div>
 
-                <div className="relative w-full sm:w-64">
+                <div className="relative w-full sm:w-72">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
+                    placeholder="ค้นหาข่าวสาร..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="ค้นหาหัวข้อข่าว..."
-                    className="pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-emerald-500 focus:bg-white w-full transition"
+                    className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition"
                   />
                 </div>
               </div>
 
-              {/* Posts Grid */}
-              {filteredPosts.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* News Grid */}
+              {filteredPosts.length === 0 ? (
+                <div className="py-20 text-center bg-white rounded-3xl border border-slate-200/80 p-8">
+                  <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-slate-600">ไม่พบข่าวสารในหมวดหมู่นี้</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredPosts.map((post) => (
                     <article 
                       key={post.id}
                       onClick={() => handleOpenPost(post)}
-                      className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-emerald-300 hover:shadow-md transition cursor-pointer flex flex-col justify-between group"
+                      className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden hover:border-emerald-300 hover:shadow-md transition duration-300 cursor-pointer flex flex-col justify-between group"
                     >
                       <div className="aspect-16/10 w-full overflow-hidden bg-slate-100">
                         <img 
-                          src={post.image_url || '/images/hero-banner.jpg'} 
+                          src={post.image_url || '/images/news-active-learning.jpg'} 
                           alt={post.title} 
                           className="w-full h-full object-cover group-hover:scale-103 transition duration-300"
                         />
                       </div>
-                      <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div className="p-6 flex-1 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-2">
+                          <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-2.5">
                             <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
                               {post.category}
                             </span>
@@ -1232,25 +1277,17 @@ export default function App() {
                           <h4 className="font-bold text-base text-slate-900 group-hover:text-emerald-700 transition leading-snug line-clamp-2">
                             {post.title}
                           </h4>
-                          <p className="text-xs sm:text-sm text-slate-500 mt-2 line-clamp-3 leading-relaxed font-normal">
+                          <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">
                             {post.summary || post.content}
                           </p>
                         </div>
-                        <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-emerald-700 flex items-center justify-between">
-                          <span className="flex items-center gap-1">
-                            อ่านต่อ <ArrowRight className="w-3.5 h-3.5" />
-                          </span>
-                          <span className="text-[11px] text-slate-400 font-normal">
-                            {post.views || 0} views
-                          </span>
+                        <div className="mt-5 pt-3.5 border-t border-slate-100 text-xs font-semibold text-emerald-700 flex items-center justify-between">
+                          <span className="flex items-center gap-1">อ่านรายละเอียด <ArrowRight className="w-3.5 h-3.5" /></span>
+                          <span className="text-slate-400 font-normal flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
                         </div>
                       </div>
                     </article>
                   ))}
-                </div>
-              ) : (
-                <div className="py-16 text-center text-slate-400 text-sm bg-white rounded-2xl border border-slate-200">
-                  ไม่พบข้อมูลข่าวสารที่ตรงกับเงื่อนไขการค้นหา
                 </div>
               )}
 
@@ -1258,7 +1295,7 @@ export default function App() {
           )}
 
           {/* ========================================================= */}
-          {/* PAGE 5: ติดต่อเรา (CONTACT US - DEDICATED PAGE)           */}
+          {/* PAGE 5: ติดต่อเรา (CONTACT US)                             */}
           {/* ========================================================= */}
           {currentPage === 'contact' && (
             <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
@@ -1278,7 +1315,7 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 
                 {/* Contact Card */}
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
                   <div>
                     <h4 className="font-bold text-lg text-slate-900">
                       ข้อมูลที่ตั้งและการติดต่อ
@@ -1354,7 +1391,7 @@ export default function App() {
                 </div>
 
                 {/* Map & Directions Card */}
-                <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-6">
+                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-6">
                   <div>
                     <h4 className="font-bold text-lg text-slate-900">
                       การเดินทางและพิกัดที่ตั้ง
@@ -1381,15 +1418,12 @@ export default function App() {
                       href="https://www.google.com/maps/search/?api=1&query=โรงเรียนโพนงามพิทยานุกูล+โกสุมพิสัย+มหาสารคาม"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-emerald-200"
+                      className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
                     >
                       <MapPin className="w-4 h-4" />
                       เปิดพิกัดนำทางบน Google Maps
                       <ExternalLink className="w-3.5 h-3.5" />
                     </a>
-                    <p className="text-[11px] text-slate-400 text-center">
-                      * สามารถใช้ Google Maps ค้นหา "โรงเรียนโพนงามพิทยานุกูล" เพื่อนำทางด้วย GPS
-                    </p>
                   </div>
                 </div>
 
@@ -1430,7 +1464,7 @@ export default function App() {
                   {activeDynamicPage.layout_type === 'blocks' && activeDynamicPage.layout_data ? (
                     <BlockRenderer blocks={activeDynamicPage.layout_data} />
                   ) : (
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 bg-white rounded-2xl border border-slate-200 shadow-xs">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 bg-white rounded-3xl border border-slate-200/80 shadow-xs">
                       <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-6 pb-4 border-b border-slate-100">
                         {activeDynamicPage.title}
                       </h1>
@@ -1441,13 +1475,13 @@ export default function App() {
                   )}
                 </div>
               ) : (
-                <div className="max-w-xl mx-auto px-4 py-20 text-center bg-white rounded-2xl border border-slate-200 shadow-xs my-10">
+                <div className="max-w-xl mx-auto px-4 py-20 text-center bg-white rounded-3xl border border-slate-200/80 shadow-xs my-10">
                   <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
                   <h3 className="text-lg font-bold text-slate-800 mb-2">ไม่พบหน้าที่คุณต้องการ</h3>
                   <p className="text-sm text-slate-500 mb-6">หน้าเพจนี้อาจยังไม่ได้รับการเผยแพร่ หรือถูกย้ายไปแล้ว</p>
                   <button 
                     onClick={() => navigateTo('home')}
-                    className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold transition shadow-xs cursor-pointer"
+                    className="px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold transition shadow-xs cursor-pointer"
                   >
                     กลับสู่หน้าแรก
                   </button>
@@ -1466,7 +1500,7 @@ export default function App() {
           onClick={() => setReadingPost(null)}
         >
           <div 
-            className="bg-white rounded-2xl max-w-2xl w-full max-h-[88vh] overflow-y-auto shadow-xl border border-slate-200 relative my-auto animate-in fade-in duration-150"
+            className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] overflow-y-auto shadow-2xl border border-slate-200 relative my-auto animate-in fade-in duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {loadingPost && (
@@ -1512,7 +1546,7 @@ export default function App() {
               </div>
 
               {readingPost.summary && (
-                <div className="p-4 rounded-xl bg-slate-50 border-l-3 border-emerald-600 text-slate-700 text-sm sm:text-base leading-relaxed font-medium">
+                <div className="p-4 rounded-2xl bg-slate-50 border-l-4 border-emerald-600 text-slate-700 text-sm sm:text-base leading-relaxed font-medium">
                   {readingPost.summary}
                 </div>
               )}
@@ -1525,7 +1559,7 @@ export default function App() {
                 <span>ยอดเข้าชม {readingPost.views || 0} ครั้ง</span>
                 <button 
                   onClick={() => setReadingPost(null)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-medium transition cursor-pointer"
+                  className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full font-medium transition cursor-pointer"
                 >
                   ปิด (ESC)
                 </button>
@@ -1535,8 +1569,8 @@ export default function App() {
         </div>
       )}
 
-      {/* 7. Footer */}
-      <footer className="border-t border-slate-200 bg-white py-12 px-4 sm:px-6 text-slate-400 text-xs mt-auto">
+      {/* 7. Minimal Footer */}
+      <footer className="border-t border-slate-100 bg-white py-12 px-4 sm:px-6 text-slate-400 text-xs mt-auto">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <div className="flex items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 p-0.5 flex items-center justify-center shrink-0">
@@ -1553,11 +1587,11 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-6 text-xs text-slate-500 font-medium">
-            <button onClick={() => navigateTo('home')} className="hover:text-emerald-700">หน้าแรก</button>
-            <button onClick={() => navigateTo('about')} className="hover:text-emerald-700">เกี่ยวกับโรงเรียน</button>
-            <button onClick={() => navigateTo('eservice')} className="hover:text-emerald-700">E-Service</button>
-            <button onClick={() => navigateTo('news')} className="hover:text-emerald-700">ข่าวสาร</button>
-            <button onClick={() => navigateTo('contact')} className="hover:text-emerald-700">ติดต่อเรา</button>
+            <button onClick={() => navigateTo('home')} className="hover:text-emerald-700 cursor-pointer">หน้าแรก</button>
+            <button onClick={() => navigateTo('about')} className="hover:text-emerald-700 cursor-pointer">เกี่ยวกับโรงเรียน</button>
+            <button onClick={() => navigateTo('eservice')} className="hover:text-emerald-700 cursor-pointer">E-Service</button>
+            <button onClick={() => navigateTo('news')} className="hover:text-emerald-700 cursor-pointer">ข่าวสาร</button>
+            <button onClick={() => navigateTo('contact')} className="hover:text-emerald-700 cursor-pointer">ติดต่อเรา</button>
           </div>
 
           <div className="text-slate-400 text-xs space-y-1">

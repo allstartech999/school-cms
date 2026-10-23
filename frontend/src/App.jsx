@@ -28,7 +28,8 @@ import {
   Bot,
   GraduationCap,
   ShieldCheck,
-  ArrowUpRight
+  ArrowUpRight,
+  UserCheck
 } from 'lucide-react';
 import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage } from './api';
 import BlockRenderer from './components/BlockRenderer';
@@ -118,7 +119,8 @@ export default function App() {
   const [readingPost, setReadingPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [aboutActiveTab, setAboutActiveTab] = useState('history'); // history | admin | teachers | vision
+  const [aboutActiveTab, setAboutActiveTab] = useState('history');
+  const [facultyCategoryFilter, setFacultyCategoryFilter] = useState('all'); // 'all' | 'teacher' | 'staff'
 
   // Categories list
   const categories = ['ทั้งหมด', 'วิชาการ', 'กิจกรรม'];
@@ -246,48 +248,132 @@ export default function App() {
     { title: 'กลุ่มบริหารงานทั่วไป', img: '/images/artboard-4.png', head: 'นายณรงค์ศักดิ์ บัวลาด' },
   ];
 
-  // Administration list with REAL photos
+  // Administration list with REAL photos & structured duties
   const administrators = [
     {
       name: 'นายดนุพล คำชมภู',
-      role: 'หัวหน้ากลุ่มงานวิชาการ',
+      role: 'หัวหน้ากลุ่มบริหารงานวิชาการ',
       position: 'ครูชำนาญการ',
       photo: '/images/head-academic.jpg',
-      group: 'กลุ่มบริหารงานวิชาการ'
+      group: 'กลุ่มบริหารงานวิชาการ',
+      badge: 'ฝ่ายวิชาการ',
+      duties: [
+        'หลักสูตรต้านทุจริตศึกษา',
+        'Active Learning & นวัตกรรมการสอน',
+        'งานวัดผล ประเมินผล และทะเบียน',
+        'การประเมินสมรรถนะความฉลาดรู้ PISA'
+      ]
     },
     {
       name: 'นางสุปราณี อันทรินทร์',
-      role: 'หัวหน้ากลุ่มงานบุคคล',
+      role: 'หัวหน้ากลุ่มบริหารงานบุคคล',
       position: 'ครูชำนาญการ',
       photo: '/images/head-personnel.jpg',
-      group: 'กลุ่มบริหารงานบุคคล'
+      group: 'กลุ่มบริหารงานบุคคล',
+      badge: 'ฝ่ายบุคคล',
+      duties: [
+        'วินัยและการรักษาวินัยครูและบุคลากร',
+        'การพัฒนาข้าราชการครูสู่ความเป็นเลิศ',
+        'ระบบดูแลช่วยเหลือนักเรียนรอบด้าน',
+        'กิจการนักเรียนและส่งเสริมประชาธิปไตย'
+      ]
     },
     {
       name: 'น.ส. สุดารัตน์ กองเพชร',
-      role: 'หัวหน้ากลุ่มงานงบประมาณ',
+      role: 'หัวหน้ากลุ่มบริหารงบประมาณ',
       position: 'ครูชำนาญการ',
       photo: '/images/head-budget.jpg',
-      group: 'กลุ่มบริหารงบประมาณ'
+      group: 'กลุ่มบริหารงบประมาณ',
+      badge: 'ฝ่ายงบประมาณ',
+      duties: [
+        'งานแผนงานและงบประมาณสถานศึกษา',
+        'งานการเงินและบัญชีโปร่งใส ตรวจสอบได้',
+        'งานพัสดุ สินทรัพย์ และอาคารสถานที่',
+        'การประเมินคุณธรรมและความโปร่งใส ITA'
+      ]
     },
     {
       name: 'นายณรงค์ศักดิ์ บัวลาด',
       role: 'หัวหน้ากลุ่มบริหารทั่วไป',
       position: 'ครูชำนาญการ',
       photo: '/images/head-general.jpg',
-      group: 'กลุ่มบริหารงานทั่วไป'
+      group: 'กลุ่มบริหารงานทั่วไป',
+      badge: 'ฝ่ายทั่วไป',
+      duties: [
+        'งานอาคารสถานที่และสิ่งแวดล้อม 32 ไร่',
+        'งานสารบรรณและธุรการสถานศึกษา',
+        'การสร้างความสัมพันธ์กับชุมชนตำบลโพนงาม',
+        'ระบบสารสนเทศและการสื่อสารสถานศึกษา'
+      ]
     },
   ];
 
-  // Teachers and Staff with REAL photos
+  // Teachers and Staff with REAL photos and department categorization
   const teachers = [
-    { name: 'นางสดชื่น ดวงคำน้อย', position: 'ครูชำนาญการพิเศษ', department: 'กลุ่มสาระการเรียนรู้', photo: '/images/teacher-sodchuen.jpg' },
-    { name: 'นายยธิน อสุริยิน', position: 'ครูชำนาญการ', department: 'กลุ่มสาระการเรียนรู้', photo: '/images/teacher-yathin.jpg' },
-    { name: 'นายปรมินทร์ อัตตะเนย์', position: 'ครูชำนาญการ', department: 'กลุ่มสาระการเรียนรู้', photo: '/images/teacher-poramin.jpg' },
-    { name: 'นางสาวพัชรินทร์ โมหา', position: 'ครู ค.ศ.1', department: 'กลุ่มสาระการเรียนรู้', photo: '/images/teacher-patcharin.jpg' },
-    { name: 'นายเกียรติยศ ชมเชย', position: 'ครูผู้ช่วย', department: 'กลุ่มสาระการเรียนรู้', photo: '/images/teacher-kiattiyos.jpg' },
-    { name: 'นายทินกร นิลพุฒ', position: 'พนักงานราชการ', department: 'กลุ่มสาระการเรียนรู้', photo: '/images/teacher-thinnakorn.jpg' },
-    { name: 'นางสาวอโนทัย พึ่งเปี่ยม', position: 'ครูอัตราจ้าง', department: 'กลุ่มสาระการเรียนรู้', photo: '/images/teacher-anothai.jpg' },
-    { name: 'นายบุญเรือง ดวงสุฤทธิ์', position: 'นักการภารโรง', department: 'ฝ่ายบริการและสนับสนุน', photo: '/images/staff-boonrueng.jpg' },
+    { 
+      name: 'นางสดชื่น ดวงคำน้อย', 
+      position: 'ครูชำนาญการพิเศษ', 
+      department: 'กลุ่มสาระการเรียนรู้ภาษาไทย', 
+      subject: 'กลุ่มสาระภาษาไทย',
+      category: 'teacher',
+      photo: '/images/teacher-sodchuen.jpg' 
+    },
+    { 
+      name: 'นายยธิน อสุริยิน', 
+      position: 'ครูชำนาญการ', 
+      department: 'กลุ่มสาระการเรียนรู้คณิตศาสตร์', 
+      subject: 'กลุ่มสาระคณิตศาสตร์',
+      category: 'teacher',
+      photo: '/images/teacher-yathin.jpg' 
+    },
+    { 
+      name: 'นายปรมินทร์ อัตตะเนย์', 
+      position: 'ครูชำนาญการ', 
+      department: 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี', 
+      subject: 'กลุ่มสาระวิทยาศาสตร์ฯ',
+      category: 'teacher',
+      photo: '/images/teacher-poramin.jpg' 
+    },
+    { 
+      name: 'นางสาวพัชรินทร์ โมหา', 
+      position: 'ครู ค.ศ.1', 
+      department: 'กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ', 
+      subject: 'กลุ่มสาระภาษาต่างประเทศ',
+      category: 'teacher',
+      photo: '/images/teacher-patcharin.jpg' 
+    },
+    { 
+      name: 'นายเกียรติยศ ชมเชย', 
+      position: 'ครูผู้ช่วย', 
+      department: 'กลุ่มสาระการเรียนรู้สังคมศึกษาฯ', 
+      subject: 'กลุ่มสาระสังคมศึกษาฯ',
+      category: 'teacher',
+      photo: '/images/teacher-kiattiyos.jpg' 
+    },
+    { 
+      name: 'นายทินกร นิลพุฒ', 
+      position: 'พนักงานราชการ', 
+      department: 'กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา', 
+      subject: 'กลุ่มสาระสุขศึกษาและพลศึกษา',
+      category: 'teacher',
+      photo: '/images/teacher-thinnakorn.jpg' 
+    },
+    { 
+      name: 'นางสาวอโนทัย พึ่งเปี่ยม', 
+      position: 'ครูอัตราจ้าง', 
+      department: 'กลุ่มสาระการเรียนรู้ศิลปะและการงานอาชีพ', 
+      subject: 'กลุ่มสาระศิลปะ & การงานฯ',
+      category: 'teacher',
+      photo: '/images/teacher-anothai.jpg' 
+    },
+    { 
+      name: 'นายบุญเรือง ดวงสุฤทธิ์', 
+      position: 'นักการภารโรง', 
+      department: 'ฝ่ายบริการและสนับสนุนการศึกษา', 
+      subject: 'บริการ อาคารสถานที่ และยานพาหนะ',
+      category: 'staff',
+      photo: '/images/staff-boonrueng.jpg' 
+    },
   ];
 
   // Load initial data from backend if available
@@ -408,7 +494,7 @@ export default function App() {
           <nav className="hidden lg:flex items-center gap-1.5">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
-              { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
+              { id: 'about', title: 'โครงสร้างและบุคลากร', path: 'about' },
               { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
               { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
               { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
@@ -465,15 +551,24 @@ export default function App() {
             })}
           </nav>
 
-          {/* Right Action Button (Clean Emerald Pill) */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Right Action Button (Modern Emerald Glow & Gradient - Compact & Aligned with Nav) */}
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
             <button 
               type="button"
               onClick={() => navigateTo('eservice')}
-              className="px-6 py-2.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white font-bold text-xs sm:text-sm transition cursor-pointer shadow-sm hover:shadow-md flex items-center gap-1.5"
+              className="relative group overflow-hidden h-9 px-4 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:via-emerald-400 hover:to-teal-500 text-white font-semibold text-xs whitespace-nowrap shrink-0 shadow-[0_2px_10px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_16px_rgba(16,185,129,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer border border-emerald-300/40 inline-flex items-center gap-2"
             >
-              <span>เข้าสู่ระบบ E-Service</span>
-              <ArrowUpRight className="w-4 h-4" />
+              {/* Shimmer sweep effect */}
+              <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+              
+              {/* Glowing indicator dot */}
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-xs"></span>
+              </span>
+
+              <span className="relative tracking-normal whitespace-nowrap font-medium drop-shadow-xs">เข้าสู่ระบบ E-Service</span>
+              <ArrowUpRight className="relative w-3.5 h-3.5 text-emerald-100 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200 shrink-0" />
             </button>
           </div>
 
@@ -495,7 +590,7 @@ export default function App() {
           <div className="lg:hidden border-t border-[#E2E8F0] bg-white px-6 py-4 space-y-1.5 shadow-lg">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
-              { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
+              { id: 'about', title: 'โครงสร้างและบุคลากร', path: 'about' },
               { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
               { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
               { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
@@ -529,6 +624,22 @@ export default function App() {
                 </div>
               );
             })}
+
+            {/* Mobile E-Service CTA Button */}
+            <div className="pt-3 pb-1">
+              <button 
+                type="button"
+                onClick={() => navigateTo('eservice')}
+                className="w-full relative group overflow-hidden px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white font-bold text-sm shadow-[0_4px_16px_rgba(16,185,129,0.3)] active:scale-[0.98] transition-all duration-200 cursor-pointer border border-emerald-400/40 flex items-center justify-center gap-2"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                <span>เข้าสู่ระบบ E-Service</span>
+                <ArrowUpRight className="w-4 h-4 text-emerald-100" />
+              </button>
+            </div>
           </div>
         )}
       </header>
@@ -634,7 +745,7 @@ export default function App() {
                         ขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ยกระดับการจัดการเรียนรู้เชิงรุก และส่งเสริมการใช้สื่อนวัตกรรม
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { navigateTo('about'); setTimeout(() => { document.getElementById('departments')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}>
                       ดูข้อมูลฝ่ายวิชาการ →
                     </span>
                   </div>
@@ -650,7 +761,7 @@ export default function App() {
                         พัฒนาครูและบุคลากรทางการศึกษา เสริมสร้างวินัย คุณธรรมจริยธรรม และการมีส่วนร่วมของชุมชน
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { navigateTo('about'); setTimeout(() => { document.getElementById('departments')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}>
                       ดูข้อมูลฝ่ายบุคคล →
                     </span>
                   </div>
@@ -666,7 +777,7 @@ export default function App() {
                         บริหารงบประมาณโปร่งใส ตรวจสอบได้ตามหลักธรรมาภิบาล และการประเมินคุณธรรม ITA
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { navigateTo('about'); setTimeout(() => { document.getElementById('departments')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}>
                       ดูข้อมูลฝ่ายงบประมาณ →
                     </span>
                   </div>
@@ -682,7 +793,7 @@ export default function App() {
                         พัฒนาสภาพแวดล้อมและภูมิทัศน์สถานศึกษา ร่มรื่น ปลอดภัย น่าอยู่ และเอื้อต่อการเรียนรู้รอบด้าน
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { navigateTo('about'); setTimeout(() => { document.getElementById('departments')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}>
                       ดูข้อมูลฝ่ายทั่วไป →
                     </span>
                   </div>
@@ -930,195 +1041,374 @@ export default function App() {
           {/* PAGE 2: เกี่ยวกับโรงเรียน (ABOUT SCHOOL - Apple Minimal)   */}
           {/* ========================================================= */}
           {currentPage === 'about' && (
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 animate-in fade-in duration-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
               
               {/* Header Title */}
-              <div className="text-center max-w-2xl mx-auto mb-12">
-                <span className="text-xs font-medium uppercase tracking-widest text-neutral-400">
-                  เกี่ยวกับโรงเรียน
+              <div className="text-center max-w-3xl mx-auto mb-12">
+                <span className="inline-block px-3.5 py-1 rounded-full text-xs font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] uppercase tracking-wider mb-2.5 shadow-2xs">
+                  แผนผังโครงสร้างสายการบริหาร • สพม.มหาสารคาม
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-950 mt-1.5">
-                  ข้อมูลพื้นฐานและประวัติสถานศึกษา
-                </h2>
-                <p className="text-xs sm:text-sm text-neutral-500 mt-2">
-                  สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold site-emerald tracking-tight">
+                  โครงสร้างการบริหารและทำเนียบบุคลากร
+                </h1>
+                <p className="text-xs sm:text-sm text-[#64748B] mt-2.5 font-medium max-w-xl mx-auto">
+                  โรงเรียนโพนงามพิทยานุกูล อำเภอโกสุมพิสัย จังหวัดมหาสารคาม
                 </p>
+                
+                {/* Fast Anchor Navigation Bar */}
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mt-6">
+                  <a
+                    href="#director"
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5"
+                  >
+                    <UserCheck className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>ผู้บริหารสถานศึกษา</span>
+                  </a>
+                  <a
+                    href="#departments"
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5"
+                  >
+                    <Building2 className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>4 กลุ่มบริหารงานหลัก</span>
+                  </a>
+                  <a
+                    href="#faculty"
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5"
+                  >
+                    <GraduationCap className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>คณะครูและบุคลากร</span>
+                  </a>
+                  <a
+                    href="#history-vision"
+                    className="px-4 py-1.5 rounded-full text-xs font-bold bg-white hover:bg-[#ECFDF5] text-[#0F172A] hover:text-[#059669] border border-[#E2E8F0] hover:border-[#10B981] transition shadow-xs flex items-center gap-1.5"
+                  >
+                    <Compass className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>ประวัติ & วิสัยทัศน์</span>
+                  </a>
+                </div>
               </div>
 
-              {/* Subtabs */}
-              <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
-                {[
-                  { id: 'history', label: 'ประวัติความเป็นมา', icon: Building2 },
-                  { id: 'admin', label: 'คณะผู้บริหาร & กลุ่มงาน', icon: Users },
-                  { id: 'teachers', label: 'คณะครูและบุคลากร', icon: Award },
-                  { id: 'vision', label: 'วิสัยทัศน์ & PPK Model', icon: Compass }
-                ].map((tab) => {
-                  const Icon = tab.icon;
-                  const active = aboutActiveTab === tab.id;
-                  return (
+              {/* ======================================================== */}
+              {/* LEVEL 1: ผู้บริหารสถานศึกษา (EXECUTIVE LEADERSHIP)        */}
+              {/* ======================================================== */}
+              <div id="director" className="scroll-mt-24">
+                <div className="max-w-2xl mx-auto akat-card p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center sm:text-left relative z-10 shadow-lg border-2 border-[#D1FAE5]">
+                  <div className="w-36 h-48 sm:w-44 sm:h-56 rounded-2xl overflow-hidden bg-[#F0FDF4] border-2 border-[#10B981]/40 shadow-md shrink-0">
+                    <img 
+                      src="/images/director.jpg" 
+                      alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการโรงเรียน" 
+                      className="w-full h-full object-cover object-top"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/images/head-academic.jpg';
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-2.5">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">
+                      <Sparkles className="w-3.5 h-3.5 text-[#10B981]" />
+                      <span>ผู้บริหารสูงสุดของสถานศึกษา (School Director)</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] tracking-tight">
+                      นายวัชรินทร์ ติดวงษา
+                    </h2>
+                    <p className="text-sm font-bold text-[#059669]">
+                      ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล
+                    </p>
+                    <p className="text-xs text-[#64748B] font-medium">
+                      วิทยฐานะ: ผู้อำนวยการชำนาญการพิเศษ
+                    </p>
+                    <div className="p-3.5 rounded-xl bg-[#F0FDF4] border border-[#D1FAE5] text-xs text-[#065F46] leading-relaxed italic">
+                      “มุ่งมั่นบริหารงานสถานศึกษาด้วยความโปร่งใส ตามหลักธรรมาภิบาล พัฒนาผู้เรียนให้มีคุณภาพ และการมีส่วนร่วมของชุมชนอย่างยั่งยืน”
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-[#64748B]">
+                      <span className="bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-0.5 rounded-md font-bold text-[#047857]">
+                        ประธาน กก.สถานศึกษา
+                      </span>
+                      <span className="bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-0.5 rounded-md font-bold text-[#047857]">
+                        ITA ระดับผ่านดีเยี่ยม
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tree Connector: Downward Line from Director */}
+                <div className="flex flex-col items-center my-6">
+                  <div className="w-0.5 h-10 bg-gradient-to-b from-[#10B981] to-[#059669]"></div>
+                  <div className="px-4 py-1.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold shadow-xs flex items-center gap-1.5 z-10">
+                    <Building2 className="w-3.5 h-3.5 text-[#059669]" />
+                    <span>โครงสร้างการบริหาร 4 กลุ่มงานหลักสถานศึกษา</span>
+                  </div>
+                  <div className="w-0.5 h-6 bg-[#059669]"></div>
+                </div>
+
+                {/* Tree Horizontal Branch (Desktop) */}
+                <div className="hidden lg:block relative max-w-5xl mx-auto -mt-6 mb-8">
+                  <div className="h-0.5 bg-[#A7F3D0] w-3/4 mx-auto"></div>
+                  <div className="grid grid-cols-4 w-3/4 mx-auto">
+                    <div className="flex justify-center"><div className="w-0.5 h-6 bg-[#A7F3D0]"></div></div>
+                    <div className="flex justify-center"><div className="w-0.5 h-6 bg-[#A7F3D0]"></div></div>
+                    <div className="flex justify-center"><div className="w-0.5 h-6 bg-[#A7F3D0]"></div></div>
+                    <div className="flex justify-center"><div className="w-0.5 h-6 bg-[#A7F3D0]"></div></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ======================================================== */}
+              {/* LEVEL 2: 4 เสาหลักกลุ่มบริหารงาน (4 DEPARTMENTS GRID)      */}
+              {/* ======================================================== */}
+              <div id="departments" className="scroll-mt-24">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {administrators.map((admin, idx) => (
+                    <div 
+                      key={idx} 
+                      className="akat-card p-6 flex flex-col justify-between text-center relative hover:shadow-xl transition-all"
+                    >
+                      <div>
+                        {/* Group Pill Header */}
+                        <div className="mb-4">
+                          <span className="inline-block px-3 py-1 rounded-xl text-xs font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] shadow-2xs">
+                            {admin.group}
+                          </span>
+                        </div>
+
+                        {/* Head Portrait */}
+                        <div className="w-28 h-36 rounded-2xl overflow-hidden bg-[#F0FDF4] border border-[#D1FAE5] shadow-xs mx-auto mb-4">
+                          <img 
+                            src={admin.photo} 
+                            alt={admin.name} 
+                            className="w-full h-full object-cover object-top"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/images/director.jpg';
+                            }}
+                          />
+                        </div>
+
+                        {/* Name & Titles */}
+                        <h3 className="font-bold text-sm sm:text-base text-[#0F172A] leading-tight">
+                          {admin.name}
+                        </h3>
+                        <p className="text-xs text-[#059669] font-bold mt-1">
+                          {admin.role}
+                        </p>
+                        <p className="text-[11px] text-[#64748B] mt-0.5">
+                          {admin.position}
+                        </p>
+                      </div>
+
+                      {/* Duties List */}
+                      <div className="mt-5 pt-4 border-t border-[#E2E8F0] text-left">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] block mb-2">
+                          ภาระหน้าที่หลัก
+                        </span>
+                        <ul className="space-y-1.5 text-xs text-[#475569]">
+                          {admin.duties && admin.duties.map((duty, dIdx) => (
+                            <li key={dIdx} className="flex items-start gap-1.5">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981] shrink-0 mt-0.5" />
+                              <span className="leading-tight text-[11px]">{duty}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tree Connector: Downward Line to Faculty */}
+              <div className="flex flex-col items-center my-10">
+                <div className="w-0.5 h-10 bg-gradient-to-b from-[#059669] to-[#10B981]"></div>
+                <div className="px-4 py-1.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs font-bold shadow-xs flex items-center gap-1.5 z-10">
+                  <GraduationCap className="w-4 h-4 text-[#059669]" />
+                  <span>คณะครูผู้สอนและบุคลากรทางการศึกษาประจำสถานศึกษา</span>
+                </div>
+                <div className="w-0.5 h-6 bg-[#10B981]"></div>
+              </div>
+
+              {/* ======================================================== */}
+              {/* LEVEL 3: ทำเนียบคณะครูและบุคลากร (FACULTY DIRECTORY)     */}
+              {/* ======================================================== */}
+              <div id="faculty" className="scroll-mt-24">
+                
+                {/* Section Subhead & Filter */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 pb-4 border-b border-[#E2E8F0]">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#0F172A]">
+                      ทำเนียบคณะครูและบุคลากรทางการศึกษา
+                    </h3>
+                    <p className="text-xs text-[#64748B] mt-0.5">
+                      บุคลากรผู้ปฏิบัติหน้าที่จัดการเรียนการสอนและสนับสนุนการศึกษา ({teachers.length} ท่าน)
+                    </p>
+                  </div>
+
+                  {/* Filter Pills */}
+                  <div className="flex items-center gap-1.5 bg-white p-1 rounded-full border border-[#E2E8F0] shadow-xs">
                     <button
-                      key={tab.id}
-                      onClick={() => setAboutActiveTab(tab.id)}
-                      className={`px-4 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                        active
-                          ? 'bg-neutral-950 text-white shadow-xs'
-                          : 'bg-neutral-100 text-neutral-600 hover:text-neutral-950 hover:bg-neutral-200/80'
+                      onClick={() => setFacultyCategoryFilter('all')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+                        facultyCategoryFilter === 'all'
+                          ? 'bg-[#059669] text-white shadow-xs'
+                          : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9]'
                       }`}
                     >
-                      <Icon className="w-3.5 h-3.5" />
-                      {tab.label}
+                      ทั้งหมด ({teachers.length})
                     </button>
-                  );
-                })}
+                    <button
+                      onClick={() => setFacultyCategoryFilter('teacher')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+                        facultyCategoryFilter === 'teacher'
+                          ? 'bg-[#059669] text-white shadow-xs'
+                          : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9]'
+                      }`}
+                    >
+                      กลุ่มสาระการเรียนรู้ (7)
+                    </button>
+                    <button
+                      onClick={() => setFacultyCategoryFilter('staff')}
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+                        facultyCategoryFilter === 'staff'
+                          ? 'bg-[#059669] text-white shadow-xs'
+                          : 'text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9]'
+                      }`}
+                    >
+                      ฝ่ายสนับสนุน (1)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Faculty 8-Card Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+                  {teachers
+                    .filter(t => facultyCategoryFilter === 'all' || t.category === facultyCategoryFilter)
+                    .map((t, idx) => (
+                      <div 
+                        key={idx} 
+                        className="akat-card p-5 text-center flex flex-col items-center justify-between hover:shadow-lg transition-all group"
+                      >
+                        <div className="flex flex-col items-center w-full">
+                          <div className="w-24 h-32 rounded-2xl overflow-hidden bg-[#F0FDF4] border border-[#D1FAE5] shadow-xs mb-3.5 group-hover:scale-105 transition-transform duration-300">
+                            <img 
+                              src={t.photo} 
+                              alt={t.name} 
+                              className="w-full h-full object-cover object-top"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '/images/director.jpg';
+                              }}
+                            />
+                          </div>
+                          <h4 className="font-bold text-xs sm:text-sm text-[#0F172A] leading-tight group-hover:text-[#059669] transition line-clamp-1">
+                            {t.name}
+                          </h4>
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] mt-1.5">
+                            {t.position}
+                          </span>
+                        </div>
+
+                        <div className="mt-3.5 pt-2.5 border-t border-[#E2E8F0] w-full">
+                          <p className="text-[11px] font-semibold text-[#334155] line-clamp-1">
+                            {t.subject || t.department}
+                          </p>
+                          <p className="text-[10px] text-[#94A3B8] mt-0.5">
+                            {t.category === 'staff' ? 'ฝ่ายสนับสนุนการศึกษา' : 'ผู้ปฏิบัติหน้าที่การสอน'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
               </div>
 
-              {/* Subtab 1: History */}
-              {aboutActiveTab === 'history' && (
-                <div className="space-y-6">
-                  <div className="bg-white p-8 sm:p-12 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-6 text-neutral-600 leading-relaxed text-sm sm:text-base font-normal">
-                    <h3 className="text-xl font-semibold text-neutral-950 pb-4 border-b border-neutral-100">
-                      ประวัติการก่อตั้งสถานศึกษา
-                    </h3>
+              {/* ======================================================== */}
+              {/* LEVEL 4: ข้อมูลประวัติและวิสัยทัศน์ (SAME PAGE INTEGRATION) */}
+              {/* ======================================================== */}
+              <div id="history-vision" className="mt-20 pt-12 border-t-2 border-[#E2E8F0] scroll-mt-24 space-y-8">
+                
+                <div className="text-center max-w-2xl mx-auto mb-8">
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] uppercase tracking-wider mb-2">
+                    ข้อมูลสถานศึกษา
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-bold site-emerald">
+                    ประวัติความเป็นมาและวิสัยทัศน์
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#64748B] mt-1">
+                    รากฐานการศึกษาและทิศทางการพัฒนาโรงเรียนโพนงามพิทยานุกูล
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  
+                  {/* History Card */}
+                  <div className="akat-card p-8 sm:p-10 space-y-4 text-sm text-[#475569] leading-relaxed">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-[#E2E8F0]">
+                      <Building2 className="w-5 h-5 text-[#059669]" />
+                      <h4 className="text-lg font-bold text-[#0F172A]">
+                        ประวัติการก่อตั้งสถานศึกษา
+                      </h4>
+                    </div>
                     <p>
                       โรงเรียนโพนงามพิทยานุกูล อำเภอโกสุมพิสัย จังหวัดมหาสารคาม สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม (สพม.มหาสารคาม) เดิมมีฐานะเป็น <strong>"สาขาโรงเรียนโกสุมวิทยาสรรค์"</strong>
                     </p>
                     <p>
-                      ก่อตั้งขึ้นเมื่อปี พ.ศ. 2534 โดย <strong>นายณรงค์ จันทชุม</strong> ผู้อำนวยการโรงเรียนโกสุมวิทยาสรรค์ในขณะนั้น ได้ร่วมกับผู้นำชุมชน นำโดย <strong>นายวินัย สมศรีลัย</strong> กำนันตำบลโพนงาม พร้อมด้วยผู้ใหญ่บ้านทุกหมู่บ้าน มีมติเห็นชอบร่วมกันในการใช้พื้นที่ดินสาธารณประโยชน์ <strong>"โคกหนองเรือ"</strong> เนื้อที่ 32 ไร่ 3 งาน 72 ตารางวา เป็นสถานที่ตั้งโรงเรียนสาขา
+                      ก่อตั้งขึ้นเมื่อปี <strong>พ.ศ. 2534</strong> โดย <strong>นายณรงค์ จันทชุม</strong> ผู้อำนวยการโรงเรียนโกสุมวิทยาสรรค์ในขณะนั้น ได้ร่วมกับผู้นำชุมชน นำโดย <strong>นายวินัย สมศรีลัย</strong> กำนันตำบลโพนงาม พร้อมด้วยผู้ใหญ่บ้านทุกหมู่บ้าน มีมติเห็นชอบร่วมกันในการใช้พื้นที่ดินสาธารณประโยชน์ <strong>"โคกหนองเรือ"</strong> เนื้อที่ 32 ไร่ 3 งาน 72 ตารางวา เป็นสถานที่ตั้งโรงเรียนสาขา
                     </p>
                     <p>
                       ต่อมาได้รับอนุมัติจากกรมสามัญศึกษาให้ยกฐานะเป็นโรงเรียนเอกเทศอย่างเป็นทางการ เมื่อวันที่ <strong>3 กุมภาพันธ์ พ.ศ. 2538</strong> (คำสั่งกรมสามัญศึกษาที่ 391/2538) และใช้ชื่อว่า <strong>"โรงเรียนโพนงามพิทยานุกูล"</strong> โดยมีอักษรย่อว่า <strong>"พ.พ.ก."</strong>
                     </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Subtab 2: Admin */}
-              {aboutActiveTab === 'admin' && (
-                <div className="space-y-10">
-                  {/* Director Card */}
-                  <div className="bg-white p-8 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-                    <div className="w-32 h-40 rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-200/80 shrink-0">
-                      <img 
-                        src="/images/director.jpg" 
-                        alt="ผู้อำนวยการโรงเรียน" 
-                        className="w-full h-full object-cover object-top"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-semibold tracking-wider uppercase text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full border border-neutral-200/60">
-                        ผู้บริหารสูงสุดของสถานศึกษา
-                      </span>
-                      <h3 className="text-2xl font-semibold text-neutral-950 mt-2">
-                        นายวัชรินทร์ ติดวงษา
-                      </h3>
-                      <p className="text-sm font-medium text-neutral-700 mt-0.5">
-                        ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-2.5 leading-relaxed max-w-xl">
-                        วิทยฐานะ: ผู้อำนวยการชำนาญการพิเศษ <br />
-                        มุ่งมั่นบริหารงานสถานศึกษาด้วยความโปร่งใส ตามหลักธรรมาภิบาล และการมีส่วนร่วมของชุมชน
-                      </p>
+                    <div className="pt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="px-3 py-1 bg-[#F1F5F9] rounded-lg font-semibold text-slate-700">ที่ดินโคกหนองเรือ 32 ไร่</span>
+                      <span className="px-3 py-1 bg-[#F1F5F9] rounded-lg font-semibold text-slate-700">ยกฐานะ 3 ก.พ. 2538</span>
+                      <span className="px-3 py-1 bg-[#ECFDF5] text-[#059669] rounded-lg font-bold">อักษรย่อ: พ.พ.ก.</span>
                     </div>
                   </div>
 
-                  {/* 4 Group Heads */}
-                  <div>
-                    <h4 className="font-semibold text-base text-neutral-950 mb-5">
-                      หัวหน้ากลุ่มบริหารงาน 4 ฝ่าย
-                    </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                      {administrators.map((admin, idx) => (
-                        <div key={idx} className="bg-white p-6 rounded-2xl border border-neutral-200/80 text-center flex flex-col items-center hover:border-neutral-300 transition">
-                          <div className="w-24 h-32 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200/80 mb-3.5 shrink-0">
-                            <img 
-                              src={admin.photo} 
-                              alt={admin.name} 
-                              className="w-full h-full object-cover object-top"
-                            />
-                          </div>
-                          <h5 className="font-semibold text-xs sm:text-sm text-neutral-950 leading-tight">
-                            {admin.name}
-                          </h5>
-                          <p className="text-xs text-neutral-600 font-medium mt-1">
-                            {admin.role}
-                          </p>
-                          <p className="text-[11px] text-neutral-400 mt-0.5">
-                            {admin.position}
-                          </p>
-                        </div>
-                      ))}
+                  {/* Vision & Motto Card */}
+                  <div className="akat-card p-8 sm:p-10 space-y-6">
+                    <div className="flex items-center gap-2.5 pb-3 border-b border-[#E2E8F0]">
+                      <Compass className="w-5 h-5 text-[#059669]" />
+                      <h4 className="text-lg font-bold text-[#0F172A]">
+                        วิสัยทัศน์ พันธกิจ และคำขวัญ
+                      </h4>
                     </div>
-                  </div>
-                </div>
-              )}
 
-              {/* Subtab 3: Teachers */}
-              {aboutActiveTab === 'teachers' && (
-                <div className="space-y-6">
-                  <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold text-neutral-950">
-                      ทำเนียบคณะครูและบุคลากรทางการศึกษา
-                    </h3>
-                    <p className="text-xs text-neutral-500 mt-1">
-                      คณะครูผู้สอนโรงเรียนโพนงามพิทยานุกูล สพม.มหาสารคาม
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-                    {teachers.map((t, idx) => (
-                      <div key={idx} className="bg-white p-5 rounded-2xl border border-neutral-200/80 text-center flex flex-col items-center hover:border-neutral-300 transition">
-                        <div className="w-20 h-28 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200/80 mb-3 shrink-0">
-                          <img 
-                            src={t.photo} 
-                            alt={t.name} 
-                            className="w-full h-full object-cover object-top"
-                          />
-                        </div>
-                        <h5 className="font-semibold text-xs sm:text-sm text-neutral-950 leading-tight">
-                          {t.name}
-                        </h5>
-                        <p className="text-[11px] text-neutral-600 font-medium mt-0.5">
-                          {t.position}
-                        </p>
-                        <p className="text-[10px] text-neutral-400 mt-0.5">
-                          {t.department}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Subtab 4: Vision */}
-              {aboutActiveTab === 'vision' && (
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white p-8 sm:p-10 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
-                      <span className="text-[10px] font-semibold tracking-wider uppercase text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full border border-neutral-200/60">
+                    <div className="p-5 rounded-2xl bg-[#F0FDF4] border border-[#D1FAE5]">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#059669] block mb-1">
                         วิสัยทัศน์ (Vision)
                       </span>
-                      <h4 className="text-xl font-semibold text-neutral-950 leading-snug">
-                        เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
-                      </h4>
-                      <p className="text-xs text-neutral-500 leading-relaxed font-normal">
-                        มุ่งเน้นการพัฒนาผู้เรียนให้มีสมรรถนะตามมาตรฐานสากล มีทักษะในศตวรรษที่ 21 ควบคู่คุณธรรมจริยธรรม และน้อมนำหลักปรัชญาของเศรษฐกิจพอเพียงมาปรับใช้ในการดำเนินชีวิต
+                      <h5 className="text-base font-bold text-[#065F46] leading-snug">
+                        “เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ”
+                      </h5>
+                      <p className="text-xs text-[#047857] mt-2 leading-relaxed">
+                        มุ่งเน้นการพัฒนาผู้เรียนให้มีสมรรถนะตามมาตรฐานสากล มีทักษะในศตวรรษที่ 21 ควบคู่คุณธรรมจริยธรรม และน้อมนำหลักปรัชญาของเศรษฐกิจพอเพียงมาปรับใช้
                       </p>
                     </div>
 
-                    <div className="bg-white p-8 sm:p-10 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
-                      <span className="text-[10px] font-semibold tracking-wider uppercase text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full border border-neutral-200/60">
+                    <div className="p-5 rounded-2xl bg-white border border-[#E2E8F0]">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748B] block mb-1">
                         คำขวัญโรงเรียน (Motto)
                       </span>
-                      <h4 className="text-xl font-semibold text-neutral-950 leading-snug">
-                        ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์
-                      </h4>
-                      <p className="text-xs text-neutral-500 leading-relaxed font-normal">
-                        ส่งเสริมการเรียนรู้ตลอดชีวิตของนักเรียน สร้างสรรค์ปัญญา พัฒนาตนเองและร่วมสร้างประโยชน์ให้แก่ชุมชนและสังคมอย่างยั่งยืน
-                      </p>
+                      <h5 className="text-base font-bold text-[#0F172A] leading-snug">
+                        “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”
+                      </h5>
                     </div>
+
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs text-[#475569] flex items-center justify-between">
+                      <div>
+                        <strong className="block text-[#0F172A]">รูปแบบการบริหารจัดการ</strong>
+                        <span>PPK SMART Model (4 ด้าน 12 ตัวชี้วัด)</span>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-md bg-[#059669] text-white font-bold text-[10px]">
+                        SMART
+                      </span>
+                    </div>
+
                   </div>
+
                 </div>
-              )}
+
+              </div>
 
             </div>
           )}
@@ -1583,7 +1873,7 @@ export default function App() {
 
             <div className="flex flex-wrap items-center gap-6 text-xs text-[#ECFDF5]/80 font-medium">
               <button onClick={() => navigateTo('home')} className="hover:text-[#34D399] transition cursor-pointer">หน้าแรก</button>
-              <button onClick={() => navigateTo('about')} className="hover:text-[#34D399] transition cursor-pointer">เกี่ยวกับโรงเรียน</button>
+              <button onClick={() => navigateTo('about')} className="hover:text-[#34D399] transition cursor-pointer">โครงสร้างและบุคลากร</button>
               <button onClick={() => navigateTo('eservice')} className="hover:text-[#34D399] transition cursor-pointer">ระบบ E-Service</button>
               <button onClick={() => navigateTo('news')} className="hover:text-[#34D399] transition cursor-pointer">บทความ & ข่าวสาร</button>
               <button onClick={() => navigateTo('contact')} className="hover:text-[#34D399] transition cursor-pointer">ติดต่อเรา</button>

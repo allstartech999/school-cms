@@ -2,14 +2,14 @@
 
 @layer base {
   :root {
-    --cream: #FEF9E1;
-    --cream-dark: #F9F0C8;
-    --yellow: #FEDB3B;
-    --header: #FFE042;
-    --orange: #FD9800;
-    --orange-dark: #E98C00;
+    --cream: #F4F8F5;
+    --emerald-primary: #059669;
+    --emerald-dark: #065F46;
+    --emerald-deep: #064E3B;
+    --emerald-forest: #032017;
+    --emerald-light: #ECFDF5;
+    --emerald-accent: #10B981;
     --navy: #0F172A;
-    --ink: #141006;
     --text: #454F5E;
   }
 
@@ -36,41 +36,43 @@
   }
 }
 
-/* Akat Coding Center Signature Elements */
-.site-gold {
-  background: linear-gradient(100deg, #C98A12 0%, #F2B227 35%, #FFD24D 55%, #E2A21C 80%);
+/* Akat Layout Signature with Clean Emerald Green Palette */
+.site-emerald {
+  background: linear-gradient(105deg, #065F46 0%, #059669 40%, #10B981 70%, #047857 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent !important;
 }
 
 .glass-hero-card {
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 30px 60px -10px rgba(180, 130, 0, 0.15), 0 20px 30px -10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 30px 60px -10px rgba(5, 150, 105, 0.15), 0 20px 30px -10px rgba(0, 0, 0, 0.08);
 }
 
-.glass-chip {
-  background: rgba(255, 252, 240, 0.65);
+.glass-chip-emerald {
+  background: rgba(236, 253, 245, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 25px rgba(160, 110, 0, 0.15);
-  color: #8A6210;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.18);
+  color: #065F46;
 }
 
 .akat-card {
   background: #ffffff;
   border-radius: 20px;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .akat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 30px 50px -10px rgba(180, 130, 0, 0.12);
+  border-color: #10B981;
+  box-shadow: 0 30px 50px -10px rgba(5, 150, 105, 0.12);
 }
+
 

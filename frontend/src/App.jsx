@@ -367,10 +367,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FEF9E1] text-[#454F5E] flex flex-col font-sans selection:bg-[#FEDB3B] selection:text-[#141006]">
+    <div className="min-h-screen bg-[#F4F8F5] text-[#334155] flex flex-col font-sans selection:bg-[#D1FAE5] selection:text-[#065F46]">
       
-      {/* 1. Header (Akat Coding Center Sunny Header) */}
-      <header className="bg-[#FFE042] border-b border-[#F9F0C8] sticky top-0 z-50 transition-all shadow-xs">
+      {/* 1. Header (Akat Clean Layout with Fresh White & Emerald Tone) */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-[#E2E8F0] sticky top-0 z-50 transition-all shadow-2xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           
           {/* Logo & School Name */}
@@ -378,7 +378,7 @@ export default function App() {
             className="flex items-center gap-3.5 cursor-pointer select-none group shrink-0" 
             onClick={() => navigateTo('home')}
           >
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center p-1 border border-white/80 shadow-xs shrink-0 overflow-hidden group-hover:scale-105 transition">
+            <div className="w-12 h-12 rounded-2xl bg-[#F0FDF4] flex items-center justify-center p-1 border border-[#D1FAE5] shadow-xs shrink-0 overflow-hidden group-hover:scale-105 transition">
               <img 
                 src="/images/logo.png" 
                 alt="ตราสัญลักษณ์โรงเรียนโพนงามพิทยานุกูล" 
@@ -391,21 +391,21 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-base sm:text-lg text-[#141006] leading-tight tracking-tight group-hover:text-[#E98C00] transition whitespace-nowrap">
+                <span className="font-bold text-base sm:text-lg text-[#0F172A] leading-tight tracking-tight group-hover:text-[#059669] transition whitespace-nowrap">
                   {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
                 </span>
-                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold bg-[#FD9800] text-white rounded-full whitespace-nowrap">
+                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0] rounded-full whitespace-nowrap">
                   พ.พ.ก.
                 </span>
               </div>
-              <p className="text-xs text-[#141006]/70 font-medium whitespace-nowrap">
+              <p className="text-xs text-[#64748B] font-medium whitespace-nowrap">
                 สพม.มหาสารคาม • อ.โกสุมพิสัย
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1.5">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
@@ -423,23 +423,23 @@ export default function App() {
                       onClick={() => navigateTo(item.path)}
                       className={`px-3.5 py-2 text-sm font-semibold whitespace-nowrap rounded-xl transition-colors flex items-center gap-1 cursor-pointer ${
                         active
-                          ? 'text-[#E98C00] bg-white/70 shadow-2xs'
-                          : 'text-[#222222] hover:text-[#E98C00] hover:bg-white/40'
+                          ? 'text-[#065F46] bg-[#ECFDF5] border border-[#A7F3D0]/70'
+                          : 'text-[#334155] hover:text-[#059669] hover:bg-[#F0FDF4]'
                       }`}
                     >
                       <span>{item.title}</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-[#141006]/60 group-hover:text-[#E98C00] transition" />
+                      <ChevronDown className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#059669] transition" />
                     </button>
                     {/* Dropdown Menu */}
                     <div className="absolute left-0 top-full pt-2 hidden group-hover:block z-50 min-w-[200px] animate-in fade-in duration-100">
-                      <div className="bg-white rounded-2xl shadow-xl border border-[#F9F0C8] p-2 space-y-1">
+                      <div className="bg-white rounded-2xl shadow-xl border border-[#E2E8F0] p-2 space-y-1">
                         {item.children.map((child) => (
                           <button
                             key={child.id || child.path}
                             onClick={() => navigateTo(child.path)}
-                            className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-[#FEF9E1] hover:text-[#E98C00] text-[#454F5E] flex items-center gap-2 transition cursor-pointer font-semibold"
+                            className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-[#ECFDF5] hover:text-[#065F46] text-[#334155] flex items-center gap-2 transition cursor-pointer font-semibold"
                           >
-                            <ChevronRight className="w-3.5 h-3.5 text-[#FD9800] shrink-0" />
+                            <ChevronRight className="w-3.5 h-3.5 text-[#059669] shrink-0" />
                             <span className="truncate">{child.title}</span>
                           </button>
                         ))}
@@ -455,8 +455,8 @@ export default function App() {
                   onClick={() => navigateTo(item.path)}
                   className={`px-3.5 py-2 text-sm font-semibold whitespace-nowrap rounded-xl transition-colors cursor-pointer ${
                     active
-                      ? 'text-[#E98C00] bg-white/70 shadow-2xs'
-                      : 'text-[#222222] hover:text-[#E98C00] hover:bg-white/40'
+                      ? 'text-[#065F46] bg-[#ECFDF5] border border-[#A7F3D0]/70'
+                      : 'text-[#334155] hover:text-[#059669] hover:bg-[#F0FDF4]'
                   }`}
                 >
                   {item.title}
@@ -465,12 +465,12 @@ export default function App() {
             })}
           </nav>
 
-          {/* Right Action Button (Akat site-login style) */}
+          {/* Right Action Button (Clean Emerald Pill) */}
           <div className="hidden lg:flex items-center gap-3">
             <button 
               type="button"
               onClick={() => navigateTo('eservice')}
-              className="px-6 py-2.5 rounded-full bg-[#FD9800] hover:bg-[#E98C00] text-white font-bold text-xs sm:text-sm transition cursor-pointer shadow-sm hover:shadow-md flex items-center gap-1.5"
+              className="px-6 py-2.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white font-bold text-xs sm:text-sm transition cursor-pointer shadow-sm hover:shadow-md flex items-center gap-1.5"
             >
               <span>เข้าสู่ระบบ E-Service</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -482,7 +482,7 @@ export default function App() {
             <button 
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#141006] hover:text-[#FD9800] transition cursor-pointer rounded-xl hover:bg-white/40"
+              className="p-2 text-[#0F172A] hover:text-[#059669] transition cursor-pointer rounded-xl hover:bg-[#F0FDF4]"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -492,7 +492,7 @@ export default function App() {
 
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-[#F9F0C8] bg-[#FFE042] px-6 py-4 space-y-1.5 shadow-lg">
+          <div className="lg:hidden border-t border-[#E2E8F0] bg-white px-6 py-4 space-y-1.5 shadow-lg">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
@@ -507,19 +507,19 @@ export default function App() {
                   <button 
                     onClick={() => navigateTo(item.path)}
                     className={`block w-full text-left py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-between ${
-                      active ? 'bg-white text-[#E98C00] shadow-xs' : 'text-[#141006] hover:bg-white/40'
+                      active ? 'bg-[#ECFDF5] text-[#065F46]' : 'text-[#334155] hover:bg-[#F0FDF4]'
                     }`}
                   >
                     <span>{item.title}</span>
-                    {item.children && item.children.length > 0 && <ChevronDown className="w-4 h-4 text-[#141006]/60" />}
+                    {item.children && item.children.length > 0 && <ChevronDown className="w-4 h-4 text-[#64748B]" />}
                   </button>
                   {item.children && item.children.length > 0 && (
-                    <div className="pl-4 space-y-1 border-l-2 border-[#FD9800] ml-3 py-1">
+                    <div className="pl-4 space-y-1 border-l-2 border-[#10B981] ml-3 py-1">
                       {item.children.map((child) => (
                         <button
                           key={child.id || child.path}
                           onClick={() => navigateTo(child.path)}
-                          className="block w-full text-left py-1.5 px-2.5 text-xs text-[#222222] hover:text-[#E98C00] font-medium rounded-lg"
+                          className="block w-full text-left py-1.5 px-2.5 text-xs text-[#334155] hover:text-[#059669] font-medium rounded-lg"
                         >
                           • {child.title}
                         </button>
@@ -537,21 +537,21 @@ export default function App() {
       {loading ? (
         <div className="max-w-4xl mx-auto px-4 py-24 flex-1 w-full space-y-8 animate-pulse text-center">
           <div className="flex flex-col items-center justify-center">
-            <div className="w-10 h-10 rounded-full border-3 border-[#FFE042] border-t-[#FD9800] animate-spin mb-4"></div>
-            <p className="text-sm font-medium text-[#454F5E]">กำลังโหลดข้อมูลโรงเรียนโพนงามพิทยานุกูล...</p>
+            <div className="w-10 h-10 rounded-full border-3 border-[#D1FAE5] border-t-[#059669] animate-spin mb-4"></div>
+            <p className="text-sm font-medium text-[#475569]">กำลังโหลดข้อมูลโรงเรียนโพนงามพิทยานุกูล...</p>
           </div>
         </div>
       ) : (
         <main className="flex-1">
 
           {/* ========================================================= */}
-          {/* PAGE 1: หน้าแรก (HOME - Akat Coding Center Style)         */}
+          {/* PAGE 1: หน้าแรก (HOME - Akat Clean Layout in Emerald Tone) */}
           {/* ========================================================= */}
           {currentPage === 'home' && (
             <div className="animate-in fade-in duration-200">
               
-              {/* Akat Signature Hero (Dark Warm BG + Floating Glass Chips + Center Glass Card) */}
-              <section className="relative min-h-[660px] pb-36 pt-16 flex items-center justify-center overflow-hidden bg-[#141006] text-center">
+              {/* Signature Hero (Deep Emerald BG + Floating Glass Chips + Center Glass Card) */}
+              <section className="relative min-h-[660px] pb-36 pt-16 flex items-center justify-center overflow-hidden bg-[#032017] text-center">
                 
                 {/* Background Photo with Gradient Tint & Atmosphere */}
                 <div className="absolute inset-0 z-0">
@@ -560,24 +560,24 @@ export default function App() {
                     alt="บรรยากาศการเรียนรู้โรงเรียนโพนงามพิทยานุกูล"
                     className="w-full h-full object-cover opacity-20 scale-105 blur-[3px]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#141006] via-[#141006]/85 to-black/60"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#032017] via-[#032017]/85 to-black/60"></div>
                 </div>
 
-                {/* Floating Glass Chips (Akat Style) */}
+                {/* Floating Glass Chips (Emerald Theme) */}
                 <div className="absolute inset-0 z-1 pointer-events-none hidden md:block">
-                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute left-[6%] top-[22%] shadow-lg">
+                  <span className="glass-chip-emerald px-4 py-2 rounded-2xl text-sm font-bold absolute left-[6%] top-[22%] shadow-lg">
                     🏫 พ.พ.ก.
                   </span>
-                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute right-[8%] top-[18%] shadow-lg">
+                  <span className="glass-chip-emerald px-4 py-2 rounded-2xl text-sm font-bold absolute right-[8%] top-[18%] shadow-lg">
                     ✨ Active Learning
                   </span>
-                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute left-[9%] bottom-[38%] shadow-lg">
+                  <span className="glass-chip-emerald px-4 py-2 rounded-2xl text-sm font-bold absolute left-[9%] bottom-[38%] shadow-lg">
                     🎓 100% ศึกษาต่อ
                   </span>
-                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute right-[9%] bottom-[34%] shadow-lg">
+                  <span className="glass-chip-emerald px-4 py-2 rounded-2xl text-sm font-bold absolute right-[9%] bottom-[34%] shadow-lg">
                     🏆 15+ รางวัลเด่น
                   </span>
-                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute right-[26%] top-[12%] shadow-lg">
+                  <span className="glass-chip-emerald px-4 py-2 rounded-2xl text-sm font-bold absolute right-[26%] top-[12%] shadow-lg">
                     ⚡ PPK SMART Model
                   </span>
                 </div>
@@ -586,22 +586,22 @@ export default function App() {
                 <div className="relative z-10 max-w-4xl mx-4 glass-hero-card rounded-[32px] p-8 sm:p-14 text-center shadow-2xl">
                   
                   {/* Eyebrow */}
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FEF9E1] border border-[#F9F0C8] text-[#8A6210] text-xs sm:text-sm font-semibold mb-4 shadow-2xs">
-                    <span className="w-2 h-2 rounded-full bg-[#FD9800]"></span>
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[#065F46] text-xs sm:text-sm font-semibold mb-4 shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-[#10B981] animate-ping"></span>
                     <span>มาเริ่มต้นเรียนรู้และเติบโตไปด้วยกันที่นี่ !</span>
                   </div>
 
-                  {/* Big Gold Title */}
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold site-gold tracking-tight leading-tight mb-4 whitespace-nowrap">
+                  {/* Big Emerald Gradient Title */}
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold site-emerald tracking-tight leading-tight mb-4 whitespace-nowrap">
                     {homepageConfig?.hero?.heading || 'โรงเรียนโพนงามพิทยานุกูล'}
                   </h1>
 
                   {/* Subtitle */}
-                  <div className="text-sm sm:text-base text-[#454F5E] max-w-xl mx-auto font-medium leading-relaxed space-y-1">
-                    <p className="text-[#8A6210] font-semibold text-xs sm:text-sm">
+                  <div className="text-sm sm:text-base text-[#475569] max-w-xl mx-auto font-medium leading-relaxed space-y-1">
+                    <p className="text-[#059669] font-semibold text-xs sm:text-sm">
                       “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”
                     </p>
-                    <p className="text-xs sm:text-sm">
+                    <p className="text-xs sm:text-sm text-[#64748B]">
                       เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
                     </p>
                   </div>
@@ -610,7 +610,7 @@ export default function App() {
                   <div className="mt-8">
                     <a 
                       href="#highlights"
-                      className="inline-flex w-12 h-12 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] hover:text-white items-center justify-center transition shadow-lg transform hover:scale-110"
+                      className="inline-flex w-12 h-12 rounded-full bg-[#10B981] hover:bg-[#059669] text-white items-center justify-center transition shadow-lg transform hover:scale-110"
                     >
                       <ChevronDown className="w-6 h-6" />
                     </a>
@@ -619,22 +619,22 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Akat Overlapping 4-Pillars Card Grid */}
+              {/* Overlapping 4-Pillars Card Grid (Clean Emerald Accent) */}
               <section id="highlights" className="relative z-20 -mt-24 sm:-mt-28 max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   
                   {/* Card 1 */}
                   <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
                     <div>
-                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] text-xs font-bold shadow-2xs mb-3">
                         Active Learning
                       </span>
                       <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารวิชาการ</h3>
-                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                      <p className="text-xs text-[#64748B] mt-2 leading-relaxed">
                         ขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ยกระดับการจัดการเรียนรู้เชิงรุก และส่งเสริมการใช้สื่อนวัตกรรม
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
                       ดูข้อมูลฝ่ายวิชาการ →
                     </span>
                   </div>
@@ -642,15 +642,15 @@ export default function App() {
                   {/* Card 2 */}
                   <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
                     <div>
-                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] text-xs font-bold shadow-2xs mb-3">
                         PPK Model
                       </span>
                       <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารงานบุคคล</h3>
-                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                      <p className="text-xs text-[#64748B] mt-2 leading-relaxed">
                         พัฒนาครูและบุคลากรทางการศึกษา เสริมสร้างวินัย คุณธรรมจริยธรรม และการมีส่วนร่วมของชุมชน
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
                       ดูข้อมูลฝ่ายบุคคล →
                     </span>
                   </div>
@@ -658,15 +658,15 @@ export default function App() {
                   {/* Card 3 */}
                   <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
                     <div>
-                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] text-xs font-bold shadow-2xs mb-3">
                         Transparency
                       </span>
                       <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารงบประมาณ</h3>
-                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                      <p className="text-xs text-[#64748B] mt-2 leading-relaxed">
                         บริหารงบประมาณโปร่งใส ตรวจสอบได้ตามหลักธรรมาภิบาล และการประเมินคุณธรรม ITA
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
                       ดูข้อมูลฝ่ายงบประมาณ →
                     </span>
                   </div>
@@ -674,26 +674,26 @@ export default function App() {
                   {/* Card 4 */}
                   <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
                     <div>
-                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] text-xs font-bold shadow-2xs mb-3">
                         Campus 32 ไร่
                       </span>
                       <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารทั่วไป</h3>
-                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                      <p className="text-xs text-[#64748B] mt-2 leading-relaxed">
                         พัฒนาสภาพแวดล้อมและภูมิทัศน์สถานศึกษา ร่มรื่น ปลอดภัย น่าอยู่ และเอื้อต่อการเรียนรู้รอบด้าน
                       </p>
                     </div>
-                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                    <span className="mt-5 text-xs font-bold text-[#059669] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
                       ดูข้อมูลฝ่ายทั่วไป →
                     </span>
                   </div>
 
                 </div>
 
-                {/* Center Yellow Pill Button */}
+                {/* Center Emerald Pill Button */}
                 <div className="text-center mt-10">
                   <button 
                     onClick={() => navigateTo('about')}
-                    className="px-8 py-3.5 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] hover:text-white font-bold text-sm shadow-md transition transform hover:-translate-y-0.5 cursor-pointer inline-flex items-center gap-2"
+                    className="px-8 py-3.5 rounded-full bg-[#059669] hover:bg-[#047857] text-white font-bold text-sm shadow-md transition transform hover:-translate-y-0.5 cursor-pointer inline-flex items-center gap-2"
                   >
                     <span>ดูข้อมูลและโครงสร้างสถานศึกษาทั้งหมด</span>
                     <span>+</span>
@@ -701,25 +701,25 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Akat Journey & Director Showcase */}
+              {/* Journey & Director Showcase (3-Column Layout) */}
               <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                   
                   {/* Left Column: Intro */}
                   <div className="lg:col-span-4">
-                    <h2 className="text-3xl sm:text-4xl font-bold site-gold leading-tight">
+                    <h2 className="text-3xl sm:text-4xl font-bold site-emerald leading-tight">
                       ก้าวสู่อนาคตการศึกษา ที่มีคุณภาพ
                     </h2>
-                    <p className="text-sm text-[#454F5E] mt-4 leading-relaxed">
+                    <p className="text-sm text-[#475569] mt-4 leading-relaxed">
                       โรงเรียนโพนงามพิทยานุกูล มุ่งเน้นการพัฒนาผู้เรียนเป็นสำคัญ สืบสานศาสตร์พระราชา และเสริมสร้างทักษะแห่งศตวรรษที่ 21 เพื่อเยาวชนในชุมชนตำบลโพนงามและอำเภอโกสุมพิสัย
                     </p>
-                    <hr className="w-24 border-0 border-t-3 border-[#FD9800] mt-6" />
+                    <hr className="w-24 border-0 border-t-3 border-[#10B981] mt-6" />
                   </div>
 
                   {/* Center Column: Director Photo */}
                   <div className="lg:col-span-4 flex justify-center">
-                    <div className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-white shadow-xl border border-white/80 p-3">
-                      <div className="rounded-[24px] overflow-hidden aspect-4/5 bg-[#FEF9E1]">
+                    <div className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-white shadow-xl border border-[#E2E8F0] p-3">
+                      <div className="rounded-[24px] overflow-hidden aspect-4/5 bg-[#F0FDF4]">
                         <img 
                           src="/images/director.jpg" 
                           alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการ"
@@ -732,47 +732,47 @@ export default function App() {
                       </div>
                       <div className="p-4 text-center">
                         <h4 className="font-bold text-base text-[#0F172A]">นายวัชรินทร์ ติดวงษา</h4>
-                        <p className="text-xs text-[#FD9800] font-semibold mt-0.5">ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล</p>
-                        <p className="text-xs text-[#454F5E] mt-2 italic bg-[#FEF9E1] p-3 rounded-xl border border-[#F9F0C8]">
+                        <p className="text-xs text-[#059669] font-semibold mt-0.5">ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล</p>
+                        <p className="text-xs text-[#065F46] mt-2 italic bg-[#ECFDF5] p-3 rounded-xl border border-[#D1FAE5]">
                           “เราพร้อมส่งเสริมเยาวชนให้เติบโตอย่างมีคุณภาพและรอบด้าน”
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right Column: 3 Numbered Steps (Akat Style) */}
+                  {/* Right Column: 3 Numbered Steps (Emerald Accents) */}
                   <div className="lg:col-span-4 space-y-6">
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-[#FEDB3B] text-[#141006] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
+                      <div className="w-14 h-14 rounded-2xl bg-[#ECFDF5] text-[#047857] border-2 border-[#A7F3D0] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
                         1
                       </div>
                       <div>
                         <h4 className="font-bold text-base text-[#0F172A]">องค์กรคุณภาพ</h4>
-                        <p className="text-xs text-[#454F5E] mt-1 leading-relaxed">
+                        <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
                           บริหารจัดการสถานศึกษาด้วยระบบคุณภาพมาตรฐานสากล สพม.มหาสารคาม
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-[#FEDB3B] text-[#141006] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
+                      <div className="w-14 h-14 rounded-2xl bg-[#ECFDF5] text-[#047857] border-2 border-[#A7F3D0] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
                         2
                       </div>
                       <div>
                         <h4 className="font-bold text-base text-[#0F172A]">ศาสตร์พระราชา</h4>
-                        <p className="text-xs text-[#454F5E] mt-1 leading-relaxed">
+                        <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
                           น้อมนำหลักปรัชญาของเศรษฐกิจพอเพียง ปลูกฝังคุณธรรมและความซื่อสัตย์สุจริต
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-[#FEDB3B] text-[#141006] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
+                      <div className="w-14 h-14 rounded-2xl bg-[#ECFDF5] text-[#047857] border-2 border-[#A7F3D0] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
                         3
                       </div>
                       <div>
                         <h4 className="font-bold text-base text-[#0F172A]">สู่ความเป็นเลิศ</h4>
-                        <p className="text-xs text-[#454F5E] mt-1 leading-relaxed">
+                        <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
                           จัดการเรียนรู้เชิงรุก (Active Learning) สร้างสรรค์นวัตกรรมและต่อยอดสู่อุดมศึกษา
                         </p>
                       </div>
@@ -782,13 +782,13 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Akat E-Service Section */}
-              <section className="py-20 bg-gradient-to-b from-[#FEF9E1] to-white border-t border-[#F9F0C8]">
+              {/* Clean E-Service Section */}
+              <section className="py-20 bg-gradient-to-b from-[#F4F8F5] to-white border-t border-[#E2E8F0]">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
                   
                   <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
                     <div>
-                      <span className="text-[#FD9800] text-xs font-bold uppercase tracking-wider bg-[#FEDB3B]/40 px-3 py-1 rounded-full">
+                      <span className="text-[#059669] text-xs font-bold uppercase tracking-wider bg-[#ECFDF5] border border-[#A7F3D0] px-3.5 py-1 rounded-full">
                         ระบบสารสนเทศออนไลน์
                       </span>
                       <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] mt-2">
@@ -797,7 +797,7 @@ export default function App() {
                     </div>
                     <button 
                       onClick={() => navigateTo('eservice')}
-                      className="px-5 py-2.5 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      className="px-5 py-2.5 rounded-full bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#047857] border border-[#A7F3D0] font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <span>ดูระบบทั้งหมด ({eServices.length})</span>
                       <ArrowUpRight className="w-4 h-4" />
@@ -812,27 +812,27 @@ export default function App() {
                       >
                         <div>
                           <div className="flex items-center justify-between mb-4">
-                            <span className="text-[10px] font-bold text-[#141006] bg-[#FEDB3B] px-2.5 py-1 rounded-lg">
+                            <span className="text-[10px] font-bold text-[#047857] bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-1 rounded-lg">
                               {srv.badge}
                             </span>
-                            <span className="text-xs text-[#454F5E] font-medium">
+                            <span className="text-xs text-[#64748B] font-medium">
                               {srv.category}
                             </span>
                           </div>
                           <h4 className="font-bold text-base text-[#0F172A] leading-snug">
                             {srv.title}
                           </h4>
-                          <p className="text-xs text-[#454F5E] mt-2 leading-relaxed line-clamp-2">
+                          <p className="text-xs text-[#64748B] mt-2 leading-relaxed line-clamp-2">
                             {srv.desc}
                           </p>
                         </div>
 
-                        <div className="mt-6 pt-4 border-t border-[#F9F0C8] flex items-center justify-between">
+                        <div className="mt-6 pt-4 border-t border-[#E2E8F0] flex items-center justify-between">
                           <a 
                             href={srv.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-5 py-2 bg-[#FD9800] hover:bg-[#E98C00] text-white rounded-full text-xs font-bold transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                            className="px-5 py-2 bg-[#059669] hover:bg-[#047857] text-white rounded-full text-xs font-bold transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
                           >
                             <span>เข้าสู่ระบบ</span>
                             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -842,7 +842,7 @@ export default function App() {
                               href={srv.manualUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-[#FD9800] hover:underline font-semibold"
+                              className="text-xs text-[#059669] hover:underline font-semibold"
                             >
                               คู่มือการใช้งาน
                             </a>
@@ -855,12 +855,12 @@ export default function App() {
                 </div>
               </section>
 
-              {/* Akat News / Articles Section (เรื่องเล่าและข่าวสารจากโรงเรียน) */}
+              {/* Clean News / Articles Section (เรื่องเล่าและข่าวสารจากโรงเรียน) */}
               <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6">
                 
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
                   <div>
-                    <span className="text-[#FD9800] text-xs font-bold uppercase tracking-wider bg-[#FEDB3B]/40 px-3 py-1 rounded-full">
+                    <span className="text-[#059669] text-xs font-bold uppercase tracking-wider bg-[#ECFDF5] border border-[#A7F3D0] px-3.5 py-1 rounded-full">
                       บทความ & ข่าวสาร
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] mt-2">
@@ -869,7 +869,7 @@ export default function App() {
                   </div>
                   <button 
                     onClick={() => navigateTo('news')}
-                    className="px-5 py-2.5 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    className="px-5 py-2.5 rounded-full bg-[#ECFDF5] hover:bg-[#D1FAE5] text-[#047857] border border-[#A7F3D0] font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <span>ดูบทความทั้งหมด</span>
                     <ArrowUpRight className="w-4 h-4" />
@@ -883,7 +883,7 @@ export default function App() {
                       onClick={() => handleOpenPost(post)}
                       className="akat-card overflow-hidden cursor-pointer flex flex-col justify-between group"
                     >
-                      <div className="aspect-16/10 w-full overflow-hidden bg-[#FEF9E1]">
+                      <div className="aspect-16/10 w-full overflow-hidden bg-[#F0FDF4]">
                         <img 
                           src={post.image_url || '/images/news-active-learning.jpg'} 
                           alt={post.title} 
@@ -892,21 +892,21 @@ export default function App() {
                       </div>
                       <div className="p-6 flex-1 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-2 text-xs text-[#454F5E] mb-2.5">
-                            <span className="font-bold text-[#141006] bg-[#FEDB3B] px-2 py-0.5 rounded-md text-[10px]">
+                          <div className="flex items-center gap-2 text-xs text-[#64748B] mb-2.5">
+                            <span className="font-bold text-[#047857] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded-md text-[10px]">
                               {post.category}
                             </span>
                             <span>•</span>
                             <span>{formatThaiDate(post.created_at)}</span>
                           </div>
-                          <h4 className="font-bold text-base text-[#0F172A] group-hover:text-[#FD9800] transition leading-snug line-clamp-2">
+                          <h4 className="font-bold text-base text-[#0F172A] group-hover:text-[#059669] transition leading-snug line-clamp-2">
                             {post.title}
                           </h4>
-                          <p className="text-xs text-[#454F5E] mt-2 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-[#64748B] mt-2 line-clamp-2 leading-relaxed">
                             {post.summary || post.content}
                           </p>
                         </div>
-                        <div className="mt-5 pt-3 border-t border-[#F9F0C8] text-xs font-bold text-[#FD9800] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <div className="mt-5 pt-3 border-t border-[#E2E8F0] text-xs font-bold text-[#059669] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                           อ่านต่อ →
                         </div>
                       </div>
@@ -1486,45 +1486,45 @@ export default function App() {
         </main>
       )}
 
-      {/* 6. Post Reader Modal (Apple Minimal) */}
+      {/* 6. Post Reader Modal (Wide & Modern Reading Experience) */}
       {readingPost && (
         <div 
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-y-auto"
           onClick={() => setReadingPost(null)}
         >
           <div 
-            className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] overflow-y-auto shadow-2xl border border-neutral-200 relative my-auto animate-in fade-in duration-150"
+            className="bg-white rounded-3xl max-w-4xl lg:max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-neutral-200 relative my-auto animate-in fade-in duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {loadingPost && (
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 py-1 bg-white/95 rounded-full text-xs text-neutral-600 border border-neutral-200">
-                <Loader2 className="w-3 h-3 animate-spin text-neutral-900" />
+              <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 py-1 bg-white/95 backdrop-blur-md rounded-full text-xs text-neutral-700 border border-neutral-200 shadow-sm">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-900" />
                 กำลังโหลด...
               </div>
             )}
 
             <button 
               onClick={() => setReadingPost(null)}
-              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-neutral-900/60 hover:bg-neutral-900 text-white flex items-center justify-center transition cursor-pointer"
+              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-neutral-900/70 hover:bg-neutral-900 text-white flex items-center justify-center backdrop-blur-sm shadow-md transition cursor-pointer"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
             </button>
 
             {readingPost.image_url && (
-              <div className="aspect-16/9 w-full overflow-hidden bg-neutral-100">
+              <div className="w-full max-h-[360px] sm:max-h-[440px] md:max-h-[480px] overflow-hidden bg-neutral-100 flex items-center justify-center">
                 <img 
                   src={readingPost.image_url} 
                   alt={readingPost.title} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                 />
               </div>
             )}
 
-            <div className="p-6 sm:p-10 space-y-6">
-              <div>
-                <div className="flex items-center gap-2 text-xs text-neutral-400 mb-2">
-                  <span className="text-neutral-900 font-medium bg-neutral-100 px-2.5 py-0.5 rounded-full">
+            <div className="p-6 sm:p-10 md:p-12 space-y-6 sm:space-y-8">
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                  <span className="text-neutral-900 font-semibold bg-neutral-100 px-3 py-1 rounded-full border border-neutral-200/60">
                     {readingPost.category}
                   </span>
                   <span>•</span>
@@ -1533,26 +1533,26 @@ export default function App() {
                   <span>ผู้เขียน: {readingPost.author || 'โรงเรียนโพนงามพิทยานุกูล'}</span>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-semibold text-neutral-950 leading-snug">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-950 leading-snug tracking-tight">
                   {readingPost.title}
                 </h3>
               </div>
 
               {readingPost.summary && (
-                <div className="p-4 rounded-2xl bg-neutral-50 border-l-2 border-neutral-900 text-neutral-700 text-xs sm:text-sm leading-relaxed font-normal">
+                <div className="p-5 sm:p-6 rounded-2xl bg-neutral-50 border-l-4 border-amber-500 text-neutral-800 text-sm sm:text-base leading-relaxed">
                   {readingPost.summary}
                 </div>
               )}
 
-              <div className="text-neutral-600 text-xs sm:text-sm leading-loose whitespace-pre-line font-normal">
+              <div className="text-neutral-700 text-sm sm:text-base leading-relaxed sm:leading-loose whitespace-pre-line font-normal">
                 {readingPost.content}
               </div>
 
-              <div className="pt-6 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-400">
+              <div className="pt-6 border-t border-neutral-100 flex items-center justify-between text-xs sm:text-sm text-neutral-400">
                 <span>ยอดเข้าชม {readingPost.views || 0} ครั้ง</span>
                 <button 
                   onClick={() => setReadingPost(null)}
-                  className="px-5 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-full font-medium transition cursor-pointer"
+                  className="px-6 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm"
                 >
                   ปิด (ESC)
                 </button>
@@ -1562,8 +1562,8 @@ export default function App() {
         </div>
       )}
 
-      {/* 7. Footer (Akat Coding Center Warm Dark Footer) */}
-      <footer className="border-t-2 border-[#FD9800] bg-[#141006] py-14 px-4 sm:px-6 text-[#FEF9E1]/70 text-xs mt-auto">
+      {/* 7. Footer (Akat Clean Layout with Deep Emerald Green) */}
+      <footer className="border-t-2 border-[#10B981] bg-[#032017] py-14 px-4 sm:px-6 text-[#ECFDF5]/70 text-xs mt-auto">
         <div className="max-w-6xl mx-auto space-y-10">
           
           <div className="flex flex-col sm:flex-row items-start justify-between gap-8">
@@ -1575,24 +1575,24 @@ export default function App() {
                 <p className="text-white font-bold text-base">
                   {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
                 </p>
-                <p className="text-[#FEDB3B] text-xs mt-0.5">
+                <p className="text-[#A7F3D0] text-xs mt-0.5">
                   สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-6 text-xs text-[#FEF9E1]/80 font-medium">
-              <button onClick={() => navigateTo('home')} className="hover:text-[#FEDB3B] transition cursor-pointer">หน้าแรก</button>
-              <button onClick={() => navigateTo('about')} className="hover:text-[#FEDB3B] transition cursor-pointer">เกี่ยวกับโรงเรียน</button>
-              <button onClick={() => navigateTo('eservice')} className="hover:text-[#FEDB3B] transition cursor-pointer">ระบบ E-Service</button>
-              <button onClick={() => navigateTo('news')} className="hover:text-[#FEDB3B] transition cursor-pointer">บทความ & ข่าวสาร</button>
-              <button onClick={() => navigateTo('contact')} className="hover:text-[#FEDB3B] transition cursor-pointer">ติดต่อเรา</button>
+            <div className="flex flex-wrap items-center gap-6 text-xs text-[#ECFDF5]/80 font-medium">
+              <button onClick={() => navigateTo('home')} className="hover:text-[#34D399] transition cursor-pointer">หน้าแรก</button>
+              <button onClick={() => navigateTo('about')} className="hover:text-[#34D399] transition cursor-pointer">เกี่ยวกับโรงเรียน</button>
+              <button onClick={() => navigateTo('eservice')} className="hover:text-[#34D399] transition cursor-pointer">ระบบ E-Service</button>
+              <button onClick={() => navigateTo('news')} className="hover:text-[#34D399] transition cursor-pointer">บทความ & ข่าวสาร</button>
+              <button onClick={() => navigateTo('contact')} className="hover:text-[#34D399] transition cursor-pointer">ติดต่อเรา</button>
             </div>
           </div>
 
-          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[#FEF9E1]/50 gap-4 text-xs">
+          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[#ECFDF5]/50 gap-4 text-xs">
             <p>Copyright © 2026 {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'} (พ.พ.ก.)</p>
-            <p>Powered by Smart School CMS • เว็บไซต์ทางการ: <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="text-[#FEDB3B] hover:underline">www.ppks.ac.th</a></p>
+            <p>Powered by Smart School CMS • เว็บไซต์ทางการ: <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="text-[#34D399] hover:underline font-medium">www.ppks.ac.th</a></p>
           </div>
 
         </div>

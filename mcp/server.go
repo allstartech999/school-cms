@@ -332,6 +332,31 @@ func registerTools(s *server.MCPServer) {
 		),
 		handleManageNavigationMenu,
 	)
+
+	// ==========================================
+	// หมวด 5: School Identity & Site Settings (อัตลักษณ์ โลโก้ และ Favicon)
+	// ==========================================
+
+	// 15. Tool: get_site_settings
+	s.AddTool(
+		mcp.NewTool("get_site_settings",
+			mcp.WithDescription("อ่านการตั้งค่าอัตลักษณ์และข้อมูลหลักของโรงเรียน (ชื่อโรงเรียน, สังกัด, URL โลโก้ school logo, URL Favicon สำหรับแท็บเบราว์เซอร์)"),
+		),
+		handleGetSiteSettings,
+	)
+
+	// 16. Tool: update_site_settings
+	s.AddTool(
+		mcp.NewTool("update_site_settings",
+			mcp.WithDescription("ปรับปรุงการตั้งค่าอัตลักษณ์ของโรงเรียน เช่น เปลี่ยน URL โลโก้โรงเรียน (logo_url), URL Favicon สำหรับแท็บเบราว์เซอร์ (favicon_url), ชื่อโรงเรียนภาษาไทย (school_name), ชื่อภาษาอังกฤษ (school_name_en) หรือสังกัด (school_subtitle)"),
+			mcp.WithString("logo_url", mcp.Description("URL รูปภาพโลโก้/ตราสัญลักษณ์โรงเรียน (เช่น /images/ppk-emblem-2d.png หรือ URL ที่อัปโหลดผ่าน upload_media_by_url)")),
+			mcp.WithString("favicon_url", mcp.Description("URL รูปภาพ Favicon สำหรับแท็บเบราว์เซอร์ (เช่น /images/ppk-emblem-2d.png หรือ URL ที่อัปโหลดผ่าน upload_media_by_url)")),
+			mcp.WithString("school_name", mcp.Description("ชื่อโรงเรียนภาษาไทย")),
+			mcp.WithString("school_name_en", mcp.Description("ชื่อโรงเรียนภาษาอังกฤษ")),
+			mcp.WithString("school_subtitle", mcp.Description("ข้อความสังกัดหรือคำขวัญย่อย")),
+		),
+		handleUpdateSiteSettings,
+	)
 }
 
 func registerResources(s *server.MCPServer) {
@@ -365,6 +390,25 @@ func registerResources(s *server.MCPServer) {
 				URI:      "school://guidelines/writing",
 				MIMEType: "text/markdown",
 				Text:     WritingGuidelines,
+			},
+		}, nil
+	})
+
+	// Resource 3: school://settings
+	resSettings := mcp.NewResource(
+		"school://settings",
+		"School Identity & Site Settings",
+		mcp.WithResourceDescription("การตั้งค่าอัตลักษณ์โรงเรียน เช่น ชื่อโรงเรียน, URL โลโก้, URL Favicon, และสังกัด"),
+		mcp.WithMIMEType("application/json"),
+	)
+	s.AddResource(resSettings, func(ctx context.Context, request mcp.ReadResourceRequest) ([]mcp.ResourceContents, error) {
+		settings := handlers.GetSiteSettingsInternal()
+		b, _ := json.MarshalIndent(settings, "", "  ")
+		return []mcp.ResourceContents{
+			mcp.TextResourceContents{
+				URI:      "school://settings",
+				MIMEType: "application/json",
+				Text:     string(b),
 			},
 		}, nil
 	})
@@ -830,4 +874,58 @@ func handleManageNavigationMenu(ctx context.Context, request mcp.CallToolRequest
 		b, _ := json.MarshalIndent(res, "", "  ")
 		return mcp.NewToolResultText(string(b)), nil
 	}
+}
+
+func handleGetSiteSettings(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	settings := handlers.GetSiteSettingsInternal()
+	resJSON, err := json.MarshalIndent(settings, "", "  ")
+	if err != nil {
+		return mcp.NewToolResultError("Failed to encode settings: " + err.Error()), nil
+	}
+	return mcp.NewToolResultText(string(resJSON)), nil
+}
+
+func handleUpdateSiteSettings(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	req := models.UpdateSiteSettingsRequest{}
+	args := request.GetArguments()
+	if args != nil {
+		if val, ok := args["school_name"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.SchoolName = &v
+			}
+		}
+		if val, ok := args["school_name_en"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.SchoolNameEn = &v
+			}
+		}
+		if val, ok := args["school_subtitle"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.SchoolSubtitle = &v
+			}
+		}
+		if val, ok := args["logo_url"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.LogoURL = &v
+			}
+		}
+		if val, ok := args["favicon_url"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.FaviconURL = &v
+			}
+		}
+	}
+
+	updated, err := handlers.SaveSiteSettingsInternal(req)
+	if err != nil {
+		return mcp.NewToolResultError("Failed to update site settings: " + err.Error()), nil
+	}
+
+	resJSON, _ := json.MarshalIndent(updated, "", "  ")
+	return mcp.NewToolResultText("School identity & site settings updated successfully!\n" + string(resJSON)), nil
 }

@@ -165,6 +165,29 @@ export async function agentCreateOrUpdatePage(pageData, agentKey = 'agent-school
   return res.json();
 }
 
+export async function fetchSiteSettings() {
+  const res = await fetch(`${API_BASE}/settings`);
+  if (!res.ok) throw new Error('Failed to fetch site settings');
+  return res.json();
+}
+
+export async function updateSiteSettings(settings, authHeader = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...authHeader,
+  };
+  const res = await fetch(`${API_BASE}/settings`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(settings),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update site settings');
+  }
+  return res.json();
+}
+
 /**
  * Generate Next.js style optimized image URL
  */

@@ -129,7 +129,27 @@ type SystemStats struct {
 	TotalPages      int64  `json:"total_pages"`
 	AgentPosts      int64  `json:"agent_posts"`
 	SchoolName      string `json:"school_name"`
+	SchoolNameEn    string `json:"school_name_en"`
+	SchoolSubtitle  string `json:"school_subtitle"`
+	LogoURL         string `json:"logo_url"`
+	FaviconURL      string `json:"favicon_url"`
 	AgentKeyPreview string `json:"agent_key_preview"`
+}
+
+type SiteSettings struct {
+	SchoolName     string `json:"school_name"`
+	SchoolNameEn   string `json:"school_name_en"`
+	SchoolSubtitle string `json:"school_subtitle"`
+	LogoURL        string `json:"logo_url"`
+	FaviconURL     string `json:"favicon_url"`
+}
+
+type UpdateSiteSettingsRequest struct {
+	SchoolName     *string `json:"school_name,omitempty"`
+	SchoolNameEn   *string `json:"school_name_en,omitempty"`
+	SchoolSubtitle *string `json:"school_subtitle,omitempty"`
+	LogoURL        *string `json:"logo_url,omitempty"`
+	FaviconURL     *string `json:"favicon_url,omitempty"`
 }
 
 // Navigation Menu item definition

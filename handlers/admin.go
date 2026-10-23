@@ -39,11 +39,7 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 	db.DB.Model(&models.Page{}).Count(&totalPages)
 	db.DB.Model(&models.Post{}).Where("created_by_agent = ?", true).Count(&agentPosts)
 
-	var schoolNameSetting models.Setting
-	schoolName := "โรงเรียนสาธิตนวัตกรรมวิทยาการ"
-	if err := db.DB.Where("key = ?", "school_name").First(&schoolNameSetting).Error; err == nil && schoolNameSetting.Value != "" {
-		schoolName = schoolNameSetting.Value
-	}
+	settings := GetSiteSettingsInternal()
 
 	var agentKeySetting models.Setting
 	var agentKey string
@@ -60,7 +56,11 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 		TotalPosts:      totalPosts,
 		TotalPages:      totalPages,
 		AgentPosts:      agentPosts,
-		SchoolName:      schoolName,
+		SchoolName:      settings.SchoolName,
+		SchoolNameEn:    settings.SchoolNameEn,
+		SchoolSubtitle:  settings.SchoolSubtitle,
+		LogoURL:         settings.LogoURL,
+		FaviconURL:      settings.FaviconURL,
 		AgentKeyPreview: previewKey,
 	}
 

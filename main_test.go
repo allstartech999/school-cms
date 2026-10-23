@@ -29,6 +29,8 @@ func setupTestApp(t *testing.T) http.Handler {
 	mux.HandleFunc("GET /api/v1/pages/{slug}", handlers.GetPage)
 	mux.HandleFunc("GET /api/v1/homepage", handlers.GetHomepageConfig)
 	mux.HandleFunc("GET /api/v1/menu", handlers.GetNavigationMenu)
+	mux.HandleFunc("GET /api/v1/settings", handlers.GetSiteSettings)
+	mux.HandleFunc("PUT /api/v1/settings", middleware.AgentOrAdminAuth(handlers.UpdateSiteSettings))
 	mux.HandleFunc("POST /api/v1/admin/login", handlers.AdminLogin)
 	mux.HandleFunc("POST /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentCreatePost))
 	mux.HandleFunc("GET /api/v1/agent/pages", middleware.AgentAuth(handlers.AgentListPages))
@@ -181,6 +183,8 @@ func TestMCPServerToolRegistration(t *testing.T) {
 		"get_homepage_config",
 		"update_homepage_config",
 		"manage_navigation_menu",
+		"get_site_settings",
+		"update_site_settings",
 	}
 
 	for _, toolName := range expectedTools {
@@ -188,5 +192,44 @@ func TestMCPServerToolRegistration(t *testing.T) {
 		if tool == nil {
 			t.Errorf("expected tool '%s' to be registered in MCP server", toolName)
 		}
+	}
+}
+
+func TestSiteSettingsAPI(t *testing.T) {
+	app := setupTestApp(t)
+	if app == nil {
+		return
+	}
+
+	// 1. GET /api/v1/settings
+	reqGet := httptest.NewRequest("GET", "/api/v1/settings", nil)
+	wGet := httptest.NewRecorder()
+	app.ServeHTTP(wGet, reqGet)
+
+	if wGet.Code != http.StatusOK {
+		t.Fatalf("expected 200 from GET /api/v1/settings, got %d", wGet.Code)
+	}
+
+	var currentSettings map[string]any
+	if err := json.Unmarshal(wGet.Body.Bytes(), &currentSettings); err != nil {
+		t.Fatalf("failed to decode settings: %v", err)
+	}
+
+	if currentSettings["logo_url"] == "" || currentSettings["favicon_url"] == "" {
+		t.Fatalf("expected non-empty logo_url and favicon_url, got %v", currentSettings)
+	}
+
+	// 2. PUT /api/v1/settings with Agent Auth
+	updatePayload := []byte(`{
+		"logo_url": "/images/ppk-emblem-2d.png",
+		"favicon_url": "/images/ppk-emblem-2d.png"
+	}`)
+	reqPut := httptest.NewRequest("PUT", "/api/v1/settings", bytes.NewReader(updatePayload))
+	reqPut.Header.Set("X-Agent-Key", "agent-school-secret-key-2026")
+	wPut := httptest.NewRecorder()
+	app.ServeHTTP(wPut, reqPut)
+
+	if wPut.Code != http.StatusOK {
+		t.Fatalf("expected 200 from PUT /api/v1/settings, got %d. Body: %s", wPut.Code, wPut.Body.String())
 	}
 }

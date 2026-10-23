@@ -98,9 +98,24 @@ go build -o school-cms .
 - `GET /api/v1/posts/{id}` - ดึงรายละเอียดข่าวตาม ID หรือ Slug (เพิ่มยอดเข้าชมอัตโนมัติ)
 - `GET /api/v1/pages` - ดึงรายการหน้าเพจทั้งหมด
 - `GET /api/v1/pages/{slug}` - ดึงเนื้อหาหน้าเพจตาม Slug (เช่น `about`, `contact`)
-- `GET /api/v1/stats` - ข้อมูลสรุปจำนวนข่าว, หน้าเพจ, และข่าวที่สร้างโดย AI
+- `GET /api/v1/stats` - ข้อมูลสรุปจำนวนข่าว, หน้าเพจ, อัตลักษณ์โรงเรียน (logo, favicon, ชื่อโรงเรียน)
+- `GET /api/v1/settings` - ดึงการตั้งค่าอัตลักษณ์โรงเรียน (school_name, school_name_en, school_subtitle, logo_url, favicon_url)
+- `PUT /api/v1/settings` - ปรับปรุงอัตลักษณ์โรงเรียน เช่น URL โลโก้ และ Favicon (Admin หรือ AI Agent Auth)
+- `GET /api/v1/homepage` - ดึงการตั้งค่าโครงสร้างหน้าแรก (Hero, Announcements, Ticker)
+- `PUT /api/v1/homepage` - ปรับปรุงโครงสร้างหน้าแรก (Admin หรือ AI Agent Auth)
+- `GET /api/v1/menu` - ดึงโครงสร้างเมนูนำทาง (Dynamic Navigation Bar)
+- `PUT /api/v1/menu` - ปรับแต่งเมนูนำทาง
 - `GET /api/v1/images` - **Next.js-style On-demand Image Optimizer** (Query: `url`, `w`, `q`, `format`)
 - `GET /uploads/{path}?w=...&q=...` - เสิร์ฟไฟล์อัปโหลด พร้อมรองรับการ optimize ปรับขนาดและแปลง WebP แบบ On-the-fly ในตัว
+
+### ระบบ MCP Server (Model Context Protocol)
+เซิร์ฟเวอร์มีระบบ MCP ในตัว รองรับทั้ง **Stdio Mode** (`--mcp-stdio`) และ **SSE Server** (`/mcp/sse`):
+- `get_site_settings`: อ่านข้อมูลอัตลักษณ์, โลโก้ และ Favicon ปัจจุบัน
+- `update_site_settings`: แก้ไขโลโก้โรงเรียน (`logo_url`), Favicon (`favicon_url`), ชื่อโรงเรียน และสังกัด
+- `upload_media_by_url`: ดูดภาพจาก URL มาเก็บในคลังสื่อโรงเรียนเพื่อนำ URL มาใช้เป็นโลโก้หรือเนื้อหา
+- `create_or_update_page` / `list_pages` / `get_page` / `delete_page`: ระบบจัดการหน้าเพจแบบ Gutenberg Blocks
+- `get_homepage_config` / `update_homepage_config`: จัดการ Hero Banner และ Sections หน้าแรก
+- `manage_navigation_menu`: จัดการเมนูนำทาง Navbar
 
 ### ระบบแอดมิน (Admin APIs - Header: `X-Admin-Token`)
 - `POST /api/v1/admin/login` - ยืนยันรหัสผ่านเพื่อรับ Token

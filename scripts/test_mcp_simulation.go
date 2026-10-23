@@ -143,13 +143,44 @@ func main() {
 	fmt.Println("✅ Result:", pageRes.Content[0])
 
 	// 3. Test list_pages
-	fmt.Println("\n📋 [3/3] Testing Tool: list_pages...")
+	fmt.Println("\n📋 [3/4] Testing Tool: list_pages...")
 	listPagesTool := server.GetTool("list_pages")
 	listRes, err := listPagesTool.Handler(ctx, mcp.CallToolRequest{})
 	if err != nil || listRes.IsError {
 		log.Fatalf("list_pages failed: %v", listRes)
 	}
 	fmt.Println("✅ Available Pages:\n", listRes.Content[0])
+
+	// 4. Test get_site_settings & update_site_settings
+	fmt.Println("\n🏫 [4/4] Testing Tools: get_site_settings & update_site_settings...")
+	getSettingsTool := server.GetTool("get_site_settings")
+	if getSettingsTool == nil {
+		log.Fatalf("Tool get_site_settings not found")
+	}
+	getSettingsRes, err := getSettingsTool.Handler(ctx, mcp.CallToolRequest{})
+	if err != nil || getSettingsRes.IsError {
+		log.Fatalf("get_site_settings failed: %v", getSettingsRes)
+	}
+	fmt.Println("✅ Current Settings:\n", getSettingsRes.Content[0])
+
+	updateSettingsTool := server.GetTool("update_site_settings")
+	if updateSettingsTool == nil {
+		log.Fatalf("Tool update_site_settings not found")
+	}
+	updateReq := mcp.CallToolRequest{}
+	updateReq.Params.Name = "update_site_settings"
+	updateReq.Params.Arguments = map[string]any{
+		"logo_url":        "/images/ppk-emblem-2d.png",
+		"favicon_url":     "/images/ppk-emblem-2d.png",
+		"school_name":     "โรงเรียนโพนงามพิทยานุกูล",
+		"school_name_en":  "Phon-ngam Pittayanukun School",
+		"school_subtitle": "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม",
+	}
+	updateRes, err := updateSettingsTool.Handler(ctx, updateReq)
+	if err != nil || updateRes.IsError {
+		log.Fatalf("update_site_settings failed: %v", updateRes)
+	}
+	fmt.Println("✅ Updated Settings Result:\n", updateRes.Content[0])
 
 	fmt.Println("\n🎉 All MCP Phase 3 tests completed successfully!")
 	os.Exit(0)

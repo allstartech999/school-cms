@@ -40,6 +40,14 @@ func getLockForKey(key string) *sync.Mutex {
 	return mu
 }
 
+func isDevMode() bool {
+	env := strings.ToLower(os.Getenv("APP_ENV"))
+	if env == "" {
+		env = strings.ToLower(os.Getenv("ENV"))
+	}
+	return env != "production"
+}
+
 func getCacheDir() string {
 	cacheDir := filepath.Join(UploadBaseDir, ".cache")
 	_ = os.MkdirAll(cacheDir, 0755)
@@ -163,7 +171,11 @@ func ServeOptimizedUpload(w http.ResponseWriter, r *http.Request) {
 	// If no image processing queries are present, serve directly with caching headers
 	q := r.URL.Query()
 	if q.Get("w") == "" && q.Get("width") == "" && q.Get("q") == "" && q.Get("quality") == "" && q.Get("format") == "" {
-		w.Header().Set("Cache-Control", "public, max-age=86400")
+		if isDevMode() {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		} else {
+			w.Header().Set("Cache-Control", "public, max-age=86400")
+		}
 		fileServer := http.StripPrefix("/uploads/", http.FileServer(http.Dir(UploadBaseDir)))
 		fileServer.ServeHTTP(w, r)
 		return
@@ -213,7 +225,11 @@ func processAndServeImage(w http.ResponseWriter, r *http.Request, relPath string
 	// SVGs do not need bitmap resizing/conversion
 	if srcExt == ".svg" {
 		w.Header().Set("Content-Type", "image/svg+xml")
-		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		if isDevMode() {
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+		} else {
+			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		}
 		http.ServeFile(w, r, diskPath)
 		return
 	}
@@ -248,7 +264,11 @@ func processAndServeImage(w http.ResponseWriter, r *http.Request, relPath string
 
 	etag := fmt.Sprintf(`"%s"`, cacheHash)
 	w.Header().Set("ETag", etag)
-	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	if isDevMode() {
+		w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	} else {
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	}
 	w.Header().Set("X-Image-Optimizer", "school-cms-engine/1.0")
 
 	// If browser sent matching ETag, return 304 Not Modified immediately
@@ -261,10 +281,12 @@ func processAndServeImage(w http.ResponseWriter, r *http.Request, relPath string
 
 	cacheFile := filepath.Join(getCacheDir(), fmt.Sprintf("%s.%s", cacheHash, targetFormat))
 
-	// Check if already in disk cache
-	if _, err := os.Stat(cacheFile); err == nil {
-		serveCachedFile(w, r, cacheFile, targetFormat)
-		return
+	// Check if already in disk cache (bypass disk cache in dev mode so updates reflect immediately)
+	if !isDevMode() {
+		if _, err := os.Stat(cacheFile); err == nil {
+			serveCachedFile(w, r, cacheFile, targetFormat)
+			return
+		}
 	}
 
 	// Acquire lock for this specific cache key to prevent concurrent duplicate processing
@@ -273,9 +295,11 @@ func processAndServeImage(w http.ResponseWriter, r *http.Request, relPath string
 	defer lock.Unlock()
 
 	// Double check cache after lock acquired
-	if _, err := os.Stat(cacheFile); err == nil {
-		serveCachedFile(w, r, cacheFile, targetFormat)
-		return
+	if !isDevMode() {
+		if _, err := os.Stat(cacheFile); err == nil {
+			serveCachedFile(w, r, cacheFile, targetFormat)
+			return
+		}
 	}
 
 	// Decode source image

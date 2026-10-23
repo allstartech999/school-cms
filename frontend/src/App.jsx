@@ -92,6 +92,9 @@ export default function App() {
   const [stats, setStats] = useState({
     school_name: "โรงเรียนโพนงามพิทยานุกูล",
     school_name_en: "Phon-ngam Pittayanukun School",
+    school_subtitle: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม",
+    logo_url: "/images/ppk-emblem-2d.png",
+    favicon_url: "/images/ppk-emblem-2d.png",
     total_posts: 4,
     total_pages: 3
   });
@@ -416,6 +419,22 @@ export default function App() {
       });
   }, []);
 
+  // Dynamic Favicon and Document Title sync
+  useEffect(() => {
+    const faviconUrl = stats?.favicon_url || stats?.logo_url || '/images/ppk-emblem-2d.png';
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = faviconUrl;
+
+    if (stats?.school_name) {
+      document.title = `${stats.school_name} – ${stats.school_subtitle || 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม'}`;
+    }
+  }, [stats?.favicon_url, stats?.logo_url, stats?.school_name, stats?.school_subtitle]);
+
   // Keyboard shortcut: ESC to close reading modal
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -479,12 +498,12 @@ export default function App() {
           >
             <div className="w-12 h-12 rounded-2xl bg-[#F0FDF4] flex items-center justify-center p-1 border border-[#D1FAE5] shadow-xs shrink-0 overflow-hidden group-hover:scale-105 transition">
               <img 
-                src="/images/logo.png" 
-                alt="ตราสัญลักษณ์โรงเรียนโพนงามพิทยานุกูล" 
+                src={stats?.logo_url || "/images/ppk-emblem-2d.png"} 
+                alt={`ตราสัญลักษณ์${stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}`} 
                 className="w-full h-full object-contain"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/favicon.svg';
+                  e.target.src = '/images/ppk-emblem-2d.png';
                 }}
               />
             </div>
@@ -493,7 +512,7 @@ export default function App() {
                 {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
               </span>
               <p className="text-xs text-[#64748B] font-medium whitespace-nowrap">
-                สพม.มหาสารคาม • อ.โกสุมพิสัย
+                {stats?.school_subtitle || 'สพม.มหาสารคาม • อ.โกสุมพิสัย'}
               </p>
             </div>
           </div>
@@ -2091,15 +2110,23 @@ export default function App() {
           
           <div className="flex flex-col sm:flex-row items-start justify-between gap-8">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md">
-                <img src="/images/logo.png" alt="PPKS" className="w-full h-full object-contain" />
+              <div className="w-11 h-11 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md overflow-hidden">
+                <img 
+                  src={stats?.logo_url || "/images/ppk-emblem-2d.png"} 
+                  alt={stats?.school_name || "PPKS"} 
+                  className="w-full h-full object-contain" 
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/ppk-emblem-2d.png';
+                  }}
+                />
               </div>
               <div>
                 <p className="text-white font-bold text-base">
                   {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
                 </p>
                 <p className="text-[#A7F3D0] text-xs mt-0.5">
-                  สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
+                  {stats?.school_subtitle || 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม'}
                 </p>
               </div>
             </div>

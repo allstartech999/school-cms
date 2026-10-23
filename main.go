@@ -69,11 +69,13 @@ func main() {
 	mux.HandleFunc("GET /api/v1/pages", handlers.ListPages)
 	mux.HandleFunc("GET /api/v1/pages/{slug}", handlers.GetPage)
 	mux.HandleFunc("GET /api/v1/stats", handlers.GetStats)
+	mux.HandleFunc("GET /api/v1/settings", handlers.GetSiteSettings)
 	mux.HandleFunc("GET /api/v1/media", handlers.ListMedia)
 	mux.HandleFunc("GET /api/v1/homepage", handlers.GetHomepageConfig)
 	mux.HandleFunc("GET /api/v1/menu", handlers.GetNavigationMenu)
 
 	// --- Site Customizer & Menu APIs (Protected by Admin or Agent) ---
+	mux.HandleFunc("PUT /api/v1/settings", middleware.AgentOrAdminAuth(handlers.UpdateSiteSettings))
 	mux.HandleFunc("PUT /api/v1/homepage", middleware.AgentOrAdminAuth(handlers.UpdateHomepageConfig))
 	mux.HandleFunc("PUT /api/v1/menu", middleware.AgentOrAdminAuth(handlers.UpdateNavigationMenu))
 	mux.HandleFunc("POST /api/v1/menu/reset", middleware.AgentOrAdminAuth(handlers.ResetNavigationMenu))
@@ -129,8 +131,9 @@ func main() {
 		}
 
 		if hasEmbedded {
-			// Cache policy for immutable hashed assets vs index
-			if strings.HasPrefix(path, "/assets/") {
+			// Cache policy: In development mode, strictly disable browser caching
+			isDev := strings.ToLower(os.Getenv("APP_ENV")) != "production" && strings.ToLower(os.Getenv("ENV")) != "production"
+			if !isDev && strings.HasPrefix(path, "/assets/") {
 				w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 			} else {
 				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")

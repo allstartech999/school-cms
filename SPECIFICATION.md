@@ -183,7 +183,10 @@
 - [x] MCP Resources: `school://blocks/catalog` (ขยายบล็อก: `person_cards`, `rich_text`, `image_gallery`) และ `school://guidelines/writing`
 - [x] Frontend Dynamic Navbar: ดึงเมนูจาก API พร้อม Dropdown และเรนเดอร์เพจที่ AI สร้างด้วย `BlockRenderer` ทันทีเมื่อคลิก
 
-### [ ] Phase 4: Single Binary Packaging & Production VPS Deployment (ขั้นตอนถัดไป)
+### [x] Phase 4: Single Binary Packaging & Docker VPS Deployment (เสร็จสมบูรณ์ 100%)
 - [x] สั่ง Build Frontend ออกมาเป็น Static Assets ลงโฟลเดอร์ `dist/`
 - [x] ทำ Go Embedding ด้วย `//go:embed all:dist`
-- [ ] Deploy และรัน Service บน `fame_vps` เป็น Systemd daemon Service พร้อมใช้งานจริง
+- [x] สร้าง Multi-stage `Dockerfile` (Node 24 + Go 1.26 CGO LibWebP + Alpine 3.21 Runner)
+- [x] สร้าง `docker-compose.yml` รองรับ Host Network Gateway และ Persistent Volume สำหรับ `/uploads`
+- [x] Deploy และรัน Service บน `fame_vps` ผ่าน Docker Container (`127.0.0.1:8009`) พร้อม Healthcheck สมบูรณ์
+- [x] ติดตั้งและกำหนดค่า Nginx Reverse Proxy (`/etc/nginx/sites-available/school.krufame.work`) พร้อมรองรับ SSE Unbuffered Streaming สำหรับ `/mcp/`

@@ -489,11 +489,11 @@ export default function App() {
       
       {/* 1. Header (Akat Clean Layout with Fresh White & Emerald Tone) */}
       <header className="bg-white/95 backdrop-blur-md border-b border-[#E2E8F0] sticky top-0 z-50 transition-all shadow-2xs">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6 lg:gap-10">
           
           {/* Logo & School Name */}
           <div 
-            className="flex items-center gap-3.5 cursor-pointer select-none group shrink-0" 
+            className="flex items-center gap-3.5 cursor-pointer select-none group shrink-0 mr-4 lg:mr-8 xl:mr-12" 
             onClick={() => navigateTo('home')}
           >
             <div className="w-12 h-12 rounded-2xl bg-[#F0FDF4] flex items-center justify-center p-1 border border-[#D1FAE5] shadow-xs shrink-0 overflow-hidden group-hover:scale-105 transition">
@@ -512,13 +512,16 @@ export default function App() {
                 {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
               </span>
               <p className="text-xs text-[#64748B] font-medium whitespace-nowrap">
-                {stats?.school_subtitle || 'สพม.มหาสารคาม • อ.โกสุมพิสัย'}
+                {stats?.school_subtitle?.includes('สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม')
+                  ? 'สพม.มหาสารคาม • อ.โกสุมพิสัย'
+                  : (stats?.school_subtitle || 'สพม.มหาสารคาม • อ.โกสุมพิสัย')}
               </p>
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1.5">
+          {/* Desktop Navigation Links & Action Button Group */}
+          <div className="hidden lg:flex items-center gap-3 xl:gap-5 shrink-0">
+            <nav className="flex items-center gap-1 xl:gap-1.5">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { 
@@ -599,8 +602,7 @@ export default function App() {
             })}
           </nav>
 
-          {/* Right Action Button (Modern Emerald Glow & Gradient - Compact & Aligned with Nav) */}
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
+            {/* Right Action Button (Modern Emerald Glow & Gradient - Compact & Aligned with Nav) */}
             <button 
               type="button"
               onClick={() => navigateTo('eservice')}

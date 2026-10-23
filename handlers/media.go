@@ -201,3 +201,35 @@ func ListMedia(w http.ResponseWriter, r *http.Request) {
 
 	WriteJSON(w, http.StatusOK, media)
 }
+
+// DeleteMedia handles DELETE /api/v1/media/{id}
+func DeleteMedia(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	if id == "" {
+		WriteError(w, http.StatusBadRequest, "Missing media id")
+		return
+	}
+
+	var media models.Media
+	if err := db.DB.First(&media, "id = ?", id).Error; err != nil {
+		WriteError(w, http.StatusNotFound, "Media not found")
+		return
+	}
+
+	// Delete from local disk if exists
+	if strings.HasPrefix(media.URL, "/uploads/") {
+		trimmed := strings.TrimPrefix(media.URL, "/uploads/")
+		localPath := filepath.Join(UploadBaseDir, filepath.FromSlash(trimmed))
+		_ = os.Remove(localPath)
+	}
+
+	if err := db.DB.Delete(&media).Error; err != nil {
+		WriteError(w, http.StatusInternalServerError, "Failed to delete media record: "+err.Error())
+		return
+	}
+
+	WriteJSON(w, http.StatusOK, map[string]any{
+		"message": "Media deleted successfully",
+		"id":      media.ID,
+	})
+}

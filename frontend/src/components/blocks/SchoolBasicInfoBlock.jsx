@@ -9,7 +9,6 @@ import {
   School,
   X,
   ZoomIn,
-  Sparkles,
 } from 'lucide-react';
 
 export default function SchoolBasicInfoBlock({

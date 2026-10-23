@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Award, Quote } from 'lucide-react';
+import { User } from 'lucide-react';
 
 export default function PersonCardsBlock({ title, subtitle, members = [] }) {
   if (!members || members.length === 0) return null;

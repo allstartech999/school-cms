@@ -46,15 +46,136 @@ export async function fetchMenu() {
   return res.json();
 }
 
-export async function adminLogin(password) {
+export async function adminLogin(password, username = 'admin') {
   const res = await fetch(`${API_BASE}/admin/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ username, password }),
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.error || 'Login failed');
+  }
+  return res.json();
+}
+
+export async function adminVerify(token) {
+  const res = await fetch(`${API_BASE}/admin/verify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    return false;
+  }
+  return true;
+}
+
+export async function adminChangePassword(oldPassword, newPassword, token) {
+  const res = await fetch(`${API_BASE}/admin/change-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to change password');
+  }
+  return res.json();
+}
+
+export async function fetchAdminStats(token) {
+  const res = await fetch(`${API_BASE}/stats`, {
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) throw new Error('Failed to fetch admin stats');
+  return res.json();
+}
+
+export async function fetchMedia(limit = 60) {
+  const res = await fetch(`${API_BASE}/media?limit=${limit}`);
+  if (!res.ok) throw new Error('Failed to fetch media');
+  return res.json();
+}
+
+export async function uploadMedia(formData, token) {
+  const res = await fetch(`${API_BASE}/media/upload`, {
+    method: 'POST',
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: formData,
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to upload media');
+  }
+  return res.json();
+}
+
+export async function deleteMedia(id, token) {
+  const res = await fetch(`${API_BASE}/media/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete media');
+  }
+  return res.json();
+}
+
+export async function updateHomepageConfig(config, token) {
+  const res = await fetch(`${API_BASE}/homepage`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify(config),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update homepage config');
+  }
+  return res.json();
+}
+
+export async function updateNavigationMenu(menu, token) {
+  const res = await fetch(`${API_BASE}/menu`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify(menu),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update menu');
+  }
+  return res.json();
+}
+
+export async function resetNavigationMenu(token) {
+  const res = await fetch(`${API_BASE}/menu/reset`, {
+    method: 'POST',
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to reset menu');
   }
   return res.json();
 }
@@ -149,7 +270,8 @@ export async function deletePage(id, token) {
   return res.json();
 }
 
-export async function agentCreateOrUpdatePage(pageData, agentKey = 'agent-school-secret-key-2026') {
+export async function agentCreateOrUpdatePage(pageData, agentKey) {
+  if (!agentKey) throw new Error('Agent Key is required');
   const res = await fetch(`${API_BASE}/agent/pages`, {
     method: 'POST',
     headers: {
@@ -161,6 +283,124 @@ export async function agentCreateOrUpdatePage(pageData, agentKey = 'agent-school
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.error || 'Failed to update page via agent');
+  }
+  return res.json();
+}
+
+// User Management APIs
+export async function fetchUsers(token) {
+  const res = await fetch(`${API_BASE}/users`, {
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to fetch users');
+  }
+  return res.json();
+}
+
+export async function createUser(userData, token) {
+  const res = await fetch(`${API_BASE}/users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify(userData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to create user');
+  }
+  return res.json();
+}
+
+export async function updateUser(id, userData, token) {
+  const res = await fetch(`${API_BASE}/users/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify(userData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update user');
+  }
+  return res.json();
+}
+
+export async function deleteUser(id, token) {
+  const res = await fetch(`${API_BASE}/users/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete user');
+  }
+  return res.json();
+}
+
+// AI Agent API Key Management APIs
+export async function fetchAgentKeys(token) {
+  const res = await fetch(`${API_BASE}/agent-keys`, {
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to fetch agent keys');
+  }
+  return res.json();
+}
+
+export async function createAgentKey(keyData, token) {
+  const res = await fetch(`${API_BASE}/agent-keys`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+    body: JSON.stringify(keyData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to create agent key');
+  }
+  return res.json();
+}
+
+export async function deleteAgentKey(id, token) {
+  const res = await fetch(`${API_BASE}/agent-keys/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete agent key');
+  }
+  return res.json();
+}
+
+export async function toggleAgentKey(id, token) {
+  const res = await fetch(`${API_BASE}/agent-keys/${id}/toggle`, {
+    method: 'PUT',
+    headers: {
+      'X-Admin-Token': token || 'authenticated-admin',
+    },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to toggle agent key');
   }
   return res.json();
 }

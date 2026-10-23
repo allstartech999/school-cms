@@ -1,0 +1,21 @@
+services:
+  school-cms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: school-cms
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8009:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    volumes:
+      - ./uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8080/api/v1/stats || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

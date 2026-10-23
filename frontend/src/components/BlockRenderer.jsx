@@ -8,6 +8,7 @@ import PersonCardsBlock from './blocks/PersonCardsBlock';
 import RichTextBlock from './blocks/RichTextBlock';
 import ImageGalleryBlock from './blocks/ImageGalleryBlock';
 import SchoolBasicInfoBlock from './blocks/SchoolBasicInfoBlock';
+import AdaptiveContainer from './adaptive/AdaptiveContainer';
 
 const BLOCK_COMPONENTS = {
   hero_banner: HeroBannerBlock,
@@ -39,7 +40,7 @@ export default function BlockRenderer({ blocks, pageId, onPageUpdated }) {
   }
 
   return (
-    <div className="w-full space-y-6">
+    <AdaptiveContainer className="w-full space-y-6">
       {parsedBlocks.map((block, index) => {
         const Component = BLOCK_COMPONENTS[block.type];
         if (!Component) {
@@ -56,6 +57,6 @@ export default function BlockRenderer({ blocks, pageId, onPageUpdated }) {
           />
         );
       })}
-    </div>
+    </AdaptiveContainer>
   );
 }

@@ -16,7 +16,7 @@ const (
     "subheading": "เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ",
     "primary_cta": "ข่าวสารและกิจกรรมล่าสุด",
     "primary_url": "news",
-    "image_url": "https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80"
+    "image_url": "/images/hero-banner.jpg"
   },
   "announcement": "ขอเชิญชวนศิษย์เก่าทุกท่านร่วมลงทะเบียนเครือข่ายศิษย์เก่าออนไลน์ (PPK Alumni) เพื่อร่วมพัฒนาโรงเรียน",
   "show_ticker": true,

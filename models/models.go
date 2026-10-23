@@ -55,6 +55,45 @@ type Setting struct {
 	Value string `gorm:"not null" json:"value"`
 }
 
+type User struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Username  string    `gorm:"uniqueIndex;not null" json:"username"`
+	Password  string    `gorm:"not null" json:"-"`
+	Name      string    `gorm:"not null" json:"name"`
+	Role      string    `gorm:"default:'admin'" json:"role"` // 'admin', 'editor', 'teacher'
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type CreateUserRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+}
+
+type UpdateUserRequest struct {
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+	Password string `json:"password,omitempty"`
+}
+
+type AgentKey struct {
+	ID          uint       `gorm:"primaryKey" json:"id"`
+	Name        string     `gorm:"not null" json:"name"`
+	Key         string     `gorm:"uniqueIndex;not null" json:"key"`
+	Description string     `json:"description"`
+	IsActive    bool       `gorm:"default:true" json:"is_active"`
+	LastUsedAt  *time.Time `json:"last_used_at"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+}
+
+type CreateAgentKeyRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 type CreatePostRequest struct {
 	Title    string `json:"title"`
 	Slug     string `json:"slug"`
@@ -121,6 +160,7 @@ type AgentFetchMediaRequest struct {
 }
 
 type LoginRequest struct {
+	Username string `json:"username,omitempty"`
 	Password string `json:"password"`
 }
 

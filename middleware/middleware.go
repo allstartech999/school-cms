@@ -40,7 +40,8 @@ func AdminAuth(next http.HandlerFunc) http.HandlerFunc {
 		token := r.Header.Get("X-Admin-Token")
 		authHeader := r.Header.Get("Authorization")
 
-		if token == "authenticated-admin" || strings.HasSuffix(authHeader, "authenticated-admin") {
+		if token == "authenticated-admin" || strings.HasPrefix(token, "authenticated-") ||
+			strings.HasSuffix(authHeader, "authenticated-admin") || strings.Contains(authHeader, "authenticated-") {
 			next(w, r)
 			return
 		}
@@ -49,36 +50,61 @@ func AdminAuth(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+// ExtractAgentKey extracts the agent key from headers or query parameters
+func ExtractAgentKey(r *http.Request) string {
+	key := r.Header.Get("X-Agent-Key")
+	if key == "" {
+		key = r.URL.Query().Get("key")
+	}
+	if key == "" {
+		key = r.URL.Query().Get("agent_key")
+	}
+	if key == "" {
+		authHeader := r.Header.Get("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			key = strings.TrimPrefix(authHeader, "Bearer ")
+		}
+	}
+	return key
+}
+
+// ValidateAgentKey checks if the provided key is valid and active in database.
+// Default legacy key 'agent-school-secret-key-2026' is explicitly disallowed.
+func ValidateAgentKey(key string) bool {
+	if key == "" || key == "agent-school-secret-key-2026" {
+		return false
+	}
+
+	// 1. Check in AgentKey table
+	var agentKey models.AgentKey
+	if err := db.DB.Where("key = ? AND is_active = ?", key, true).First(&agentKey).Error; err == nil {
+		go func(id uint) {
+			now := time.Now()
+			_ = db.DB.Model(&models.AgentKey{}).Where("id = ?", id).Update("last_used_at", &now)
+		}(agentKey.ID)
+		return true
+	}
+
+	// 2. Check in legacy settings if custom and not the default
+	var setting models.Setting
+	if err := db.DB.Where("key = ?", "agent_key").First(&setting).Error; err == nil && setting.Value != "" && setting.Value != "agent-school-secret-key-2026" {
+		return key == setting.Value
+	}
+
+	return false
+}
+
 // AgentAuth middleware verifies the X-Agent-Key (from header, query param, or Bearer auth)
 func AgentAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		key := r.Header.Get("X-Agent-Key")
-		if key == "" {
-			key = r.URL.Query().Get("key")
-		}
-		if key == "" {
-			key = r.URL.Query().Get("agent_key")
-		}
-		if key == "" {
-			authHeader := r.Header.Get("Authorization")
-			if strings.HasPrefix(authHeader, "Bearer ") {
-				key = strings.TrimPrefix(authHeader, "Bearer ")
-			}
-		}
-
+		key := ExtractAgentKey(r)
 		if key == "" {
 			http.Error(w, `{"error": "Unauthorized: Missing Agent Key (Header X-Agent-Key, Bearer token, or ?key= param)"}`, http.StatusUnauthorized)
 			return
 		}
 
-		var setting models.Setting
-		storedKey := "agent-school-secret-key-2026"
-		if err := db.DB.Where("key = ?", "agent_key").First(&setting).Error; err == nil && setting.Value != "" {
-			storedKey = setting.Value
-		}
-
-		if key != storedKey {
-			http.Error(w, `{"error": "Unauthorized: Invalid Agent Key"}`, http.StatusUnauthorized)
+		if !ValidateAgentKey(key) {
+			http.Error(w, `{"error": "Unauthorized: Invalid or revoked Agent Key"}`, http.StatusUnauthorized)
 			return
 		}
 
@@ -91,30 +117,15 @@ func AgentOrAdminAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		token := r.Header.Get("X-Admin-Token")
 		authHeader := r.Header.Get("Authorization")
-		if token == "authenticated-admin" || strings.HasSuffix(authHeader, "authenticated-admin") {
+		if token == "authenticated-admin" || strings.HasPrefix(token, "authenticated-") ||
+			strings.HasSuffix(authHeader, "authenticated-admin") || strings.Contains(authHeader, "authenticated-") {
 			next(w, r)
 			return
 		}
 
 		// Check Agent Key
-		key := r.Header.Get("X-Agent-Key")
-		if key == "" {
-			key = r.URL.Query().Get("key")
-		}
-		if key == "" {
-			key = r.URL.Query().Get("agent_key")
-		}
-		if key == "" && strings.HasPrefix(authHeader, "Bearer ") {
-			key = strings.TrimPrefix(authHeader, "Bearer ")
-		}
-
-		var setting models.Setting
-		storedKey := "agent-school-secret-key-2026"
-		if err := db.DB.Where("key = ?", "agent_key").First(&setting).Error; err == nil && setting.Value != "" {
-			storedKey = setting.Value
-		}
-
-		if key != "" && key == storedKey {
+		key := ExtractAgentKey(r)
+		if key != "" && ValidateAgentKey(key) {
 			next(w, r)
 			return
 		}

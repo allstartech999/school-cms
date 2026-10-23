@@ -81,7 +81,10 @@ func main() {
 	mux.HandleFunc("POST /api/v1/menu/reset", middleware.AgentOrAdminAuth(handlers.ResetNavigationMenu))
 
 	// --- Admin APIs (Protected by AdminAuth) ---
+	// Force password change on first login supported (air reload)
 	mux.HandleFunc("POST /api/v1/admin/login", handlers.AdminLogin)
+	mux.HandleFunc("POST /api/v1/admin/verify", middleware.AdminAuth(handlers.AdminVerify))
+	mux.HandleFunc("POST /api/v1/admin/change-password", middleware.AdminAuth(handlers.AdminChangePassword))
 	mux.HandleFunc("POST /api/v1/posts", middleware.AdminAuth(handlers.CreatePost))
 	mux.HandleFunc("PUT /api/v1/posts/{id}", middleware.AdminAuth(handlers.UpdatePost))
 	mux.HandleFunc("DELETE /api/v1/posts/{id}", middleware.AdminAuth(handlers.DeletePost))
@@ -89,6 +92,19 @@ func main() {
 	mux.HandleFunc("PUT /api/v1/pages/{id}", middleware.AdminAuth(handlers.UpdatePage))
 	mux.HandleFunc("DELETE /api/v1/pages/{id}", middleware.AdminAuth(handlers.DeletePage))
 	mux.HandleFunc("POST /api/v1/media/upload", middleware.AdminAuth(handlers.UploadMedia))
+	mux.HandleFunc("DELETE /api/v1/media/{id}", middleware.AdminAuth(handlers.DeleteMedia))
+
+	// --- User Management APIs (Protected by AdminAuth) ---
+	mux.HandleFunc("GET /api/v1/users", middleware.AdminAuth(handlers.ListUsers))
+	mux.HandleFunc("POST /api/v1/users", middleware.AdminAuth(handlers.CreateUser))
+	mux.HandleFunc("PUT /api/v1/users/{id}", middleware.AdminAuth(handlers.UpdateUser))
+	mux.HandleFunc("DELETE /api/v1/users/{id}", middleware.AdminAuth(handlers.DeleteUser))
+
+	// --- AI Agent API Key Management APIs (Protected by AdminAuth) ---
+	mux.HandleFunc("GET /api/v1/agent-keys", middleware.AdminAuth(handlers.ListAgentKeys))
+	mux.HandleFunc("POST /api/v1/agent-keys", middleware.AdminAuth(handlers.CreateAgentKey))
+	mux.HandleFunc("DELETE /api/v1/agent-keys/{id}", middleware.AdminAuth(handlers.DeleteAgentKey))
+	mux.HandleFunc("PUT /api/v1/agent-keys/{id}/toggle", middleware.AdminAuth(handlers.ToggleAgentKey))
 
 	// --- AI Agent APIs (Protected by AgentAuth: X-Agent-Key) ---
 	mux.HandleFunc("GET /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentListPosts))

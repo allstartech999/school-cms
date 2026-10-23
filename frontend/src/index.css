@@ -21,7 +21,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -73,6 +72,22 @@
   transform: translateY(-4px);
   border-color: #10B981;
   box-shadow: 0 30px 50px -10px rgba(5, 150, 105, 0.12);
+}
+
+/* Adaptive Web Design (AWD) Stage Utilities */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom-padding {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 5rem);
+  }
+}
+
+.adaptive-stage-transition {
+  transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
 }
 
 

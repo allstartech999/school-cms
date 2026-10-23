@@ -1,0 +1,14 @@
+.git
+.github
+.air.toml
+.env
+.cloudflared.log
+tmp
+uploads
+server.exe
+server.exe~
+*.tmp
+*.log
+*.md
+frontend/node_modules
+frontend/.vite

@@ -88,8 +88,29 @@
 
 ### 3.3 ตาราง `settings` (การตั้งค่าระบบ)
 * `admin_password`: รหัสผ่านสำหรับเข้าสู่ระบบแอดมิน (ค่าเริ่มต้น: `admin123`)
-* `agent_key`: API Key สำหรับ AI Agent (ค่าเริ่มต้น: `agent-school-secret-key-2026`)
 * `school_name`: ชื่อโรงเรียนที่แสดงบนหัวเว็บ
+
+### 3.4 ตาราง `users` (ผู้ใช้งานระบบ)
+| ฟิลด์ | ประเภท | คำอธิบาย |
+| :--- | :--- | :--- |
+| `id` | INTEGER PK AUTOINCREMENT | รหัสผู้ใช้งาน |
+| `username` | TEXT UNIQUE NOT NULL | ชื่อบัญชีเข้าสู่ระบบ |
+| `password` | TEXT NOT NULL | รหัสผ่านเข้ารหัสด้วย bcrypt |
+| `name` | TEXT NOT NULL | ชื่อ-นามสกุล หรือชื่อแสดง |
+| `role` | TEXT DEFAULT 'admin' | สิทธิ์ผู้ใช้ (`admin`, `editor`, `teacher`) |
+| `created_at` | DATETIME | วันเวลาที่สร้าง |
+| `updated_at` | DATETIME | วันเวลาที่แก้ไข |
+
+### 3.5 ตาราง `agent_keys` (API Keys สำหรับ AI Agent)
+| ฟิลด์ | ประเภท | คำอธิบาย |
+| :--- | :--- | :--- |
+| `id` | INTEGER PK AUTOINCREMENT | รหัสคีย์ |
+| `name` | TEXT NOT NULL | ชื่อเรียกของคีย์ (เช่น Claude, Gemini) |
+| `key` | TEXT UNIQUE NOT NULL | API Key สุ่มปลอดภัย (`ppk_agent_...`) |
+| `description` | TEXT | คำอธิบายการใช้งาน |
+| `is_active` | BOOLEAN DEFAULT true | สถานะเปิด/ปิดใช้งาน |
+| `last_used_at` | DATETIME | วันเวลาที่ใช้งานล่าสุด |
+| `created_at` | DATETIME | วันเวลาที่สร้าง |
 
 ---
 
@@ -103,13 +124,21 @@
 * `GET /api/v1/stats`: ข้อมูลสรุปจำนวนข่าว, หน้าเพจ, และข่าวที่ AI สร้าง
 
 ### 4.2 หมวดหมู่ Admin (ต้องส่ง Header `X-Admin-Token: authenticated-admin`)
-* `POST /api/v1/admin/login`: ยืนยันรหัสผ่านเพื่อรับสิทธิ์เข้าสู่ระบบ
+* `POST /api/v1/admin/login`: ยืนยันชื่อผู้ใช้และรหัสผ่านเพื่อรับสิทธิ์เข้าสู่ระบบ
 * `POST /api/v1/posts`: สร้างข่าวใหม่
 * `PUT /api/v1/posts/{id}`: แก้ไขข่าว
 * `DELETE /api/v1/posts/{id}`: ลบข่าว
 * `POST /api/v1/pages`: สร้างหน้าเพจใหม่
 * `PUT /api/v1/pages/{id}`: แก้ไขหน้าเพจ
 * `DELETE /api/v1/pages/{id}`: ลบหน้าเพจ
+* `GET /api/v1/users`: ดูรายชื่อผู้ใช้งานทั้งหมด
+* `POST /api/v1/users`: สร้างผู้ใช้งานใหม่ พร้อมกำหนดสิทธิ์และรหัสผ่าน
+* `PUT /api/v1/users/{id}`: แก้ไขข้อมูลผู้ใช้ สิทธิ์ และรีเซ็ตรหัสผ่าน
+* `DELETE /api/v1/users/{id}`: ลบผู้ใช้งาน (ป้องกันการลบแอดมินคนสุดท้าย)
+* `GET /api/v1/agent-keys`: ดูรายการ API Keys สำหรับ AI Agent ทั้งหมด
+* `POST /api/v1/agent-keys`: สร้าง API Key สุ่มความปลอดภัยสูง (`ppk_agent_...`)
+* `PUT /api/v1/agent-keys/{id}/toggle`: เปิด/ระงับการใช้งาน API Key ชั่วคราว
+* `DELETE /api/v1/agent-keys/{id}`: ลบและเพิกถอน API Key อย่างถาวร
 
 ### 4.3 หมวดหมู่ AI Agent (ต้องส่ง Header `X-Agent-Key: <AGENT_KEY>`)
 * `GET /api/v1/agent/posts`: ดึงประวัติข่าวสารล่าสุดไปประมวลผลหรือสรุปความ

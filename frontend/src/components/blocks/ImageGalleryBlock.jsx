@@ -1,5 +1,4 @@
 import React from 'react';
-import { Image as ImageIcon } from 'lucide-react';
 
 export default function ImageGalleryBlock({ title, subtitle, columns = 3, images = [] }) {
   if (!images || images.length === 0) return null;

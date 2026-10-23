@@ -7,6 +7,7 @@ import (
 	"school-cms/models"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -62,7 +63,7 @@ func InitDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	// Auto-migrate tables on PostgreSQL
-	if err := database.AutoMigrate(&models.Post{}, &models.Page{}, &models.Setting{}, &models.Media{}); err != nil {
+	if err := database.AutoMigrate(&models.Post{}, &models.Page{}, &models.Setting{}, &models.Media{}, &models.User{}, &models.AgentKey{}); err != nil {
 		return nil, fmt.Errorf("failed to migrate tables: %w", err)
 	}
 
@@ -86,7 +87,7 @@ func seedInitialData(database *gorm.DB) {
 				Category:       "วิชาการ",
 				Summary:        "โรงเรียนโพนงามพิทยานุกูล ได้รับการคัดเลือกและรับรางวัลระดับดีเด่น ในการขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ประจำปีการศึกษา 2568 สพม.มหาสารคาม",
 				Content:        "โรงเรียนโพนงามพิทยานุกูล สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม มุ่งมั่นปลูกฝังคุณธรรมและความซื่อสัตย์สุจริตให้แก่นักเรียนอย่างต่อเนื่อง ล่าสุดทางโรงเรียนได้รับรางวัลระดับดีเด่น ในโครงการขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ประจำปีการศึกษา 2568 สะท้อนถึงความมุ่งมั่นของคณะผู้บริหาร คณะครู และนักเรียนในการร่วมกันสร้างสังคมคุณธรรมและโปร่งใส",
-				ImageURL:       "https://images.unsplash.com/photo-1546410531-bb4caa6b424d?w=1200&auto=format&fit=crop&q=80",
+				ImageURL:       "/images/hero-banner.jpg",
 				Author:         "กลุ่มบริหารงานวิชาการ",
 				CreatedByAgent: false,
 				Status:         "published",
@@ -97,7 +98,7 @@ func seedInitialData(database *gorm.DB) {
 				Category:       "วิชาการ",
 				Summary:        "โรงเรียนโพนงามพิทยานุกูล พัฒนานวัตกรรมการบริหารสถานศึกษาด้วยรูปแบบ PPK SMART Model เพื่อเสริมสร้างประสิทธิภาพการเรียนรู้รอบด้าน",
 				Content:        "เพื่อการพัฒนาคุณภาพการศึกษาที่ยั่งยืน โรงเรียนโพนงามพิทยานุกูล ได้นำนวัตกรรมการบริหารแบบมีส่วนร่วม 'PPK SMART Model' มาขับเคลื่อนงานทั้ง 4 กลุ่มงาน (วิชาการ, บุคคล, งบประมาณ, บริหารทั่วไป) สอดคล้องกับวิสัยทัศน์ 'เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ'",
-				ImageURL:       "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200&auto=format&fit=crop&q=80",
+				ImageURL:       "/images/news-smart-model.jpg",
 				Author:         "นายวัชรินทร์ ติดวงษา ผู้อำนวยการ",
 				CreatedByAgent: false,
 				Status:         "published",
@@ -108,7 +109,7 @@ func seedInitialData(database *gorm.DB) {
 				Category:       "กิจกรรม",
 				Summary:        "กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ ขับเคลื่อนการเรียนรู้เชิงรุกโดยใช้เกมเป็นฐาน ส่งเสริมทักษะภาษาอังกฤษของนักเรียน",
 				Content:        "คณะครูกลุ่มสาระการเรียนรู้ภาษาต่างประเทศ โรงเรียนโพนงามพิทยานุกูล ได้ดำเนินการพัฒนาการจัดกิจกรรมการเรียนรู้ภาษาอังกฤษเชิงรุก (Active Learning) ด้วยเกมเป็นฐาน ผ่านโมเดล 'PM SMART MODEL' ส่งผลให้นักเรียนเกิดความสนุกสนาน กล้าแสดงออก และมีเจตคติที่ดีต่อการสื่อสารภาษาอังกฤษ",
-				ImageURL:       "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200&auto=format&fit=crop&q=80",
+				ImageURL:       "/images/news-active-learning.jpg",
 				Author:         "กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ",
 				CreatedByAgent: false,
 				Status:         "published",
@@ -119,7 +120,7 @@ func seedInitialData(database *gorm.DB) {
 				Category:       "กิจกรรม",
 				Summary:        "เปิดให้บริการระบบเครือข่ายทำเนียบศิษย์เก่าออนไลน์ เพื่อเชื่อมความสัมพันธ์และร่วมพัฒนาสถานศึกษา",
 				Content:        "โรงเรียนโพนงามพิทยานุกูล ขอเชิญชวนศิษย์เก่าทุกรุ่น ร่วมลงทะเบียนฐานข้อมูลศิษย์เก่าผ่านระบบ E-Service (PPK Alumni) ที่ https://alumni.ppks.ac.th เพื่อสร้างเครือข่ายความร่วมมือ อัพเดตข่าวสาร และร่วมเป็นพลังในการพัฒนาคุณภาพการศึกษาของน้องๆ รุ่นต่อไป",
-				ImageURL:       "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1200&auto=format&fit=crop&q=80",
+				ImageURL:       "/images/banner-alumni.png",
 				Author:         "งานประชาสัมพันธ์และเครือข่ายศิษย์เก่า",
 				CreatedByAgent: false,
 				Status:         "published",
@@ -157,7 +158,6 @@ func seedInitialData(database *gorm.DB) {
 	// Seed settings if not present
 	defaultSettings := []models.Setting{
 		{Key: "admin_password", Value: "admin123"},
-		{Key: "agent_key", Value: "agent-school-secret-key-2026"},
 		{Key: "school_name", Value: "โรงเรียนโพนงามพิทยานุกูล"},
 		{Key: "school_name_en", Value: "Phon-ngam Pittayanukun School"},
 		{Key: "school_area", Value: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม"},
@@ -175,6 +175,39 @@ func seedInitialData(database *gorm.DB) {
 			database.Create(&s)
 		} else if s.Key == "school_name" && existing.Value != "โรงเรียนโพนงามพิทยานุกูล" {
 			database.Model(&existing).Update("value", s.Value)
+		}
+	}
+
+	// Remove default agent key if it exists in settings
+	database.Where("key = ? AND value = ?", "agent_key", "agent-school-secret-key-2026").Delete(&models.Setting{})
+
+	// Seed default admin user if users table is empty
+	var userCount int64
+	database.Model(&models.User{}).Count(&userCount)
+	if userCount == 0 {
+		adminPass := os.Getenv("ADMIN_DEFAULT_PASSWORD")
+		if adminPass == "" {
+			adminPass = os.Getenv("ADMIN_PASSWORD")
+		}
+		if adminPass == "" {
+			var passSetting models.Setting
+			if err := database.Where("key = ?", "admin_password").First(&passSetting).Error; err == nil && passSetting.Value != "" {
+				adminPass = passSetting.Value
+			} else {
+				adminPass = "admin123"
+			}
+		}
+
+		hashedPass, err := bcrypt.GenerateFromPassword([]byte(adminPass), bcrypt.DefaultCost)
+		if err == nil {
+			adminUser := models.User{
+				Username: "admin",
+				Password: string(hashedPass),
+				Name:     "ผู้ดูแลระบบ (Super Admin)",
+				Role:     "admin",
+			}
+			database.Create(&adminUser)
+			log.Println("Created initial default admin user in database.")
 		}
 	}
 }

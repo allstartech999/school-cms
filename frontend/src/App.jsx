@@ -3,7 +3,6 @@ import {
   Menu, 
   X, 
   Phone, 
-  Shield, 
   Eye, 
   Calendar, 
   Search, 
@@ -13,90 +12,43 @@ import {
   MapPin, 
   Mail, 
   Sparkles,
-  BookOpen,
   Award,
   ExternalLink,
   Users,
   Building2,
-  Globe,
   FileText,
   Compass,
   CheckCircle2,
   ChevronRight,
   ChevronDown,
-  Home,
-  Bot,
   GraduationCap,
-  ShieldCheck,
   ArrowUpRight,
-  UserCheck
+  UserCheck,
+  Lock,
+  LayoutDashboard
 } from 'lucide-react';
 import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage } from './api';
 import BlockRenderer from './components/BlockRenderer';
 import OptimizedImage from './components/OptimizedImage';
-
-const INITIAL_POSTS = [
-  {
-    id: 1,
-    title: "โรงเรียนโพนงามพิทยานุกูล คว้ารางวัลระดับดีเด่น การขับเคลื่อนหลักสูตร ต้านทุจริตศึกษา ปีการศึกษา 2568",
-    slug: "anti-corruption-curriculum-award-2568",
-    category: "วิชาการ",
-    summary: "โรงเรียนโพนงามพิทยานุกูล ได้รับการคัดเลือกและรับรางวัลระดับดีเด่น ในการขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ประจำปีการศึกษา 2568 สพม.มหาสารคาม",
-    content: "โรงเรียนโพนงามพิทยานุกูล สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม มุ่งมั่นปลูกฝังคุณธรรมและความซื่อสัตย์สุจริตให้แก่นักเรียนอย่างต่อเนื่อง ล่าสุดทางโรงเรียนได้รับรางวัลระดับดีเด่น ในโครงการขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ประจำปีการศึกษา 2568 สะท้อนถึงความมุ่งมั่นของคณะผู้บริหาร คณะครู และนักเรียนในการร่วมกันสร้างสังคมคุณธรรมและโปร่งใส",
-    image_url: "/images/news-active-learning.jpg",
-    author: "กลุ่มบริหารงานวิชาการ",
-    created_at: "2026-10-20T08:30:00Z",
-    views: 320
-  },
-  {
-    id: 2,
-    title: "การบริหารสถานศึกษาแบบมีส่วนร่วมเพื่อยกระดับคุณภาพการศึกษา โดยใช้ PPK SMART Model",
-    slug: "ppk-smart-model-management",
-    category: "วิชาการ",
-    summary: "โรงเรียนโพนงามพิทยานุกูล พัฒนานวัตกรรมการบริหารสถานศึกษาด้วยรูปแบบ PPK SMART Model เพื่อเสริมสร้างประสิทธิภาพการเรียนรู้รอบด้าน",
-    content: "เพื่อการพัฒนาคุณภาพการศึกษาที่ยั่งยืน โรงเรียนโพนงามพิทยานุกูล ได้นำนวัตกรรมการบริหารแบบมีส่วนร่วม 'PPK SMART Model' มาขับเคลื่อนงานทั้ง 4 กลุ่มงาน (วิชาการ, บุคคล, งบประมาณ, บริหารทั่วไป) สอดคล้องกับวิสัยทัศน์ 'เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ'",
-    image_url: "/images/news-smart-model.jpg",
-    author: "นายวัชรินทร์ ติดวงษา ผู้อำนวยการ",
-    created_at: "2026-10-18T09:00:00Z",
-    views: 450
-  },
-  {
-    id: 3,
-    title: "การพัฒนาการจัดการเรียนรู้เชิงรุก (Active Learning) ด้วยเกมเป็นฐาน รูปแบบ PM SMART MODEL",
-    slug: "active-learning-pm-smart-model",
-    category: "กิจกรรม",
-    summary: "กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ ขับเคลื่อนการเรียนรู้เชิงรุกโดยใช้เกมเป็นฐาน ส่งเสริมทักษะภาษาอังกฤษของนักเรียน",
-    content: "คณะครูกลุ่มสาระการเรียนรู้ภาษาต่างประเทศ โรงเรียนโพนงามพิทยานุกูล ได้ดำเนินการพัฒนาการจัดกิจกรรมการเรียนรู้ภาษาอังกฤษเชิงรุก (Active Learning) ด้วยเกมเป็นฐาน ผ่านโมเดล 'PM SMART MODEL' ส่งผลให้นักเรียนเกิดความสนุกสนาน กล้าแสดงออก และมีเจตคติที่ดีต่อการสื่อสารภาษาอังกฤษ",
-    image_url: "/images/banner-semarak.png",
-    author: "กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ",
-    created_at: "2026-10-15T10:15:00Z",
-    views: 290
-  },
-  {
-    id: 4,
-    title: "ขอเชิญชวนศิษย์เก่าโรงเรียนโพนงามพิทยานุกูล ร่วมลงทะเบียนผ่านระบบ PPK Alumni",
-    slug: "ppk-alumni-network-invitation",
-    category: "กิจกรรม",
-    summary: "เปิดให้บริการระบบเครือข่ายทำเนียบศิษย์เก่าออนไลน์ เพื่อเชื่อมความสัมพันธ์และร่วมพัฒนาสถานศึกษา",
-    content: "โรงเรียนโพนงามพิทยานุกูล ขอเชิญชวนศิษย์เก่าทุกรุ่น ร่วมลงทะเบียนฐานข้อมูลศิษย์เก่าผ่านระบบ E-Service (PPK Alumni) ที่ https://alumni.ppks.ac.th เพื่อสร้างเครือข่ายความร่วมมือ อัพเดตข่าวสาร และร่วมเป็นพลังในการพัฒนาคุณภาพการศึกษาของน้องๆ รุ่นต่อไป",
-    image_url: "/images/banner-alumni.png",
-    author: "งานประชาสัมพันธ์และเครือข่ายศิษย์เก่า",
-    created_at: "2026-10-12T11:00:00Z",
-    views: 512
-  }
-];
+import AdminDashboard from './components/admin/AdminDashboard';
+import AdminLogin from './components/admin/AdminLogin';
+import { useAdaptive } from './context/AdaptiveContext';
+import AdaptiveBottomNav from './components/adaptive/AdaptiveBottomNav';
+import AdaptiveModeSwitcher from './components/adaptive/AdaptiveModeSwitcher';
 
 export default function App() {
+  const { isMobile, isTablet, isForcedDesktop, isForcedMobile, setMode } = useAdaptive();
+  const showMobileNav = (isMobile || isTablet) && !isForcedDesktop;
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'about' | 'eservice' | 'news' | 'contact' | 'dynamic_page'
-  const [posts, setPosts] = useState(INITIAL_POSTS);
+  const [posts, setPosts] = useState([]);
   const [stats, setStats] = useState({
     school_name: "โรงเรียนโพนงามพิทยานุกูล",
     school_name_en: "Phon-ngam Pittayanukun School",
     school_subtitle: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม",
     logo_url: "/images/ppk-emblem-2d.png",
     favicon_url: "/images/ppk-emblem-2d.png",
-    total_posts: 4,
-    total_pages: 3
+    total_posts: 0,
+    total_pages: 0
   });
   const [homepageConfig, setHomepageConfig] = useState({
     hero: {
@@ -116,18 +68,37 @@ export default function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [activeDynamicPage, setActiveDynamicPage] = useState(null);
   const [loadingDynamicPage, setLoadingDynamicPage] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
   const [searchQuery, setSearchQuery] = useState('');
   const [readingPost, setReadingPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [aboutActiveTab, setAboutActiveTab] = useState('history');
   const [facultyCategoryFilter, setFacultyCategoryFilter] = useState('all'); // 'all' | 'teacher' | 'staff'
+
+  // Admin Auth States
+  const [adminToken, setAdminToken] = useState(() => localStorage.getItem('school_admin_token') || '');
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => !!localStorage.getItem('school_admin_token'));
+  const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   // Categories list
   const categories = ['ทั้งหมด', 'วิชาการ', 'กิจกรรม'];
+
+  const handleAdminLoginSuccess = (token, mustChange = false) => {
+    setAdminToken(token);
+    setIsAdminLoggedIn(true);
+    setMustChangePassword(mustChange);
+    setShowAdminLoginModal(false);
+    setCurrentPage('admin');
+    window.location.hash = 'admin';
+  };
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('school_admin_token');
+    setAdminToken('');
+    setIsAdminLoggedIn(false);
+    navigateTo('home');
+  };
 
   const loadDynamicPage = async (slug) => {
     setLoadingDynamicPage(true);
@@ -155,6 +126,16 @@ export default function App() {
       } else if (hash === 'history' || hash === 'history-vision') {
         setCurrentPage('history');
         setActiveDynamicPage(null);
+      } else if (hash === 'admin' || hash === 'login') {
+        const token = localStorage.getItem('school_admin_token');
+        if (token) {
+          setIsAdminLoggedIn(true);
+          setAdminToken(token);
+          setCurrentPage('admin');
+          setActiveDynamicPage(null);
+        } else {
+          setShowAdminLoginModal(true);
+        }
       } else if (['home', 'about', 'history', 'eservice', 'news', 'contact'].includes(hash)) {
         setCurrentPage(hash);
         setActiveDynamicPage(null);
@@ -167,10 +148,23 @@ export default function App() {
 
   const navigateTo = (target) => {
     setMobileMenuOpen(false);
-    setOpenDropdown(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     if (!target) return;
+    if (target === 'admin' || target === '/admin' || target === 'login') {
+      const token = localStorage.getItem('school_admin_token');
+      if (token) {
+        setIsAdminLoggedIn(true);
+        setAdminToken(token);
+        setCurrentPage('admin');
+        window.location.hash = 'admin';
+        setActiveDynamicPage(null);
+      } else {
+        setShowAdminLoginModal(true);
+      }
+      return;
+    }
+
     if (target.startsWith('/page/') || target.startsWith('page/')) {
       const slug = target.replace(/^\/?page\//, '');
       window.location.hash = 'page/' + slug;
@@ -256,13 +250,7 @@ export default function App() {
     }
   ];
 
-  // 4 Core Groups
-  const departmentGroups = [
-    { title: 'กลุ่มบริหารงานวิชาการ', img: '/images/artboard-1.png', head: 'นายดนุพล คำชมภู' },
-    { title: 'กลุ่มบริหารงานบุคคล', img: '/images/artboard-2.png', head: 'นางสุปราณี อันทรินทร์' },
-    { title: 'กลุ่มบริหารงบประมาณ', img: '/images/artboard-3.png', head: 'น.ส. สุดารัตน์ กองเพชร' },
-    { title: 'กลุ่มบริหารงานทั่วไป', img: '/images/artboard-4.png', head: 'นายณรงค์ศักดิ์ บัวลาด' },
-  ];
+
 
   // Administration list with REAL photos & structured duties
   const administrators = [
@@ -401,7 +389,7 @@ export default function App() {
       fetchMenu().catch(() => null)
     ])
       .then(([postsData, statsData, hpCfg, menuData]) => {
-        if (Array.isArray(postsData) && postsData.length > 0) {
+        if (Array.isArray(postsData)) {
           setPosts(postsData);
         }
         if (statsData) {
@@ -484,12 +472,80 @@ export default function App() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#F4F8F5] text-[#334155] flex flex-col font-sans selection:bg-[#D1FAE5] selection:text-[#065F46]">
-      
+  if (currentPage === 'admin') {
+    if (!isAdminLoggedIn) {
+      return (
+        <AdminLogin
+          onClose={() => navigateTo('home')}
+          onLoginSuccess={handleAdminLoginSuccess}
+          schoolInfo={stats}
+        />
+      );
+    }
+    return (
+      <>
+        <AdminDashboard
+          onLogout={handleAdminLogout}
+          onViewSite={() => navigateTo('home')}
+          token={adminToken}
+          initialMustChangePassword={mustChangePassword}
+        />
+        <AdaptiveModeSwitcher />
+      </>
+    );
+  }
+
+  const appContent = (
+    <div className={`flex flex-col flex-1 ${isForcedDesktop ? 'w-[1200px] min-w-[1200px] mx-auto' : 'w-full'}`}>
+      {/* Forced Desktop Mode Notification Banner */}
+      {isForcedDesktop && (
+        <div className="bg-emerald-950 text-emerald-100 text-xs py-2 px-4 border-b border-emerald-800 sticky top-0 z-[70] flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-2">
+            <span>💻</span>
+            <span className="font-semibold">กำลังแสดงผลใน "มุมมองเดสก์ท็อป (Desktop View 1,200px)"</span>
+            <span className="text-emerald-300/80 text-[11px] hidden sm:inline">• เลื่อนแนวนอนเพื่อดูข้อมูลเต็มจอ</span>
+          </div>
+          <button
+            onClick={() => setMode('auto')}
+            className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition cursor-pointer shrink-0 border border-emerald-500/50"
+          >
+            กลับสู่โหมดอัตโนมัติ
+          </button>
+        </div>
+      )}
+
+      {/* Admin Floating / Sticky Top Bar when logged in */}
+      {isAdminLoggedIn && (
+        <div className="bg-emerald-950 text-white text-xs px-3 sm:px-6 py-1.5 sm:py-2 flex items-center justify-between border-b border-emerald-800/80 sticky top-0 z-[60] shadow-sm gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="font-semibold text-emerald-300 truncate text-[11px] sm:text-xs">
+              <span className="hidden xs:inline">เข้าสู่ระบบ: </span>Admin
+            </span>
+            <span className="hidden md:inline text-emerald-100/70 text-[11px]">• จัดการเนื้อหา ข่าวสาร และเว็บไซต์โรงเรียน</span>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <button
+              onClick={() => navigateTo('admin')}
+              className="px-2.5 sm:px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium text-[11px] sm:text-xs transition cursor-pointer flex items-center gap-1.5 shadow-xs"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">ระบบหลังบ้าน (Dashboard)</span>
+              <span className="sm:hidden">Dashboard</span>
+            </button>
+            <button
+              onClick={handleAdminLogout}
+              className="px-2 sm:px-2.5 py-1 bg-black/40 hover:bg-black/60 text-red-200 hover:text-red-100 rounded-lg text-[11px] sm:text-xs transition cursor-pointer"
+            >
+              ออกจากระบบ
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 1. Header (Akat Clean Layout with Fresh White & Emerald Tone) */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-[#E2E8F0] sticky top-0 z-50 transition-all shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6 lg:gap-10">
+      <header className={`bg-white/95 backdrop-blur-md border-b border-[#E2E8F0] sticky ${isAdminLoggedIn ? 'top-[37px]' : 'top-0'} z-50 transition-all shadow-2xs`}>
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-6 lg:gap-10 ${isForcedDesktop ? 'w-[1200px] min-w-[1200px]' : ''}`}>
           
           {/* Logo & School Name */}
           <div 
@@ -520,7 +576,7 @@ export default function App() {
           </div>
 
           {/* Desktop Navigation Links & Action Button Group */}
-          <div className="hidden lg:flex items-center gap-3 xl:gap-5 shrink-0">
+          <div className={`${showMobileNav ? 'hidden' : 'flex'} items-center gap-3 xl:gap-5 shrink-0`}>
             <nav className="flex items-center gap-1 xl:gap-1.5">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
@@ -602,10 +658,10 @@ export default function App() {
             })}
           </nav>
 
-            {/* Right Action Button (Modern Emerald Glow & Gradient - Compact & Aligned with Nav) */}
+            {/* Right Action Button (Login / Admin Portal) */}
             <button 
               type="button"
-              onClick={() => navigateTo('eservice')}
+              onClick={() => navigateTo('admin')}
               className="relative group overflow-hidden h-9 px-4 rounded-full bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:via-emerald-400 hover:to-teal-500 text-white font-semibold text-xs whitespace-nowrap shrink-0 shadow-[0_2px_10px_rgba(16,185,129,0.3)] hover:shadow-[0_4px_16px_rgba(16,185,129,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 cursor-pointer border border-emerald-300/40 inline-flex items-center gap-2"
             >
               {/* Shimmer sweep effect */}
@@ -617,17 +673,23 @@ export default function App() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-xs"></span>
               </span>
 
-              <span className="relative tracking-normal whitespace-nowrap font-medium drop-shadow-xs">เข้าสู่ระบบ E-Service</span>
-              <ArrowUpRight className="relative w-3.5 h-3.5 text-emerald-100 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200 shrink-0" />
+              <span className="relative tracking-normal whitespace-nowrap font-medium drop-shadow-xs">
+                {isAdminLoggedIn ? 'ระบบหลังบ้าน' : 'เข้าสู่ระบบ'}
+              </span>
+              {isAdminLoggedIn ? (
+                <LayoutDashboard className="relative w-3.5 h-3.5 text-emerald-100 group-hover:text-white transition-transform duration-200 shrink-0" />
+              ) : (
+                <Lock className="relative w-3.5 h-3.5 text-emerald-100 group-hover:text-white transition-transform duration-200 shrink-0" />
+              )}
             </button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="lg:hidden">
+          <div className={showMobileNav ? 'block' : 'hidden'}>
             <button 
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#0F172A] hover:text-[#059669] transition cursor-pointer rounded-xl hover:bg-[#F0FDF4]"
+              className="p-2 text-[#0F172A] hover:text-[#059669] transition cursor-pointer rounded-xl hover:bg-[#F0FDF4] min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -637,7 +699,7 @@ export default function App() {
 
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-[#E2E8F0] bg-white px-6 py-4 space-y-1.5 shadow-lg">
+          <div className={`${showMobileNav ? 'block' : 'hidden'} border-t border-[#E2E8F0] bg-white px-6 py-4 space-y-1.5 shadow-lg`}>
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { 
@@ -696,19 +758,23 @@ export default function App() {
               );
             })}
 
-            {/* Mobile E-Service CTA Button */}
+            {/* Mobile Action Button (Login / Admin Portal) */}
             <div className="pt-3 pb-1">
               <button 
                 type="button"
-                onClick={() => navigateTo('eservice')}
+                onClick={() => navigateTo('admin')}
                 className="w-full relative group overflow-hidden px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white font-bold text-sm shadow-[0_4px_16px_rgba(16,185,129,0.3)] active:scale-[0.98] transition-all duration-200 cursor-pointer border border-emerald-400/40 flex items-center justify-center gap-2"
               >
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                 </span>
-                <span>เข้าสู่ระบบ E-Service</span>
-                <ArrowUpRight className="w-4 h-4 text-emerald-100" />
+                <span>{isAdminLoggedIn ? 'ระบบหลังบ้าน (Dashboard)' : 'เข้าสู่ระบบแอดมิน'}</span>
+                {isAdminLoggedIn ? (
+                  <LayoutDashboard className="w-4 h-4 text-emerald-100" />
+                ) : (
+                  <Lock className="w-4 h-4 text-emerald-100" />
+                )}
               </button>
             </div>
           </div>
@@ -716,15 +782,7 @@ export default function App() {
       </header>
 
       {/* Main Content Area */}
-      {loading ? (
-        <div className="max-w-4xl mx-auto px-4 py-24 flex-1 w-full space-y-8 animate-pulse text-center">
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-10 h-10 rounded-full border-3 border-[#D1FAE5] border-t-[#059669] animate-spin mb-4"></div>
-            <p className="text-sm font-medium text-[#475569]">กำลังโหลดข้อมูลโรงเรียนโพนงามพิทยานุกูล...</p>
-          </div>
-        </div>
-      ) : (
-        <main className="flex-1">
+      <main className={`flex-1 ${isForcedDesktop ? 'w-[1200px] min-w-[1200px] mx-auto overflow-x-auto' : ''}`}>
 
           {/* ========================================================= */}
           {/* PAGE 1: หน้าแรก (HOME - Akat Clean Layout in Emerald Tone) */}
@@ -914,9 +972,6 @@ export default function App() {
                       <div className="p-4 text-center">
                         <h4 className="font-bold text-base text-[#0F172A]">นายวัชรินทร์ ติดวงษา</h4>
                         <p className="text-xs text-[#059669] font-semibold mt-0.5">ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล</p>
-                        <p className="text-xs text-[#065F46] mt-2 italic bg-[#ECFDF5] p-3 rounded-xl border border-[#D1FAE5]">
-                          “เราพร้อมส่งเสริมเยาวชนให้เติบโตอย่างมีคุณภาพและรอบด้าน”
-                        </p>
                       </div>
                     </div>
                   </div>
@@ -1198,9 +1253,6 @@ export default function App() {
                     <p className="text-xs text-[#64748B] font-medium">
                       วิทยฐานะ: ผู้อำนวยการชำนาญการพิเศษ
                     </p>
-                    <div className="p-3.5 rounded-xl bg-[#F0FDF4] border border-[#D1FAE5] text-xs text-[#065F46] leading-relaxed italic">
-                      “มุ่งมั่นบริหารงานสถานศึกษาด้วยความโปร่งใส ตามหลักธรรมาภิบาล พัฒนาผู้เรียนให้มีคุณภาพ และการมีส่วนร่วมของชุมชนอย่างยั่งยืน”
-                    </div>
                     <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-[#64748B]">
                       <span className="bg-[#ECFDF5] border border-[#A7F3D0] px-2.5 py-0.5 rounded-md font-bold text-[#047857]">
                         ประธาน กก.สถานศึกษา
@@ -1980,12 +2032,6 @@ export default function App() {
                         <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
                         <span className="text-neutral-900 font-medium">{activeDynamicPage.title}</span>
                       </div>
-                      {activeDynamicPage.created_by_agent && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-neutral-100 text-neutral-700 border border-neutral-200/60">
-                          <Bot className="w-3.5 h-3.5 text-neutral-600" />
-                          ออกแบบโดย {activeDynamicPage.agent_name || 'AI Webmaster'}
-                        </span>
-                      )}
                     </div>
                   </div>
 
@@ -2024,18 +2070,32 @@ export default function App() {
           )}
 
         </main>
-      )}
 
-      {/* 6. Post Reader Modal (Wide & Modern Reading Experience) */}
+      {/* 6. Post Reader Modal (Adaptive: Full-width Bottom Sheet on Mobile, Centered Modal on Desktop) */}
       {readingPost && (
         <div 
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-y-auto"
+          className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex overflow-y-auto ${
+            isMobile && !isForcedDesktop
+              ? 'items-end justify-center p-0'
+              : 'items-center justify-center p-3 sm:p-6 md:p-8'
+          }`}
           onClick={() => setReadingPost(null)}
         >
           <div 
-            className="bg-white rounded-3xl max-w-4xl lg:max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-neutral-200 relative my-auto animate-in fade-in duration-150"
+            className={`bg-white shadow-2xl border border-neutral-200 relative animate-in fade-in duration-200 overflow-y-auto ${
+              isMobile && !isForcedDesktop
+                ? 'w-full rounded-t-3xl rounded-b-none max-h-[92vh] pb-8'
+                : 'rounded-3xl max-w-4xl lg:max-w-5xl w-full max-h-[90vh] my-auto'
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Mobile Sheet Drag Indicator */}
+            {isMobile && !isForcedDesktop && (
+              <div className="sticky top-0 bg-white/95 backdrop-blur-md pt-3 pb-2 z-20 flex justify-center border-b border-neutral-100">
+                <div className="w-12 h-1.5 rounded-full bg-neutral-300" />
+              </div>
+            )}
+
             {loadingPost && (
               <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 py-1 bg-white/95 backdrop-blur-md rounded-full text-xs text-neutral-700 border border-neutral-200 shadow-sm">
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-900" />
@@ -2107,8 +2167,8 @@ export default function App() {
       )}
 
       {/* 7. Footer (Akat Clean Layout with Deep Emerald Green) */}
-      <footer className="border-t-2 border-[#10B981] bg-[#032017] py-14 px-4 sm:px-6 text-[#ECFDF5]/70 text-xs mt-auto">
-        <div className="max-w-6xl mx-auto space-y-10">
+      <footer className={`border-t-2 border-[#10B981] bg-[#032017] py-14 px-4 sm:px-6 text-[#ECFDF5]/70 text-xs mt-auto ${isMobile && !isForcedDesktop ? 'pb-24' : ''}`}>
+        <div className={`max-w-6xl mx-auto space-y-10 ${isForcedDesktop ? 'w-[1200px] min-w-[1200px]' : ''}`}>
           
           <div className="flex flex-col sm:flex-row items-start justify-between gap-8">
             <div className="flex items-center gap-3.5">
@@ -2141,17 +2201,89 @@ export default function App() {
               <button onClick={() => navigateTo('eservice')} className="hover:text-[#34D399] transition cursor-pointer">ระบบ E-Service</button>
               <button onClick={() => navigateTo('news')} className="hover:text-[#34D399] transition cursor-pointer">บทความ & ข่าวสาร</button>
               <button onClick={() => navigateTo('contact')} className="hover:text-[#34D399] transition cursor-pointer">ติดต่อเรา</button>
+              <button 
+                onClick={() => navigateTo('admin')} 
+                className="hover:text-[#34D399] text-emerald-400 font-semibold transition cursor-pointer flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-900/60 border border-emerald-700/50"
+              >
+                <Lock className="w-3 h-3" />
+                <span>{isAdminLoggedIn ? 'ระบบหลังบ้าน (Admin)' : 'เข้าสู่ระบบแอดมิน'}</span>
+              </button>
             </div>
           </div>
 
           <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[#ECFDF5]/50 gap-4 text-xs">
             <p>Copyright © 2026 {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'} (พ.พ.ก.)</p>
-            <p>Powered by Smart School CMS • เว็บไซต์ทางการ: <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="text-[#34D399] hover:underline font-medium">www.ppks.ac.th</a></p>
+            <div className="flex items-center gap-4">
+              <span>Powered by Smart School CMS</span>
+              <span>•</span>
+              <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="text-[#34D399] hover:underline font-medium">www.ppks.ac.th</a>
+            </div>
           </div>
 
         </div>
       </footer>
 
+      {/* Admin Login Modal (Triggered anywhere via showAdminLoginModal) */}
+      {showAdminLoginModal && (
+        <AdminLogin
+          onClose={() => setShowAdminLoginModal(false)}
+          onLoginSuccess={handleAdminLoginSuccess}
+          schoolInfo={stats}
+        />
+      )}
+
+      {/* Adaptive Mobile Bottom Navigation Bar (Thumb Zone) */}
+      <AdaptiveBottomNav
+        currentPage={currentPage}
+        onNavigate={navigateTo}
+        isAdminLoggedIn={isAdminLoggedIn}
+        newsCount={posts?.length || 0}
+      />
+
+    </div>
+  );
+
+  if (isForcedMobile) {
+    return (
+      <div className="min-h-screen bg-slate-900/10 py-6 px-3 flex flex-col items-center justify-start overflow-y-auto selection:bg-[#D1FAE5] selection:text-[#065F46]">
+        {/* Mobile Viewport Simulation Top Bar */}
+        <div className="w-full max-w-[430px] mb-3 bg-emerald-950 text-emerald-100 text-xs py-2 px-4 rounded-2xl flex items-center justify-between shadow-md border border-emerald-800/80">
+          <div className="flex items-center gap-2">
+            <span>📱</span>
+            <span className="font-semibold">จำลอง "มุมมองมือถือ (Mobile View)"</span>
+          </div>
+          <button
+            onClick={() => setMode('auto')}
+            className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition cursor-pointer border border-emerald-500/50"
+          >
+            กลับสู่โหมดอัตโนมัติ
+          </button>
+        </div>
+
+        <div className="w-full max-w-[430px] min-h-[90vh] bg-[#F4F8F5] text-[#334155] rounded-3xl shadow-2xl border border-slate-300/80 overflow-hidden relative flex flex-col">
+          {appContent}
+        </div>
+
+        <AdaptiveModeSwitcher />
+      </div>
+    );
+  }
+
+  if (isForcedDesktop) {
+    return (
+      <div className="min-h-screen bg-slate-900/5 overflow-x-auto selection:bg-[#D1FAE5] selection:text-[#065F46]">
+        <div className="w-[1200px] min-w-[1200px] mx-auto min-h-screen bg-[#F4F8F5] text-[#334155] flex flex-col shadow-xl">
+          {appContent}
+        </div>
+        <AdaptiveModeSwitcher />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F4F8F5] text-[#334155] flex flex-col font-sans selection:bg-[#D1FAE5] selection:text-[#065F46]">
+      {appContent}
+      <AdaptiveModeSwitcher />
     </div>
   );
 }

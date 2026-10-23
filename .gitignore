@@ -1,0 +1,32 @@
+# Binaries and build artifacts
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+school-cms
+tmp/
+bin/
+build-errors.log
+*.log
+
+# Sensitive environment credentials
+.env
+.env*.local
+
+# Frontend node_modules & cache (keep dist/ for single-binary embedding)
+frontend/node_modules/
+frontend/.vite/
+
+# Database files (PostgreSQL is used remotely)
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

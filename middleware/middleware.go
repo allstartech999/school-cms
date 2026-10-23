@@ -85,3 +85,40 @@ func AgentAuth(next http.HandlerFunc) http.HandlerFunc {
 		next(w, r)
 	}
 }
+
+// AgentOrAdminAuth allows either Admin token or Agent Key
+func AgentOrAdminAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get("X-Admin-Token")
+		authHeader := r.Header.Get("Authorization")
+		if token == "authenticated-admin" || strings.HasSuffix(authHeader, "authenticated-admin") {
+			next(w, r)
+			return
+		}
+
+		// Check Agent Key
+		key := r.Header.Get("X-Agent-Key")
+		if key == "" {
+			key = r.URL.Query().Get("key")
+		}
+		if key == "" {
+			key = r.URL.Query().Get("agent_key")
+		}
+		if key == "" && strings.HasPrefix(authHeader, "Bearer ") {
+			key = strings.TrimPrefix(authHeader, "Bearer ")
+		}
+
+		var setting models.Setting
+		storedKey := "agent-school-secret-key-2026"
+		if err := db.DB.Where("key = ?", "agent_key").First(&setting).Error; err == nil && setting.Value != "" {
+			storedKey = setting.Value
+		}
+
+		if key != "" && key == storedKey {
+			next(w, r)
+			return
+		}
+
+		http.Error(w, `{"error": "Unauthorized: Admin or Agent authorization required"}`, http.StatusUnauthorized)
+	}
+}

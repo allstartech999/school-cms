@@ -69,6 +69,13 @@ func main() {
 	mux.HandleFunc("GET /api/v1/pages/{slug}", handlers.GetPage)
 	mux.HandleFunc("GET /api/v1/stats", handlers.GetStats)
 	mux.HandleFunc("GET /api/v1/media", handlers.ListMedia)
+	mux.HandleFunc("GET /api/v1/homepage", handlers.GetHomepageConfig)
+	mux.HandleFunc("GET /api/v1/menu", handlers.GetNavigationMenu)
+
+	// --- Site Customizer & Menu APIs (Protected by Admin or Agent) ---
+	mux.HandleFunc("PUT /api/v1/homepage", middleware.AgentOrAdminAuth(handlers.UpdateHomepageConfig))
+	mux.HandleFunc("PUT /api/v1/menu", middleware.AgentOrAdminAuth(handlers.UpdateNavigationMenu))
+	mux.HandleFunc("POST /api/v1/menu/reset", middleware.AgentOrAdminAuth(handlers.ResetNavigationMenu))
 
 	// --- Admin APIs (Protected by AdminAuth) ---
 	mux.HandleFunc("POST /api/v1/admin/login", handlers.AdminLogin)
@@ -83,8 +90,11 @@ func main() {
 	// --- AI Agent APIs (Protected by AgentAuth: X-Agent-Key) ---
 	mux.HandleFunc("GET /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentListPosts))
 	mux.HandleFunc("POST /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentCreatePost))
+	mux.HandleFunc("PUT /api/v1/agent/posts/{id}", middleware.AgentAuth(handlers.UpdatePost))
+	mux.HandleFunc("DELETE /api/v1/agent/posts/{id}", middleware.AgentAuth(handlers.DeletePost))
 	mux.HandleFunc("GET /api/v1/agent/pages", middleware.AgentAuth(handlers.AgentListPages))
 	mux.HandleFunc("POST /api/v1/agent/pages", middleware.AgentAuth(handlers.AgentCreateOrUpdatePage))
+	mux.HandleFunc("DELETE /api/v1/agent/pages/{id}", middleware.AgentAuth(handlers.DeletePage))
 	mux.HandleFunc("POST /api/v1/agent/media/fetch", middleware.AgentAuth(handlers.AgentFetchMedia))
 
 	// --- MCP SSE Server (/mcp/sse & /mcp/messages) ---

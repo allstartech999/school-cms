@@ -15,8 +15,20 @@ import (
 
 // ListPages handles GET /api/v1/pages
 func ListPages(w http.ResponseWriter, r *http.Request) {
+	menuOnly := r.URL.Query().Get("menu") == "true"
+	query := db.DB.Model(&models.Page{})
+
+	if menuOnly {
+		query = query.Where("show_in_menu = ?", true)
+	}
+
+	status := r.URL.Query().Get("status")
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
 	var pages []models.Page
-	if err := db.DB.Order("id ASC").Find(&pages).Error; err != nil {
+	if err := query.Order("menu_order ASC, id ASC").Find(&pages).Error; err != nil {
 		WriteError(w, http.StatusInternalServerError, "Failed to query pages: "+err.Error())
 		return
 	}
@@ -83,6 +95,10 @@ func CreatePage(w http.ResponseWriter, r *http.Request) {
 		LayoutData: req.LayoutData,
 		Content:    req.Content,
 		Status:     req.Status,
+		ShowInMenu: req.ShowInMenu,
+		MenuTitle:  req.MenuTitle,
+		MenuOrder:  req.MenuOrder,
+		MenuParent: req.MenuParent,
 	}
 
 	if err := db.DB.Create(&page).Error; err != nil {
@@ -123,12 +139,16 @@ func UpdatePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updates := map[string]any{
-		"title":       req.Title,
-		"content":     req.Content,
-		"status":      req.Status,
-		"layout_type": req.LayoutType,
-		"layout_data": req.LayoutData,
-		"updated_at":  time.Now(),
+		"title":        req.Title,
+		"content":      req.Content,
+		"status":       req.Status,
+		"layout_type":  req.LayoutType,
+		"layout_data":  req.LayoutData,
+		"show_in_menu": req.ShowInMenu,
+		"menu_title":   req.MenuTitle,
+		"menu_order":   req.MenuOrder,
+		"menu_parent":  req.MenuParent,
+		"updated_at":   time.Now(),
 	}
 	if req.Slug != "" {
 		updates["slug"] = req.Slug

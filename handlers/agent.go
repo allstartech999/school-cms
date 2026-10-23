@@ -98,7 +98,7 @@ func AgentListPages(w http.ResponseWriter, r *http.Request) {
 }
 
 // AgentCreateOrUpdatePage handles POST /api/v1/agent/pages
-// AI can create a new page with block layout or update existing one
+// AI can create a new page with block layout or update existing one, and optionally place it on the Navbar
 func AgentCreateOrUpdatePage(w http.ResponseWriter, r *http.Request) {
 	var req models.AgentCreatePageRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -157,6 +157,10 @@ func AgentCreateOrUpdatePage(w http.ResponseWriter, r *http.Request) {
 			existing.Content = req.Content
 		}
 		existing.Status = status
+		existing.ShowInMenu = req.ShowInMenu
+		existing.MenuTitle = req.MenuTitle
+		existing.MenuOrder = req.MenuOrder
+		existing.MenuParent = req.MenuParent
 		existing.CreatedByAgent = true
 		existing.AgentName = agentName
 		existing.UpdatedAt = time.Now()
@@ -171,6 +175,8 @@ func AgentCreateOrUpdatePage(w http.ResponseWriter, r *http.Request) {
 			"id":               existing.ID,
 			"slug":             existing.Slug,
 			"status":           existing.Status,
+			"show_in_menu":     existing.ShowInMenu,
+			"menu_title":       existing.MenuTitle,
 			"created_by_agent": true,
 			"agent_name":       agentName,
 		})
@@ -190,6 +196,10 @@ func AgentCreateOrUpdatePage(w http.ResponseWriter, r *http.Request) {
 		LayoutData:     layoutDataStr,
 		Content:        content,
 		Status:         status,
+		ShowInMenu:     req.ShowInMenu,
+		MenuTitle:      req.MenuTitle,
+		MenuOrder:      req.MenuOrder,
+		MenuParent:     req.MenuParent,
 		CreatedByAgent: true,
 		AgentName:      agentName,
 	}
@@ -204,6 +214,8 @@ func AgentCreateOrUpdatePage(w http.ResponseWriter, r *http.Request) {
 		"id":               page.ID,
 		"slug":             page.Slug,
 		"status":           page.Status,
+		"show_in_menu":     page.ShowInMenu,
+		"menu_title":       page.MenuTitle,
 		"created_by_agent": true,
 		"agent_name":       agentName,
 	})

@@ -14,8 +14,10 @@ export async function fetchPost(idOrSlug) {
   return res.json();
 }
 
-export async function fetchPages() {
-  const res = await fetch(`${API_BASE}/pages`);
+export async function fetchPages(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const url = query ? `${API_BASE}/pages?${query}` : `${API_BASE}/pages`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch pages');
   return res.json();
 }
@@ -29,6 +31,18 @@ export async function fetchPage(slug) {
 export async function fetchStats() {
   const res = await fetch(`${API_BASE}/stats`);
   if (!res.ok) throw new Error('Failed to fetch stats');
+  return res.json();
+}
+
+export async function fetchHomepageConfig() {
+  const res = await fetch(`${API_BASE}/homepage`);
+  if (!res.ok) throw new Error('Failed to fetch homepage configuration');
+  return res.json();
+}
+
+export async function fetchMenu() {
+  const res = await fetch(`${API_BASE}/menu`);
+  if (!res.ok) throw new Error('Failed to fetch navigation menu');
   return res.json();
 }
 

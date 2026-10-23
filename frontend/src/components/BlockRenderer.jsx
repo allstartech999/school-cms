@@ -4,6 +4,9 @@ import StatsBarBlock from './blocks/StatsBarBlock';
 import FeatureGridBlock from './blocks/FeatureGridBlock';
 import TwoColumnsBlock from './blocks/TwoColumnsBlock';
 import AccordionFaqBlock from './blocks/AccordionFaqBlock';
+import PersonCardsBlock from './blocks/PersonCardsBlock';
+import RichTextBlock from './blocks/RichTextBlock';
+import ImageGalleryBlock from './blocks/ImageGalleryBlock';
 
 const BLOCK_COMPONENTS = {
   hero_banner: HeroBannerBlock,
@@ -11,6 +14,9 @@ const BLOCK_COMPONENTS = {
   feature_grid: FeatureGridBlock,
   two_columns: TwoColumnsBlock,
   accordion_faq: AccordionFaqBlock,
+  person_cards: PersonCardsBlock,
+  rich_text: RichTextBlock,
+  image_gallery: ImageGalleryBlock,
 };
 
 export default function BlockRenderer({ blocks }) {
@@ -31,7 +37,7 @@ export default function BlockRenderer({ blocks }) {
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-6">
       {parsedBlocks.map((block, index) => {
         const Component = BLOCK_COMPONENTS[block.type];
         if (!Component) {

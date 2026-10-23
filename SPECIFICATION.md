@@ -146,11 +146,13 @@
 
 ### [x] Phase 3: AI Agent Integration with Model Context Protocol (MCP) & Block Layout Engine (เสร็จสมบูรณ์ 100%)
 - [x] ติดตั้ง `github.com/mark3labs/mcp-go` รองรับทั้ง **SSE Mode** (`/mcp/sse`) และ **Stdio CLI Mode** (`--mcp-stdio`)
-- [x] พัฒนา MCP Tools ครบวงจร: `upload_media_by_url`, `create_or_update_page`, `create_school_post`, `list_recent_posts`, `list_pages`
-- [x] จัดทำ MCP Resources: `school://blocks/catalog` (Schema บล็อก) และ `school://guidelines/writing` (คู่มือเขียนข่าว)
-- [x] ระบบจัดเก็บไฟล์ Media: `./uploads/YYYY/MM/` พร้อม Static File Serving
-- [x] React Dynamic Block Renderer: `HeroBanner`, `StatsBar`, `FeatureGrid`, `TwoColumns`, `AccordionFaq`
-- [x] Unit Tests & Simulation สคริปต์ผ่านการทดสอบ 100%
+- [x] ยกระดับเป็น **WordPress-like AI Engine** ครบ 14 เครื่องมือ:
+  - **Media:** `upload_media_by_url`, `list_media`
+  - **Posts (CRUD):** `create_school_post`, `update_school_post`, `get_school_post`, `delete_school_post`, `list_recent_posts`
+  - **Pages & Blocks (CRUD):** `create_or_update_page`, `get_page`, `delete_page`, `list_pages` (รองรับการตั้งค่า `show_in_menu`, `menu_title`, `menu_order`, `menu_parent`)
+  - **Site Customizer & Menu:** `get_homepage_config`, `update_homepage_config`, `manage_navigation_menu`
+- [x] MCP Resources: `school://blocks/catalog` (ขยายบล็อก: `person_cards`, `rich_text`, `image_gallery`) และ `school://guidelines/writing`
+- [x] Frontend Dynamic Navbar: ดึงเมนูจาก API พร้อม Dropdown และเรนเดอร์เพจที่ AI สร้างด้วย `BlockRenderer` ทันทีเมื่อคลิก
 
 ### [ ] Phase 4: Single Binary Packaging & Production VPS Deployment (ขั้นตอนถัดไป)
 - [x] สั่ง Build Frontend ออกมาเป็น Static Assets ลงโฟลเดอร์ `dist/`

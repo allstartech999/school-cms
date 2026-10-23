@@ -27,6 +27,10 @@ type Page struct {
 	LayoutData     string    `gorm:"type:text" json:"layout_data"`       // JSON Array of blocks
 	Content        string    `gorm:"not null" json:"content"`            // fallback/searchable text
 	Status         string    `gorm:"default:'published'" json:"status"`
+	ShowInMenu     bool      `gorm:"default:false" json:"show_in_menu"`
+	MenuTitle      string    `json:"menu_title"`                         // Label shown on navbar
+	MenuOrder      int       `gorm:"default:0" json:"menu_order"`        // Sorting order
+	MenuParent     string    `json:"menu_parent"`                        // Parent dropdown grouping (optional)
 	CreatedByAgent bool      `gorm:"default:false" json:"created_by_agent"`
 	AgentName      string    `json:"agent_name,omitempty"`
 	CreatedAt      time.Time `json:"created_at"`
@@ -62,6 +66,17 @@ type CreatePostRequest struct {
 	Status   string `json:"status"`
 }
 
+type UpdatePostRequest struct {
+	Title    string `json:"title"`
+	Slug     string `json:"slug"`
+	Category string `json:"category"`
+	Summary  string `json:"summary"`
+	Content  string `json:"content"`
+	ImageURL string `json:"image_url"`
+	Author   string `json:"author"`
+	Status   string `json:"status"`
+}
+
 type AgentCreatePostRequest struct {
 	Title     string `json:"title"`
 	Category  string `json:"category"`
@@ -79,6 +94,10 @@ type CreatePageRequest struct {
 	LayoutData string `json:"layout_data"`
 	Content    string `json:"content"`
 	Status     string `json:"status"`
+	ShowInMenu bool   `json:"show_in_menu"`
+	MenuTitle  string `json:"menu_title"`
+	MenuOrder  int    `json:"menu_order"`
+	MenuParent string `json:"menu_parent"`
 }
 
 type AgentCreatePageRequest struct {
@@ -89,6 +108,10 @@ type AgentCreatePageRequest struct {
 	Content    string `json:"content"`
 	AgentName  string `json:"agent_name"`
 	Publish    bool   `json:"publish"`
+	ShowInMenu bool   `json:"show_in_menu"`
+	MenuTitle  string `json:"menu_title"`
+	MenuOrder  int    `json:"menu_order"`
+	MenuParent string `json:"menu_parent"`
 }
 
 type AgentFetchMediaRequest struct {
@@ -107,4 +130,36 @@ type SystemStats struct {
 	AgentPosts      int64  `json:"agent_posts"`
 	SchoolName      string `json:"school_name"`
 	AgentKeyPreview string `json:"agent_key_preview"`
+}
+
+// Navigation Menu item definition
+type MenuItem struct {
+	ID         string     `json:"id"`
+	Title      string     `json:"title"`
+	Path       string     `json:"path"`        // e.g. "home", "about", or "/page/ai-robotics"
+	Type       string     `json:"type"`        // "route", "page", "link"
+	IsExternal bool       `json:"is_external"` // if true, opens in new tab
+	Order      int        `json:"order"`
+	Children   []MenuItem `json:"children,omitempty"`
+}
+
+// Homepage Configuration for AI Site Editor
+type HomepageHeroConfig struct {
+	Badge       string `json:"badge"`
+	Heading     string `json:"heading"`
+	Subheading  string `json:"subheading"`
+	PrimaryCTA  string `json:"primary_cta"`
+	PrimaryURL  string `json:"primary_url"`
+	ImageURL    string `json:"image_url"`
+}
+
+type HomepageConfig struct {
+	Hero           HomepageHeroConfig `json:"hero"`
+	Announcement   string             `json:"announcement"`
+	ShowTicker     bool               `json:"show_ticker"`
+	ShowSlider     bool               `json:"show_slider"`
+	ShowEServices  bool               `json:"show_eservices"`
+	ShowRecentNews bool               `json:"show_recent_news"`
+	ShowTrending   bool               `json:"show_trending"`
+	CustomBlocks   string             `json:"custom_blocks"` // JSON array of blocks to render on home
 }

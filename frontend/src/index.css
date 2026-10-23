@@ -1,11 +1,23 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --cream: #FEF9E1;
+    --cream-dark: #F9F0C8;
+    --yellow: #FEDB3B;
+    --header: #FFE042;
+    --orange: #FD9800;
+    --orange-dark: #E98C00;
+    --navy: #0F172A;
+    --ink: #141006;
+    --text: #454F5E;
+  }
+
   body {
-    font-family: 'Anuphan', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Prompt', 'Anuphan', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.7;
-    background-color: #ffffff;
-    color: #1e293b;
+    background-color: var(--cream);
+    color: var(--text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
@@ -13,13 +25,52 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Prompt', 'Anuphan', sans-serif;
-    line-height: 1.3;
-    letter-spacing: -0.015em;
-    font-weight: 700;
+    font-family: 'Prompt', sans-serif;
+    line-height: 1.25;
+    color: var(--navy);
+    font-weight: 600;
   }
 
   p {
     line-height: 1.75;
   }
 }
+
+/* Akat Coding Center Signature Elements */
+.site-gold {
+  background: linear-gradient(100deg, #C98A12 0%, #F2B227 35%, #FFD24D 55%, #E2A21C 80%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+.glass-hero-card {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 30px 60px -10px rgba(180, 130, 0, 0.15), 0 20px 30px -10px rgba(0, 0, 0, 0.08);
+}
+
+.glass-chip {
+  background: rgba(255, 252, 240, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 25px rgba(160, 110, 0, 0.15);
+  color: #8A6210;
+}
+
+.akat-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.akat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 50px -10px rgba(180, 130, 0, 0.12);
+}
+

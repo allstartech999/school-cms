@@ -25,7 +25,10 @@ import {
   ChevronRight,
   ChevronDown,
   Home,
-  Bot
+  Bot,
+  GraduationCap,
+  ShieldCheck,
+  ArrowUpRight
 } from 'lucide-react';
 import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage } from './api';
 import BlockRenderer from './components/BlockRenderer';
@@ -364,18 +367,18 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-800 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-[#FEF9E1] text-[#454F5E] flex flex-col font-sans selection:bg-[#FEDB3B] selection:text-[#141006]">
       
-      {/* 1. Header (Clean Minimalist with Official Logo) */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
+      {/* 1. Header (Akat Coding Center Sunny Header) */}
+      <header className="bg-[#FFE042] border-b border-[#F9F0C8] sticky top-0 z-50 transition-all shadow-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           
           {/* Logo & School Name */}
           <div 
-            className="flex items-center gap-3.5 cursor-pointer select-none group" 
+            className="flex items-center gap-3.5 cursor-pointer select-none group shrink-0" 
             onClick={() => navigateTo('home')}
           >
-            <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center p-0.5 border border-slate-100 shadow-2xs shrink-0 overflow-hidden group-hover:scale-105 transition">
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center p-1 border border-white/80 shadow-xs shrink-0 overflow-hidden group-hover:scale-105 transition">
               <img 
                 src="/images/logo.png" 
                 alt="ตราสัญลักษณ์โรงเรียนโพนงามพิทยานุกูล" 
@@ -388,21 +391,21 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-base sm:text-lg text-slate-900 leading-tight tracking-tight group-hover:text-emerald-700 transition">
+                <span className="font-bold text-base sm:text-lg text-[#141006] leading-tight tracking-tight group-hover:text-[#E98C00] transition whitespace-nowrap">
                   {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
                 </span>
-                <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 rounded border border-emerald-200/60">
+                <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold bg-[#FD9800] text-white rounded-full whitespace-nowrap">
                   พ.พ.ก.
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5 font-normal">
+              <p className="text-xs text-[#141006]/70 font-medium whitespace-nowrap">
                 สพม.มหาสารคาม • อ.โกสุมพิสัย
               </p>
             </div>
           </div>
 
-          {/* Desktop Navigation Links (Clean, No bulky grey border, No stacked text) */}
-          <nav className="hidden lg:flex items-center gap-1.5">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
@@ -418,25 +421,25 @@ export default function App() {
                   <div className="relative group" key={item.id || item.path}>
                     <button
                       onClick={() => navigateTo(item.path)}
-                      className={`px-3.5 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
+                      className={`px-3.5 py-2 text-sm font-semibold whitespace-nowrap rounded-xl transition-colors flex items-center gap-1 cursor-pointer ${
                         active
-                          ? 'text-emerald-800 bg-emerald-50 font-semibold'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                          ? 'text-[#E98C00] bg-white/70 shadow-2xs'
+                          : 'text-[#222222] hover:text-[#E98C00] hover:bg-white/40'
                       }`}
                     >
                       <span>{item.title}</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition" />
+                      <ChevronDown className="w-3.5 h-3.5 text-[#141006]/60 group-hover:text-[#E98C00] transition" />
                     </button>
                     {/* Dropdown Menu */}
-                    <div className="absolute left-0 top-full pt-1.5 hidden group-hover:block z-50 min-w-[200px] animate-in fade-in duration-100">
-                      <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-1.5 space-y-0.5">
+                    <div className="absolute left-0 top-full pt-2 hidden group-hover:block z-50 min-w-[200px] animate-in fade-in duration-100">
+                      <div className="bg-white rounded-2xl shadow-xl border border-[#F9F0C8] p-2 space-y-1">
                         {item.children.map((child) => (
                           <button
                             key={child.id || child.path}
                             onClick={() => navigateTo(child.path)}
-                            className="w-full text-left px-3 py-2 text-xs sm:text-sm rounded-lg hover:bg-emerald-50 hover:text-emerald-800 text-slate-700 flex items-center gap-2 transition cursor-pointer font-medium"
+                            className="w-full text-left px-3 py-2 text-xs rounded-xl hover:bg-[#FEF9E1] hover:text-[#E98C00] text-[#454F5E] flex items-center gap-2 transition cursor-pointer font-semibold"
                           >
-                            <ChevronRight className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <ChevronRight className="w-3.5 h-3.5 text-[#FD9800] shrink-0" />
                             <span className="truncate">{child.title}</span>
                           </button>
                         ))}
@@ -450,14 +453,10 @@ export default function App() {
                 <button
                   key={item.id || item.path}
                   onClick={() => navigateTo(item.path)}
-                  className={`px-3.5 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-colors cursor-pointer ${
+                  className={`px-3.5 py-2 text-sm font-semibold whitespace-nowrap rounded-xl transition-colors cursor-pointer ${
                     active
-                      ? item.id === 'eservice'
-                        ? 'bg-emerald-600 text-white font-semibold shadow-2xs'
-                        : 'text-emerald-800 bg-emerald-50 font-semibold'
-                      : item.id === 'eservice'
-                        ? 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50/50'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'text-[#E98C00] bg-white/70 shadow-2xs'
+                      : 'text-[#222222] hover:text-[#E98C00] hover:bg-white/40'
                   }`}
                 >
                   {item.title}
@@ -466,15 +465,15 @@ export default function App() {
             })}
           </nav>
 
-          {/* Admin shortcut */}
-          <div className="hidden lg:flex items-center gap-2">
+          {/* Right Action Button (Akat site-login style) */}
+          <div className="hidden lg:flex items-center gap-3">
             <button 
               type="button"
-              onClick={() => alert('ระบบบริหารจัดการแอดมิน (Admin Portal)\nสามารถเข้าใช้งานผ่าน API หรือหลังบ้านผู้ดูแลระบบ')}
-              className="text-xs font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1"
+              onClick={() => navigateTo('eservice')}
+              className="px-6 py-2.5 rounded-full bg-[#FD9800] hover:bg-[#E98C00] text-white font-bold text-xs sm:text-sm transition cursor-pointer shadow-sm hover:shadow-md flex items-center gap-1.5"
             >
-              <Shield className="w-3.5 h-3.5" />
-              แอดมิน
+              <span>เข้าสู่ระบบ E-Service</span>
+              <ArrowUpRight className="w-4 h-4" />
             </button>
           </div>
 
@@ -483,7 +482,7 @@ export default function App() {
             <button 
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-slate-600 hover:text-slate-900 transition cursor-pointer rounded-lg hover:bg-slate-50"
+              className="p-2 text-[#141006] hover:text-[#FD9800] transition cursor-pointer rounded-xl hover:bg-white/40"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -493,7 +492,7 @@ export default function App() {
 
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-1.5 shadow-lg">
+          <div className="lg:hidden border-t border-[#F9F0C8] bg-[#FFE042] px-6 py-4 space-y-1.5 shadow-lg">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
@@ -507,20 +506,20 @@ export default function App() {
                 <div key={item.id || item.path} className="space-y-1">
                   <button 
                     onClick={() => navigateTo(item.path)}
-                    className={`block w-full text-left py-2.5 px-3 rounded-lg text-sm font-medium flex items-center justify-between ${
-                      active ? 'bg-emerald-50 text-emerald-800 font-bold' : 'text-slate-700 hover:bg-slate-50'
+                    className={`block w-full text-left py-2.5 px-3 rounded-xl text-sm font-semibold flex items-center justify-between ${
+                      active ? 'bg-white text-[#E98C00] shadow-xs' : 'text-[#141006] hover:bg-white/40'
                     }`}
                   >
                     <span>{item.title}</span>
-                    {item.children && item.children.length > 0 && <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    {item.children && item.children.length > 0 && <ChevronDown className="w-4 h-4 text-[#141006]/60" />}
                   </button>
                   {item.children && item.children.length > 0 && (
-                    <div className="pl-4 space-y-1 border-l-2 border-emerald-100 ml-3 py-1">
+                    <div className="pl-4 space-y-1 border-l-2 border-[#FD9800] ml-3 py-1">
                       {item.children.map((child) => (
                         <button
                           key={child.id || child.path}
                           onClick={() => navigateTo(child.path)}
-                          className="block w-full text-left py-1.5 px-2.5 text-xs text-slate-600 hover:text-emerald-700 font-medium rounded hover:bg-slate-50"
+                          className="block w-full text-left py-1.5 px-2.5 text-xs text-[#222222] hover:text-[#E98C00] font-medium rounded-lg"
                         >
                           • {child.title}
                         </button>
@@ -538,127 +537,192 @@ export default function App() {
       {loading ? (
         <div className="max-w-4xl mx-auto px-4 py-24 flex-1 w-full space-y-8 animate-pulse text-center">
           <div className="flex flex-col items-center justify-center">
-            <div className="w-10 h-10 rounded-full border-2 border-emerald-100 border-t-emerald-600 animate-spin mb-4"></div>
-            <p className="text-sm font-medium text-slate-600">กำลังโหลดข้อมูลโรงเรียนโพนงามพิทยานุกูล...</p>
+            <div className="w-10 h-10 rounded-full border-3 border-[#FFE042] border-t-[#FD9800] animate-spin mb-4"></div>
+            <p className="text-sm font-medium text-[#454F5E]">กำลังโหลดข้อมูลโรงเรียนโพนงามพิทยานุกูล...</p>
           </div>
         </div>
       ) : (
         <main className="flex-1">
 
           {/* ========================================================= */}
-          {/* PAGE 1: หน้าแรก (HOME)                                   */}
+          {/* PAGE 1: หน้าแรก (HOME - Akat Coding Center Style)         */}
           {/* ========================================================= */}
           {currentPage === 'home' && (
             <div className="animate-in fade-in duration-200">
               
-              {/* Minimal Clean Announcement Bar */}
-              {(homepageConfig?.show_ticker !== false) && (
-                <div className="bg-emerald-50/70 border-b border-emerald-100/60 text-slate-700 py-2.5 px-4 text-xs">
-                  <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 overflow-hidden">
-                      <span className="flex h-2 w-2 relative shrink-0">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              {/* Akat Signature Hero (Dark Warm BG + Floating Glass Chips + Center Glass Card) */}
+              <section className="relative min-h-[660px] pb-36 pt-16 flex items-center justify-center overflow-hidden bg-[#141006] text-center">
+                
+                {/* Background Photo with Gradient Tint & Atmosphere */}
+                <div className="absolute inset-0 z-0">
+                  <img 
+                    src="/images/news-active-learning.jpg" 
+                    alt="บรรยากาศการเรียนรู้โรงเรียนโพนงามพิทยานุกูล"
+                    className="w-full h-full object-cover opacity-20 scale-105 blur-[3px]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#141006] via-[#141006]/85 to-black/60"></div>
+                </div>
+
+                {/* Floating Glass Chips (Akat Style) */}
+                <div className="absolute inset-0 z-1 pointer-events-none hidden md:block">
+                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute left-[6%] top-[22%] shadow-lg">
+                    🏫 พ.พ.ก.
+                  </span>
+                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute right-[8%] top-[18%] shadow-lg">
+                    ✨ Active Learning
+                  </span>
+                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute left-[9%] bottom-[38%] shadow-lg">
+                    🎓 100% ศึกษาต่อ
+                  </span>
+                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute right-[9%] bottom-[34%] shadow-lg">
+                    🏆 15+ รางวัลเด่น
+                  </span>
+                  <span className="glass-chip px-4 py-2 rounded-2xl text-sm font-bold absolute right-[26%] top-[12%] shadow-lg">
+                    ⚡ PPK SMART Model
+                  </span>
+                </div>
+
+                {/* Center Glass Card */}
+                <div className="relative z-10 max-w-4xl mx-4 glass-hero-card rounded-[32px] p-8 sm:p-14 text-center shadow-2xl">
+                  
+                  {/* Eyebrow */}
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FEF9E1] border border-[#F9F0C8] text-[#8A6210] text-xs sm:text-sm font-semibold mb-4 shadow-2xs">
+                    <span className="w-2 h-2 rounded-full bg-[#FD9800]"></span>
+                    <span>มาเริ่มต้นเรียนรู้และเติบโตไปด้วยกันที่นี่ !</span>
+                  </div>
+
+                  {/* Big Gold Title */}
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold site-gold tracking-tight leading-tight mb-4 whitespace-nowrap">
+                    {homepageConfig?.hero?.heading || 'โรงเรียนโพนงามพิทยานุกูล'}
+                  </h1>
+
+                  {/* Subtitle */}
+                  <div className="text-sm sm:text-base text-[#454F5E] max-w-xl mx-auto font-medium leading-relaxed space-y-1">
+                    <p className="text-[#8A6210] font-semibold text-xs sm:text-sm">
+                      “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”
+                    </p>
+                    <p className="text-xs sm:text-sm">
+                      เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
+                    </p>
+                  </div>
+
+                  {/* Scroll Down Circle Button */}
+                  <div className="mt-8">
+                    <a 
+                      href="#highlights"
+                      className="inline-flex w-12 h-12 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] hover:text-white items-center justify-center transition shadow-lg transform hover:scale-110"
+                    >
+                      <ChevronDown className="w-6 h-6" />
+                    </a>
+                  </div>
+
+                </div>
+              </section>
+
+              {/* Akat Overlapping 4-Pillars Card Grid */}
+              <section id="highlights" className="relative z-20 -mt-24 sm:-mt-28 max-w-6xl mx-auto px-4 sm:px-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  
+                  {/* Card 1 */}
+                  <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
+                    <div>
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                        Active Learning
                       </span>
-                      <span className="font-semibold text-emerald-800 text-[11px] bg-emerald-100/60 px-1.5 py-0.5 rounded border border-emerald-200/50 shrink-0">
-                        ประกาศด่วน
-                      </span>
-                      <p className="truncate text-slate-600 text-xs font-normal">
-                        {homepageConfig?.announcement || 'ขอเชิญชวนศิษย์เก่าทุกท่านร่วมลงทะเบียนเครือข่ายศิษย์เก่าออนไลน์ (PPK Alumni) เพื่อร่วมพัฒนาโรงเรียน'}
+                      <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารวิชาการ</h3>
+                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                        ขับเคลื่อนหลักสูตรต้านทุจริตศึกษา ยกระดับการจัดการเรียนรู้เชิงรุก และส่งเสริมการใช้สื่อนวัตกรรม
                       </p>
                     </div>
-                    <button 
-                      onClick={() => navigateTo('news')}
-                      className="text-xs font-medium text-emerald-700 hover:text-emerald-900 shrink-0 hidden sm:inline-flex items-center gap-1 cursor-pointer hover:underline"
-                    >
-                      ดูข่าวทั้งหมด →
-                    </button>
+                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                      ดูข้อมูลฝ่ายวิชาการ →
+                    </span>
                   </div>
+
+                  {/* Card 2 */}
+                  <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
+                    <div>
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                        PPK Model
+                      </span>
+                      <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารงานบุคคล</h3>
+                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                        พัฒนาครูและบุคลากรทางการศึกษา เสริมสร้างวินัย คุณธรรมจริยธรรม และการมีส่วนร่วมของชุมชน
+                      </p>
+                    </div>
+                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                      ดูข้อมูลฝ่ายบุคคล →
+                    </span>
+                  </div>
+
+                  {/* Card 3 */}
+                  <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
+                    <div>
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                        Transparency
+                      </span>
+                      <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารงบประมาณ</h3>
+                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                        บริหารงบประมาณโปร่งใส ตรวจสอบได้ตามหลักธรรมาภิบาล และการประเมินคุณธรรม ITA
+                      </p>
+                    </div>
+                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                      ดูข้อมูลฝ่ายงบประมาณ →
+                    </span>
+                  </div>
+
+                  {/* Card 4 */}
+                  <div className="akat-card p-8 flex flex-col items-center text-center justify-between">
+                    <div>
+                      <span className="inline-block px-3 py-1 rounded-xl bg-[#FEDB3B] text-[#141006] text-xs font-bold shadow-2xs mb-3">
+                        Campus 32 ไร่
+                      </span>
+                      <h3 className="text-lg font-bold text-[#0F172A]">กลุ่มบริหารทั่วไป</h3>
+                      <p className="text-xs text-[#454F5E] mt-2 leading-relaxed">
+                        พัฒนาสภาพแวดล้อมและภูมิทัศน์สถานศึกษา ร่มรื่น ปลอดภัย น่าอยู่ และเอื้อต่อการเรียนรู้รอบด้าน
+                      </p>
+                    </div>
+                    <span className="mt-5 text-xs font-bold text-[#FD9800] hover:underline flex items-center gap-1 cursor-pointer" onClick={() => { setAboutActiveTab('admin'); navigateTo('about'); }}>
+                      ดูข้อมูลฝ่ายทั่วไป →
+                    </span>
+                  </div>
+
                 </div>
-              )}
 
-              {/* Ultra-Clean Minimal Hero */}
-              <section className="pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-100 bg-white">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                {/* Center Yellow Pill Button */}
+                <div className="text-center mt-10">
+                  <button 
+                    onClick={() => navigateTo('about')}
+                    className="px-8 py-3.5 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] hover:text-white font-bold text-sm shadow-md transition transform hover:-translate-y-0.5 cursor-pointer inline-flex items-center gap-2"
+                  >
+                    <span>ดูข้อมูลและโครงสร้างสถานศึกษาทั้งหมด</span>
+                    <span>+</span>
+                  </button>
+                </div>
+              </section>
+
+              {/* Akat Journey & Director Showcase */}
+              <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                   
-                  {/* Top Intro Tag */}
-                  <div className="text-center mb-8">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-50/80 rounded-full border border-emerald-200/60 shadow-2xs mb-4">
-                      <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>{homepageConfig?.hero?.badge || 'โรงเรียนคุณภาพมาตรฐานสากล • สพม.มหาสารคาม'}</span>
-                    </div>
-
-                    <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.25] sm:leading-[1.2] mb-5">
-                      {homepageConfig?.hero?.heading || 'โรงเรียนโพนงามพิทยานุกูล'}
-                    </h1>
-
-                    <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal whitespace-pre-line">
-                      {homepageConfig?.hero?.subheading || (
-                        <>
-                          “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์” <br className="hidden sm:inline" />
-                          เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
-                        </>
-                      )}
+                  {/* Left Column: Intro */}
+                  <div className="lg:col-span-4">
+                    <h2 className="text-3xl sm:text-4xl font-bold site-gold leading-tight">
+                      ก้าวสู่อนาคตการศึกษา ที่มีคุณภาพ
+                    </h2>
+                    <p className="text-sm text-[#454F5E] mt-4 leading-relaxed">
+                      โรงเรียนโพนงามพิทยานุกูล มุ่งเน้นการพัฒนาผู้เรียนเป็นสำคัญ สืบสานศาสตร์พระราชา และเสริมสร้างทักษะแห่งศตวรรษที่ 21 เพื่อเยาวชนในชุมชนตำบลโพนงามและอำเภอโกสุมพิสัย
                     </p>
-
-                    <div className="flex flex-wrap items-center justify-center gap-3.5 mt-8">
-                      <button 
-                        onClick={() => navigateTo(homepageConfig?.hero?.primary_url || 'eservice')}
-                        className="px-7 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition shadow-sm hover:shadow-md cursor-pointer flex items-center gap-2"
-                      >
-                        <Globe className="w-4 h-4" />
-                        {homepageConfig?.hero?.primary_cta || 'บริการออนไลน์ (E-Service)'}
-                      </button>
-                      <button 
-                        onClick={() => navigateTo('about')}
-                        className="px-7 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer shadow-2xs"
-                      >
-                        เกี่ยวกับโรงเรียน
-                      </button>
-                    </div>
+                    <hr className="w-24 border-0 border-t-3 border-[#FD9800] mt-6" />
                   </div>
 
-                  {/* Clean School Showcase Grid (Vision & Director Greeting) */}
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mt-12 text-left">
-                    
-                    {/* Vision & Accreditation Card (8 cols) */}
-                    <div className="md:col-span-8 bg-gradient-to-br from-emerald-900 via-emerald-950 to-slate-900 rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden shadow-sm flex flex-col justify-between min-h-[300px]">
-                      <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                      
-                      <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/10 backdrop-blur-md text-emerald-300 text-xs font-semibold mb-4 border border-white/10">
-                          <Building2 className="w-3.5 h-3.5" />
-                          <span>รหัสสถานศึกษา 1044410591 • สพม.มหาสารคาม</span>
-                        </div>
-                        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">
-                          มุ่งมั่นพัฒนาผู้เรียนสู่มาตรฐานสากล <br />
-                          บนรากฐานคุณธรรมและนวัตกรรม
-                        </h2>
-                        <p className="text-slate-300 text-xs sm:text-sm mt-3 leading-relaxed max-w-xl font-light">
-                          เปิดสอนระดับชั้นมัธยมศึกษาปีที่ 1 ถึงมัธยมศึกษาปีที่ 6 จัดการเรียนรู้เชิงรุก (Active Learning) มุ่งเสริมสร้างทักษะแห่งศตวรรษที่ 21 สู่การเป็นพลเมืองคุณภาพ
-                        </p>
-                      </div>
-
-                      <div className="relative z-10 pt-6 mt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-emerald-200">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
-                          <span>โคกหนองเรือ ต.โพนงาม อ.โกสุมพิสัย จ.มหาสารคาม</span>
-                        </div>
-                        <button 
-                          onClick={() => navigateTo('about')}
-                          className="font-semibold text-white hover:text-emerald-300 flex items-center gap-1 cursor-pointer transition"
-                        >
-                          ประวัติสถานศึกษา <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Director Message Card (4 cols) */}
-                    <div className="md:col-span-4 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs flex flex-col justify-between items-center text-center">
-                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-slate-100 border-2 border-emerald-500/20 shadow-sm mb-4 shrink-0">
+                  {/* Center Column: Director Photo */}
+                  <div className="lg:col-span-4 flex justify-center">
+                    <div className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-white shadow-xl border border-white/80 p-3">
+                      <div className="rounded-[24px] overflow-hidden aspect-4/5 bg-[#FEF9E1]">
                         <img 
                           src="/images/director.jpg" 
-                          alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการ" 
+                          alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการ"
                           className="w-full h-full object-cover object-top"
                           onError={(e) => {
                             e.target.onerror = null;
@@ -666,191 +730,149 @@ export default function App() {
                           }}
                         />
                       </div>
+                      <div className="p-4 text-center">
+                        <h4 className="font-bold text-base text-[#0F172A]">นายวัชรินทร์ ติดวงษา</h4>
+                        <p className="text-xs text-[#FD9800] font-semibold mt-0.5">ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล</p>
+                        <p className="text-xs text-[#454F5E] mt-2 italic bg-[#FEF9E1] p-3 rounded-xl border border-[#F9F0C8]">
+                          “เราพร้อมส่งเสริมเยาวชนให้เติบโตอย่างมีคุณภาพและรอบด้าน”
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: 3 Numbered Steps (Akat Style) */}
+                  <div className="lg:col-span-4 space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-[#FEDB3B] text-[#141006] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
+                        1
+                      </div>
                       <div>
-                        <h3 className="font-bold text-slate-900 text-base leading-tight">
-                          นายวัชรินทร์ ติดวงษา
-                        </h3>
-                        <p className="text-xs text-emerald-700 font-semibold mt-1">
-                          ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล
+                        <h4 className="font-bold text-base text-[#0F172A]">องค์กรคุณภาพ</h4>
+                        <p className="text-xs text-[#454F5E] mt-1 leading-relaxed">
+                          บริหารจัดการสถานศึกษาด้วยระบบคุณภาพมาตรฐานสากล สพม.มหาสารคาม
                         </p>
-                        <p className="text-xs text-slate-500 mt-2.5 leading-relaxed italic bg-slate-50 p-3 rounded-xl border border-slate-100">
-                          “ยินดีต้อนรับสู่เว็บไซต์โรงเรียนโพนงามพิทยานุกูล เราพร้อมส่งเสริมเยาวชนให้เติบโตอย่างมีคุณภาพและรอบด้าน”
-                        </p>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-slate-100 w-full flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>สารจากผู้บริหารสถานศึกษา</span>
                       </div>
                     </div>
 
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-[#FEDB3B] text-[#141006] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
+                        2
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-base text-[#0F172A]">ศาสตร์พระราชา</h4>
+                        <p className="text-xs text-[#454F5E] mt-1 leading-relaxed">
+                          น้อมนำหลักปรัชญาของเศรษฐกิจพอเพียง ปลูกฝังคุณธรรมและความซื่อสัตย์สุจริต
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-[#FEDB3B] text-[#141006] font-bold text-2xl flex items-center justify-center shrink-0 shadow-xs">
+                        3
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-base text-[#0F172A]">สู่ความเป็นเลิศ</h4>
+                        <p className="text-xs text-[#454F5E] mt-1 leading-relaxed">
+                          จัดการเรียนรู้เชิงรุก (Active Learning) สร้างสรรค์นวัตกรรมและต่อยอดสู่อุดมศึกษา
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                 </div>
               </section>
 
-              {/* Minimal Clean Stats Cards */}
-              <section className="py-12 bg-slate-50/70 border-b border-slate-100">
+              {/* Akat E-Service Section */}
+              <section className="py-20 bg-gradient-to-b from-[#FEF9E1] to-white border-t border-[#F9F0C8]">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
-                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">100%</div>
-                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">อัตราการศึกษาต่อ</div>
-                    </div>
-                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
-                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">15+</div>
-                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">รางวัลระดับชาติ & เขต</div>
-                    </div>
-                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
-                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">32 ไร่</div>
-                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">พื้นที่สถานศึกษา โคกหนองเรือ</div>
-                    </div>
-                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
-                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">30+ ปี</div>
-                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">สถาปนาสถานศึกษา</div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* 4 Core Groups Section (Official Artboards) */}
-              <section className="py-16 max-w-6xl mx-auto px-4 sm:px-6">
-                <div className="text-center max-w-xl mx-auto mb-10">
-                  <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">
-                    โครงสร้างการบริหารสถานศึกษา
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-2">
-                    4 กลุ่มบริหารงานโรงเรียนโพนงามพิทยานุกูล
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {departmentGroups.map((grp, idx) => (
-                    <div 
-                      key={idx} 
-                      onClick={() => {
-                        setAboutActiveTab('admin');
-                        navigateTo('about');
-                      }}
-                      className="bg-white rounded-2xl border border-slate-200/90 p-5 hover:border-emerald-300 hover:shadow-sm transition cursor-pointer text-center group flex flex-col items-center justify-between"
-                    >
-                      <div className="w-20 h-20 mb-3 flex items-center justify-center p-2 rounded-xl bg-slate-50 group-hover:bg-emerald-50 transition">
-                        <img 
-                          src={grp.img} 
-                          alt={grp.title} 
-                          className="w-full h-full object-contain group-hover:scale-105 transition"
-                        />
-                      </div>
-                      <h4 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-emerald-700 transition">
-                        {grp.title}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 mt-1">
-                        {grp.head}
-                      </p>
-                      <span className="mt-3 text-[10px] text-emerald-700 font-semibold flex items-center gap-0.5 group-hover:underline">
-                        ดูข้อมูล <ChevronRight className="w-3 h-3" />
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* E-Service Quick Hub */}
-              <section className="py-14 bg-white border-y border-slate-100">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                  <div className="flex items-center justify-between mb-8">
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
                     <div>
-                      <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">
-                        ระบบสารสนเทศ
+                      <span className="text-[#FD9800] text-xs font-bold uppercase tracking-wider bg-[#FEDB3B]/40 px-3 py-1 rounded-full">
+                        ระบบสารสนเทศออนไลน์
                       </span>
-                      <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-2">
-                        บริการออนไลน์ E-Service สำหรับนักเรียนและบุคลากร
-                      </h3>
+                      <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] mt-2">
+                        บริการอิเล็กทรอนิกส์ E-Service สำหรับนักเรียนและบุคลากร
+                      </h2>
                     </div>
                     <button 
                       onClick={() => navigateTo('eservice')}
-                      className="hidden sm:flex text-xs font-semibold text-emerald-700 hover:text-emerald-800 items-center gap-1 cursor-pointer bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200/60"
+                      className="px-5 py-2.5 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
-                      ดูระบบทั้งหมด ({eServices.length}) <ArrowRight className="w-3.5 h-3.5" />
+                      <span>ดูระบบทั้งหมด ({eServices.length})</span>
+                      <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {eServices.slice(0, 3).map((srv) => (
                       <div 
                         key={srv.id}
-                        className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden hover:border-emerald-300 hover:shadow-xs transition flex flex-col justify-between"
+                        className="akat-card p-6 flex flex-col justify-between"
                       >
-                        <div className="aspect-16/7 w-full overflow-hidden bg-slate-100 border-b border-slate-100">
-                          <img 
-                            src={srv.image} 
-                            alt={srv.title} 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="p-5 flex-1 flex flex-col justify-between">
-                          <div>
-                            <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-100/60 px-2 py-0.5 rounded">
+                        <div>
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-[10px] font-bold text-[#141006] bg-[#FEDB3B] px-2.5 py-1 rounded-lg">
                               {srv.badge}
                             </span>
-                            <h4 className="font-bold text-sm text-slate-900 mt-2 leading-snug">
-                              {srv.title}
-                            </h4>
-                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                              {srv.desc}
-                            </p>
+                            <span className="text-xs text-[#454F5E] font-medium">
+                              {srv.category}
+                            </span>
                           </div>
-                          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                          <h4 className="font-bold text-base text-[#0F172A] leading-snug">
+                            {srv.title}
+                          </h4>
+                          <p className="text-xs text-[#454F5E] mt-2 leading-relaxed line-clamp-2">
+                            {srv.desc}
+                          </p>
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-[#F9F0C8] flex items-center justify-between">
+                          <a 
+                            href={srv.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-5 py-2 bg-[#FD9800] hover:bg-[#E98C00] text-white rounded-full text-xs font-bold transition inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                          >
+                            <span>เข้าสู่ระบบ</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </a>
+                          {srv.manualUrl && (
                             <a 
-                              href={srv.url}
+                              href={srv.manualUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
+                              className="text-xs text-[#FD9800] hover:underline font-semibold"
                             >
-                              เข้าสู่ระบบ <ExternalLink className="w-3 h-3" />
+                              คู่มือการใช้งาน
                             </a>
-                            {srv.manualUrl && (
-                              <a 
-                                href={srv.manualUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-slate-600 hover:text-emerald-700 underline flex items-center gap-1"
-                              >
-                                <FileText className="w-3 h-3" /> คู่มือ
-                              </a>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-8 text-center sm:hidden">
-                    <button 
-                      onClick={() => navigateTo('eservice')}
-                      className="text-xs font-semibold text-emerald-700 hover:underline cursor-pointer"
-                    >
-                      ดูระบบ E-Service ทั้งหมด ({eServices.length}) →
-                    </button>
-                  </div>
                 </div>
               </section>
 
-              {/* Latest News Highlight (3 cards) */}
-              <section className="py-16 max-w-6xl mx-auto px-4 sm:px-6">
-                <div className="flex items-center justify-between mb-8">
+              {/* Akat News / Articles Section (เรื่องเล่าและข่าวสารจากโรงเรียน) */}
+              <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6">
+                
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
                   <div>
-                    <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">
-                      ข่าวประชาสัมพันธ์
+                    <span className="text-[#FD9800] text-xs font-bold uppercase tracking-wider bg-[#FEDB3B]/40 px-3 py-1 rounded-full">
+                      บทความ & ข่าวสาร
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mt-2">
-                      ข่าวและกิจกรรมล่าสุด
-                    </h3>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-[#0F172A] mt-2">
+                      เรื่องเล่าและความรู้จากสถานศึกษา
+                    </h2>
                   </div>
                   <button 
                     onClick={() => navigateTo('news')}
-                    className="text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer"
+                    className="px-5 py-2.5 rounded-full bg-[#FEDB3B] hover:bg-[#FD9800] text-[#141006] font-bold text-xs transition flex items-center gap-1.5 shadow-xs cursor-pointer"
                   >
-                    ดูข่าวทั้งหมด ({posts.length}) →
+                    <span>ดูบทความทั้งหมด</span>
+                    <ArrowUpRight className="w-4 h-4" />
                   </button>
                 </div>
 
@@ -859,36 +881,39 @@ export default function App() {
                     <article 
                       key={post.id}
                       onClick={() => handleOpenPost(post)}
-                      className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden hover:border-emerald-300 hover:shadow-xs transition cursor-pointer flex flex-col justify-between group"
+                      className="akat-card overflow-hidden cursor-pointer flex flex-col justify-between group"
                     >
-                      <div className="aspect-16/10 w-full overflow-hidden bg-slate-100">
+                      <div className="aspect-16/10 w-full overflow-hidden bg-[#FEF9E1]">
                         <img 
                           src={post.image_url || '/images/news-active-learning.jpg'} 
                           alt={post.title} 
-                          className="w-full h-full object-cover group-hover:scale-103 transition duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                         />
                       </div>
-                      <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div className="p-6 flex-1 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-2">
-                            <span className="text-emerald-700 font-semibold">{post.category}</span>
+                          <div className="flex items-center gap-2 text-xs text-[#454F5E] mb-2.5">
+                            <span className="font-bold text-[#141006] bg-[#FEDB3B] px-2 py-0.5 rounded-md text-[10px]">
+                              {post.category}
+                            </span>
                             <span>•</span>
                             <span>{formatThaiDate(post.created_at)}</span>
                           </div>
-                          <h4 className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition leading-snug line-clamp-2">
+                          <h4 className="font-bold text-base text-[#0F172A] group-hover:text-[#FD9800] transition leading-snug line-clamp-2">
                             {post.title}
                           </h4>
-                          <p className="text-xs text-slate-500 mt-2 line-clamp-2">
+                          <p className="text-xs text-[#454F5E] mt-2 line-clamp-2 leading-relaxed">
                             {post.summary || post.content}
                           </p>
                         </div>
-                        <div className="mt-4 pt-3 border-t border-slate-100 text-xs font-semibold text-emerald-700 flex items-center gap-1">
-                          อ่านต่อ <ArrowRight className="w-3.5 h-3.5" />
+                        <div className="mt-5 pt-3 border-t border-[#F9F0C8] text-xs font-bold text-[#FD9800] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                          อ่านต่อ →
                         </div>
                       </div>
                     </article>
                   ))}
                 </div>
+
               </section>
 
               {/* Optional Custom Homepage Blocks Rendered from MCP / Site Editor */}
@@ -902,78 +927,56 @@ export default function App() {
           )}
 
           {/* ========================================================= */}
-          {/* PAGE 2: เกี่ยวกับโรงเรียน (ABOUT SCHOOL - DEDICATED PAGE) */}
+          {/* PAGE 2: เกี่ยวกับโรงเรียน (ABOUT SCHOOL - Apple Minimal)   */}
           {/* ========================================================= */}
           {currentPage === 'about' && (
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 animate-in fade-in duration-200">
               
               {/* Header Title */}
-              <div className="text-center max-w-2xl mx-auto mb-10">
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
+              <div className="text-center max-w-2xl mx-auto mb-12">
+                <span className="text-xs font-medium uppercase tracking-widest text-neutral-400">
                   เกี่ยวกับโรงเรียน
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
-                  ข้อมูลพื้นฐานและประวัติโรงเรียนโพนงามพิทยานุกูล
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-950 mt-1.5">
+                  ข้อมูลพื้นฐานและประวัติสถานศึกษา
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
+                <p className="text-xs sm:text-sm text-neutral-500 mt-2">
+                  สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
                 </p>
               </div>
 
               {/* Subtabs */}
               <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
-                <button
-                  onClick={() => setAboutActiveTab('history')}
-                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
-                    aboutActiveTab === 'history'
-                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
-                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Building2 className="w-4 h-4" />
-                  ประวัติความเป็นมา
-                </button>
-                <button
-                  onClick={() => setAboutActiveTab('admin')}
-                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
-                    aboutActiveTab === 'admin'
-                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
-                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Users className="w-4 h-4" />
-                  คณะผู้บริหาร & กลุ่มงาน
-                </button>
-                <button
-                  onClick={() => setAboutActiveTab('teachers')}
-                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
-                    aboutActiveTab === 'teachers'
-                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
-                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Award className="w-4 h-4" />
-                  คณะครูและบุคลากร
-                </button>
-                <button
-                  onClick={() => setAboutActiveTab('vision')}
-                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
-                    aboutActiveTab === 'vision'
-                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
-                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
-                  }`}
-                >
-                  <Compass className="w-4 h-4" />
-                  วิสัยทัศน์ & PPK Model
-                </button>
+                {[
+                  { id: 'history', label: 'ประวัติความเป็นมา', icon: Building2 },
+                  { id: 'admin', label: 'คณะผู้บริหาร & กลุ่มงาน', icon: Users },
+                  { id: 'teachers', label: 'คณะครูและบุคลากร', icon: Award },
+                  { id: 'vision', label: 'วิสัยทัศน์ & PPK Model', icon: Compass }
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const active = aboutActiveTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setAboutActiveTab(tab.id)}
+                      className={`px-4 py-2 rounded-full text-xs font-medium transition cursor-pointer flex items-center gap-1.5 ${
+                        active
+                          ? 'bg-neutral-950 text-white shadow-xs'
+                          : 'bg-neutral-100 text-neutral-600 hover:text-neutral-950 hover:bg-neutral-200/80'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {tab.label}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Subtab 1: History */}
               {aboutActiveTab === 'history' && (
                 <div className="space-y-6">
-                  <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/80 shadow-xs space-y-5 text-slate-700 leading-relaxed text-sm sm:text-base">
-                    <h3 className="text-xl font-bold text-slate-900 pb-3 border-b border-slate-100 flex items-center gap-2.5">
-                      <span className="w-2 h-6 bg-emerald-600 rounded-full inline-block"></span>
+                  <div className="bg-white p-8 sm:p-12 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-6 text-neutral-600 leading-relaxed text-sm sm:text-base font-normal">
+                    <h3 className="text-xl font-semibold text-neutral-950 pb-4 border-b border-neutral-100">
                       ประวัติการก่อตั้งสถานศึกษา
                     </h3>
                     <p>
@@ -991,10 +994,10 @@ export default function App() {
 
               {/* Subtab 2: Admin */}
               {aboutActiveTab === 'admin' && (
-                <div className="space-y-8">
+                <div className="space-y-10">
                   {/* Director Card */}
-                  <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
-                    <div className="w-32 h-40 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                  <div className="bg-white p-8 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left">
+                    <div className="w-32 h-40 rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-200/80 shrink-0">
                       <img 
                         src="/images/director.jpg" 
                         alt="ผู้อำนวยการโรงเรียน" 
@@ -1002,16 +1005,16 @@ export default function App() {
                       />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
+                      <span className="text-[10px] font-semibold tracking-wider uppercase text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full border border-neutral-200/60">
                         ผู้บริหารสูงสุดของสถานศึกษา
                       </span>
-                      <h3 className="text-2xl font-bold text-slate-900 mt-2">
+                      <h3 className="text-2xl font-semibold text-neutral-950 mt-2">
                         นายวัชรินทร์ ติดวงษา
                       </h3>
-                      <p className="text-sm font-semibold text-slate-700 mt-0.5">
+                      <p className="text-sm font-medium text-neutral-700 mt-0.5">
                         ผู้อำนวยการโรงเรียนโพนงามพิทยานุกูล
                       </p>
-                      <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                      <p className="text-xs text-neutral-500 mt-2.5 leading-relaxed max-w-xl">
                         วิทยฐานะ: ผู้อำนวยการชำนาญการพิเศษ <br />
                         มุ่งมั่นบริหารงานสถานศึกษาด้วยความโปร่งใส ตามหลักธรรมาภิบาล และการมีส่วนร่วมของชุมชน
                       </p>
@@ -1020,26 +1023,26 @@ export default function App() {
 
                   {/* 4 Group Heads */}
                   <div>
-                    <h4 className="font-bold text-lg text-slate-900 mb-4">
+                    <h4 className="font-semibold text-base text-neutral-950 mb-5">
                       หัวหน้ากลุ่มบริหารงาน 4 ฝ่าย
                     </h4>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                       {administrators.map((admin, idx) => (
-                        <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs text-center flex flex-col items-center">
-                          <div className="w-24 h-32 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mb-3 shrink-0">
+                        <div key={idx} className="bg-white p-6 rounded-2xl border border-neutral-200/80 text-center flex flex-col items-center hover:border-neutral-300 transition">
+                          <div className="w-24 h-32 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200/80 mb-3.5 shrink-0">
                             <img 
                               src={admin.photo} 
                               alt={admin.name} 
                               className="w-full h-full object-cover object-top"
                             />
                           </div>
-                          <h5 className="font-bold text-sm text-slate-900 leading-tight">
+                          <h5 className="font-semibold text-xs sm:text-sm text-neutral-950 leading-tight">
                             {admin.name}
                           </h5>
-                          <p className="text-xs text-emerald-700 font-semibold mt-1">
+                          <p className="text-xs text-neutral-600 font-medium mt-1">
                             {admin.role}
                           </p>
-                          <p className="text-[11px] text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-neutral-400 mt-0.5">
                             {admin.position}
                           </p>
                         </div>
@@ -1053,31 +1056,31 @@ export default function App() {
               {aboutActiveTab === 'teachers' && (
                 <div className="space-y-6">
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-bold text-slate-900">
+                    <h3 className="text-xl font-semibold text-neutral-950">
                       ทำเนียบคณะครูและบุคลากรทางการศึกษา
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-neutral-500 mt-1">
                       คณะครูผู้สอนโรงเรียนโพนงามพิทยานุกูล สพม.มหาสารคาม
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
                     {teachers.map((t, idx) => (
-                      <div key={idx} className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs text-center flex flex-col items-center">
-                        <div className="w-20 h-28 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mb-2.5 shrink-0">
+                      <div key={idx} className="bg-white p-5 rounded-2xl border border-neutral-200/80 text-center flex flex-col items-center hover:border-neutral-300 transition">
+                        <div className="w-20 h-28 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200/80 mb-3 shrink-0">
                           <img 
                             src={t.photo} 
                             alt={t.name} 
                             className="w-full h-full object-cover object-top"
                           />
                         </div>
-                        <h5 className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
+                        <h5 className="font-semibold text-xs sm:text-sm text-neutral-950 leading-tight">
                           {t.name}
                         </h5>
-                        <p className="text-[11px] text-emerald-700 font-medium mt-0.5">
+                        <p className="text-[11px] text-neutral-600 font-medium mt-0.5">
                           {t.position}
                         </p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
+                        <p className="text-[10px] text-neutral-400 mt-0.5">
                           {t.department}
                         </p>
                       </div>
@@ -1090,26 +1093,26 @@ export default function App() {
               {aboutActiveTab === 'vision' && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">
+                    <div className="bg-white p-8 sm:p-10 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
+                      <span className="text-[10px] font-semibold tracking-wider uppercase text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full border border-neutral-200/60">
                         วิสัยทัศน์ (Vision)
                       </span>
-                      <h4 className="text-xl font-bold text-slate-900 leading-snug">
+                      <h4 className="text-xl font-semibold text-neutral-950 leading-snug">
                         เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
                       </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-neutral-500 leading-relaxed font-normal">
                         มุ่งเน้นการพัฒนาผู้เรียนให้มีสมรรถนะตามมาตรฐานสากล มีทักษะในศตวรรษที่ 21 ควบคู่คุณธรรมจริยธรรม และน้อมนำหลักปรัชญาของเศรษฐกิจพอเพียงมาปรับใช้ในการดำเนินชีวิต
                       </p>
                     </div>
 
-                    <div className="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
-                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">
+                    <div className="bg-white p-8 sm:p-10 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-4">
+                      <span className="text-[10px] font-semibold tracking-wider uppercase text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-full border border-neutral-200/60">
                         คำขวัญโรงเรียน (Motto)
                       </span>
-                      <h4 className="text-xl font-bold text-slate-900 leading-snug">
+                      <h4 className="text-xl font-semibold text-neutral-950 leading-snug">
                         ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์
                       </h4>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-neutral-500 leading-relaxed font-normal">
                         ส่งเสริมการเรียนรู้ตลอดชีวิตของนักเรียน สร้างสรรค์ปัญญา พัฒนาตนเองและร่วมสร้างประโยชน์ให้แก่ชุมชนและสังคมอย่างยั่งยืน
                       </p>
                     </div>
@@ -1121,19 +1124,19 @@ export default function App() {
           )}
 
           {/* ========================================================= */}
-          {/* PAGE 3: ระบบสารสนเทศ E-SERVICES                           */}
+          {/* PAGE 3: ระบบสารสนเทศ E-SERVICES (Apple Minimal)           */}
           {/* ========================================================= */}
           {currentPage === 'eservice' && (
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 animate-in fade-in duration-200">
               
-              <div className="text-center max-w-2xl mx-auto mb-10">
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
+              <div className="text-center max-w-2xl mx-auto mb-12">
+                <span className="text-xs font-medium uppercase tracking-widest text-neutral-400">
                   ระบบสารสนเทศออนไลน์
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
-                  ระบบ E-Services โรงเรียนโพนงามพิทยานุกูล
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-950 mt-1.5">
+                  บริการอิเล็กทรอนิกส์ E-Service
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                <p className="text-xs sm:text-sm text-neutral-500 mt-2">
                   ศูนย์รวมระบบสารสนเทศ การประเมินผลการเรียน และบริการอิเล็กทรอนิกส์
                 </p>
               </div>
@@ -1142,53 +1145,45 @@ export default function App() {
                 {eServices.map((service) => (
                   <div 
                     key={service.id} 
-                    className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-xs hover:border-emerald-300 hover:shadow-md transition duration-300 flex flex-col justify-between"
+                    className="bg-white rounded-3xl border border-neutral-200/80 p-6 flex flex-col justify-between hover:border-neutral-300 hover:shadow-[0_2px_12px_rgba(0,0,0,0.03)] transition duration-200"
                   >
-                    <div className="aspect-16/8 w-full overflow-hidden bg-slate-100 border-b border-slate-100">
-                      <img 
-                        src={service.image} 
-                        alt={service.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-6 flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200/60">
-                            {service.badge}
-                          </span>
-                          <span className="text-[10px] text-slate-400">
-                            {service.category}
-                          </span>
-                        </div>
-                        <h4 className="font-bold text-base text-slate-900 leading-snug">
-                          {service.title}
-                        </h4>
-                        <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                          {service.desc}
-                        </p>
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[10px] font-semibold text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-full uppercase tracking-wider border border-neutral-200/60">
+                          {service.badge}
+                        </span>
+                        <span className="text-[11px] text-neutral-400 font-normal">
+                          {service.category}
+                        </span>
                       </div>
+                      <h4 className="font-semibold text-base text-neutral-950 leading-snug">
+                        {service.title}
+                      </h4>
+                      <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
+                        {service.desc}
+                      </p>
+                    </div>
 
-                      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="mt-6 pt-4 border-t border-neutral-100 flex items-center justify-between">
+                      <a 
+                        href={service.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-neutral-950 hover:bg-neutral-800 text-white rounded-full text-xs font-medium transition inline-flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <span>เข้าสู่ระบบ</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </a>
+                      {service.manualUrl && (
                         <a 
-                          href={service.url}
+                          href={service.manualUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                          className="text-xs text-neutral-500 hover:text-neutral-950 underline flex items-center gap-1 font-normal"
                         >
-                          เข้าใช้งานระบบ <ExternalLink className="w-3.5 h-3.5" />
+                          คู่มือการใช้งาน
                         </a>
-                        {service.manualUrl && (
-                          <a 
-                            href={service.manualUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-slate-600 hover:text-emerald-700 underline flex items-center gap-1 font-medium"
-                          >
-                            <FileText className="w-3.5 h-3.5" /> คู่มือการใช้งาน
-                          </a>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1197,34 +1192,34 @@ export default function App() {
           )}
 
           {/* ========================================================= */}
-          {/* PAGE 4: ข่าวสารและประกาศ (NEWS & ARTICLES)                */}
+          {/* PAGE 4: ข่าวสารและประกาศ (NEWS & ARTICLES - Apple Minimal) */}
           {/* ========================================================= */}
           {currentPage === 'news' && (
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 animate-in fade-in duration-200">
               
-              <div className="text-center max-w-2xl mx-auto mb-10">
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
+              <div className="text-center max-w-2xl mx-auto mb-12">
+                <span className="text-xs font-medium uppercase tracking-widest text-neutral-400">
                   ข่าวประชาสัมพันธ์
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
-                  ข่าวสารและกิจกรรมโรงเรียนโพนงามพิทยานุกูล
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-950 mt-1.5">
+                  ข่าวสารและกิจกรรมโรงเรียน
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                <p className="text-xs sm:text-sm text-neutral-500 mt-2">
                   ติดตามประกาศ กิจกรรมวิชาการ และผลงานนักเรียนล่าสุด
                 </p>
               </div>
 
               {/* Filters */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-slate-50/80 p-3 rounded-2xl border border-slate-200/70">
-                <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-neutral-200/60">
+                <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
                   {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer whitespace-nowrap ${
+                      className={`px-4 py-1.5 rounded-full text-xs font-medium transition cursor-pointer whitespace-nowrap ${
                         selectedCategory === cat
-                          ? 'bg-emerald-600 text-white shadow-xs font-semibold'
-                          : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/60'
+                          ? 'bg-neutral-950 text-white shadow-xs'
+                          : 'bg-neutral-100 text-neutral-600 hover:text-neutral-950 hover:bg-neutral-200/70'
                       }`}
                     >
                       {cat}
@@ -1233,57 +1228,55 @@ export default function App() {
                 </div>
 
                 <div className="relative w-full sm:w-72">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     placeholder="ค้นหาข่าวสาร..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-slate-200 text-xs sm:text-sm focus:outline-none focus:border-emerald-500 transition"
+                    className="w-full pl-9 pr-4 py-2 bg-neutral-50 rounded-full border border-neutral-200/80 text-xs focus:outline-none focus:border-neutral-400 transition"
                   />
                 </div>
               </div>
 
               {/* News Grid */}
               {filteredPosts.length === 0 ? (
-                <div className="py-20 text-center bg-white rounded-3xl border border-slate-200/80 p-8">
-                  <FileText className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-sm font-medium text-slate-600">ไม่พบข่าวสารในหมวดหมู่นี้</p>
+                <div className="py-20 text-center bg-white rounded-3xl border border-neutral-200/80 p-8">
+                  <FileText className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
+                  <p className="text-xs font-medium text-neutral-500">ไม่พบข่าวสารในหมวดหมู่นี้</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {filteredPosts.map((post) => (
                     <article 
                       key={post.id}
                       onClick={() => handleOpenPost(post)}
-                      className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden hover:border-emerald-300 hover:shadow-md transition duration-300 cursor-pointer flex flex-col justify-between group"
+                      className="group cursor-pointer flex flex-col justify-between"
                     >
-                      <div className="aspect-16/10 w-full overflow-hidden bg-slate-100">
+                      <div className="aspect-16/10 w-full overflow-hidden rounded-2xl bg-neutral-100 border border-neutral-200/70 mb-4">
                         <img 
                           src={post.image_url || '/images/news-active-learning.jpg'} 
                           alt={post.title} 
                           className="w-full h-full object-cover group-hover:scale-103 transition duration-300"
                         />
                       </div>
-                      <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div className="flex-1 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center gap-2 text-[11px] text-slate-400 mb-2.5">
-                            <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
-                              {post.category}
-                            </span>
+                          <div className="flex items-center gap-2 text-[11px] text-neutral-400 mb-2">
+                            <span className="font-medium text-neutral-900">{post.category}</span>
                             <span>•</span>
                             <span>{formatThaiDate(post.created_at)}</span>
                           </div>
-                          <h4 className="font-bold text-base text-slate-900 group-hover:text-emerald-700 transition leading-snug line-clamp-2">
+                          <h4 className="font-semibold text-base text-neutral-950 group-hover:text-neutral-600 transition leading-snug line-clamp-2">
                             {post.title}
                           </h4>
-                          <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-neutral-500 mt-2 line-clamp-2 leading-relaxed font-normal">
                             {post.summary || post.content}
                           </p>
                         </div>
-                        <div className="mt-5 pt-3.5 border-t border-slate-100 text-xs font-semibold text-emerald-700 flex items-center justify-between">
-                          <span className="flex items-center gap-1">อ่านรายละเอียด <ArrowRight className="w-3.5 h-3.5" /></span>
-                          <span className="text-slate-400 font-normal flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
+                        <div className="mt-4 pt-3 border-t border-neutral-100 text-xs font-medium text-neutral-900 flex items-center justify-between">
+                          <span className="flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">อ่านต่อ <ArrowRight className="w-3.5 h-3.5" /></span>
+                          <span className="text-neutral-400 font-normal flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
                         </div>
                       </div>
                     </article>
@@ -1295,19 +1288,19 @@ export default function App() {
           )}
 
           {/* ========================================================= */}
-          {/* PAGE 5: ติดต่อเรา (CONTACT US)                             */}
+          {/* PAGE 5: ติดต่อเรา (CONTACT US - Apple Minimal)             */}
           {/* ========================================================= */}
           {currentPage === 'contact' && (
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 animate-in fade-in duration-200">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-16 animate-in fade-in duration-200">
               
-              <div className="text-center max-w-2xl mx-auto mb-10">
-                <span className="text-xs font-bold text-emerald-700 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/60">
+              <div className="text-center max-w-2xl mx-auto mb-12">
+                <span className="text-xs font-medium uppercase tracking-widest text-neutral-400">
                   ติดต่อสอบถาม
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3">
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-950 mt-1.5">
                   ติดต่อโรงเรียนโพนงามพิทยานุกูล
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                <p className="text-xs sm:text-sm text-neutral-500 mt-2">
                   ยินดีต้อนรับและพร้อมอำนวยความสะดวกแก่นักเรียน ผู้ปกครอง และประชาชน
                 </p>
               </div>
@@ -1315,74 +1308,74 @@ export default function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 
                 {/* Contact Card */}
-                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
+                <div className="bg-white p-8 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-6">
                   <div>
-                    <h4 className="font-bold text-lg text-slate-900">
+                    <h4 className="font-semibold text-base text-neutral-950">
                       ข้อมูลที่ตั้งและการติดต่อ
                     </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-neutral-500 mt-0.5">
                       สำนักงานกลุ่มอำนวยการ โรงเรียนโพนงามพิทยานุกูล
                     </p>
                   </div>
 
-                  <div className="space-y-4 text-sm text-slate-700">
+                  <div className="space-y-4 text-sm text-neutral-600">
                     <div className="flex items-start gap-3.5">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center shrink-0 border border-neutral-200/60">
                         <MapPin className="w-4 h-4" />
                       </div>
                       <div>
-                        <strong className="block text-slate-900 text-xs font-semibold uppercase tracking-wider">
+                        <strong className="block text-neutral-900 text-xs font-semibold uppercase tracking-wider">
                           ที่ตั้งสถานศึกษา
                         </strong>
-                        <span className="text-sm mt-0.5 block leading-relaxed">
+                        <span className="text-xs sm:text-sm mt-0.5 block leading-relaxed text-neutral-600">
                           เลขที่ 3 หมู่ที่ 2 ตำบลโพนงาม อำเภอโกสุมพิสัย จังหวัดมหาสารคาม 44140
                         </span>
-                        <span className="text-xs text-slate-400 mt-0.5 block">
+                        <span className="text-xs text-neutral-400 mt-0.5 block">
                           (ที่ดินสาธารณประโยชน์โคกหนองเรือ)
                         </span>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3.5">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center shrink-0 border border-neutral-200/60">
                         <Phone className="w-4 h-4" />
                       </div>
                       <div>
-                        <strong className="block text-slate-900 text-xs font-semibold uppercase tracking-wider">
+                        <strong className="block text-neutral-900 text-xs font-semibold uppercase tracking-wider">
                           หมายเลขโทรศัพท์
                         </strong>
-                        <a href="tel:043996058" className="text-sm text-emerald-700 hover:underline font-medium">
+                        <a href="tel:043996058" className="text-xs sm:text-sm text-neutral-950 hover:underline font-medium">
                           0-4399-6058
                         </a>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3.5">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center shrink-0 border border-neutral-200/60">
                         <Mail className="w-4 h-4" />
                       </div>
                       <div>
-                        <strong className="block text-slate-900 text-xs font-semibold uppercase tracking-wider">
+                        <strong className="block text-neutral-900 text-xs font-semibold uppercase tracking-wider">
                           ไปรษณีย์อิเล็กทรอนิกส์ (อีเมล)
                         </strong>
-                        <a href="mailto:44012012@ppks.ac.th" className="text-sm text-emerald-700 hover:underline font-medium">
+                        <a href="mailto:44012012@ppks.ac.th" className="text-xs sm:text-sm text-neutral-950 hover:underline font-medium">
                           44012012@ppks.ac.th
                         </a>
                       </div>
                     </div>
 
                     <div className="flex items-start gap-3.5">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-800 flex items-center justify-center shrink-0 border border-neutral-200/60">
                         <Clock className="w-4 h-4" />
                       </div>
                       <div>
-                        <strong className="block text-slate-900 text-xs font-semibold uppercase tracking-wider">
+                        <strong className="block text-neutral-900 text-xs font-semibold uppercase tracking-wider">
                           เวลาทำการ
                         </strong>
-                        <span className="text-sm">
+                        <span className="text-xs sm:text-sm text-neutral-600 block">
                           จันทร์ – ศุกร์: 08:30 – 16:30 น.
                         </span>
-                        <span className="text-xs text-slate-400 block mt-0.5">
+                        <span className="text-xs text-neutral-400 block mt-0.5">
                           (เว้นวันหยุดราชการและวันหยุดนักขัตฤกษ์)
                         </span>
                       </div>
@@ -1391,22 +1384,22 @@ export default function App() {
                 </div>
 
                 {/* Map & Directions Card */}
-                <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/80 shadow-xs flex flex-col justify-between space-y-6">
+                <div className="bg-white p-8 rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)] flex flex-col justify-between space-y-6">
                   <div>
-                    <h4 className="font-bold text-lg text-slate-900">
+                    <h4 className="font-semibold text-base text-neutral-950">
                       การเดินทางและพิกัดที่ตั้ง
                     </h4>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-neutral-500 mt-0.5">
                       สังกัดสำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
                     </p>
 
-                    <div className="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed space-y-2">
+                    <div className="mt-4 p-4 rounded-2xl bg-neutral-50 border border-neutral-200/70 text-xs text-neutral-600 leading-relaxed space-y-2">
                       <p>
                         <strong>เส้นทาง:</strong> ตั้งอยู่ริมถนนทางหลวงชนบทในตำบลโพนงาม สะดวกต่อการเดินทางเชื่อมต่อระหว่างอำเภอโกสุมพิสัย และพื้นที่ใกล้เคียง
                       </p>
                       <p>
                         <strong>เว็บไซต์ทางการ:</strong>{' '}
-                        <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="text-emerald-700 underline font-medium">
+                        <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="text-neutral-950 underline font-medium">
                           www.ppks.ac.th
                         </a>
                       </p>
@@ -1418,7 +1411,7 @@ export default function App() {
                       href="https://www.google.com/maps/search/?api=1&query=โรงเรียนโพนงามพิทยานุกูล+โกสุมพิสัย+มหาสารคาม"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-3.5 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                      className="w-full py-3 px-4 rounded-full bg-neutral-950 hover:bg-neutral-800 text-white font-medium text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                     >
                       <MapPin className="w-4 h-4" />
                       เปิดพิกัดนำทางบน Google Maps
@@ -1435,25 +1428,25 @@ export default function App() {
           {/* PAGE 6: DYNAMIC PAGE (FULL SITE EDITING / GUTENBERG BLOCKS) */}
           {/* ========================================================= */}
           {currentPage === 'dynamic_page' && (
-            <div className="min-h-[60vh] py-10 animate-in fade-in duration-200">
+            <div className="min-h-[60vh] py-12 animate-in fade-in duration-200">
               {loadingDynamicPage ? (
                 <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-                  <Loader2 className="w-10 h-10 animate-spin text-emerald-600 mx-auto mb-4" />
-                  <p className="text-sm font-medium text-slate-600">กำลังโหลดเนื้อหาหน้าเพจ...</p>
+                  <Loader2 className="w-8 h-8 animate-spin text-neutral-900 mx-auto mb-4" />
+                  <p className="text-xs font-medium text-neutral-500">กำลังโหลดเนื้อหาหน้าเพจ...</p>
                 </div>
               ) : activeDynamicPage ? (
                 <div>
                   {/* Page Breadcrumbs & Meta header */}
-                  <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-6">
-                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 pb-4 border-b border-slate-200/80">
+                  <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-8">
+                    <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-neutral-500 pb-4 border-b border-neutral-200/60">
                       <div className="flex items-center gap-2">
-                        <button onClick={() => navigateTo('home')} className="hover:text-emerald-700 cursor-pointer font-medium">หน้าแรก</button>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-slate-800 font-semibold">{activeDynamicPage.title}</span>
+                        <button onClick={() => navigateTo('home')} className="hover:text-neutral-950 cursor-pointer font-medium">หน้าแรก</button>
+                        <ChevronRight className="w-3.5 h-3.5 text-neutral-400" />
+                        <span className="text-neutral-900 font-medium">{activeDynamicPage.title}</span>
                       </div>
                       {activeDynamicPage.created_by_agent && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                          <Bot className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-neutral-100 text-neutral-700 border border-neutral-200/60">
+                          <Bot className="w-3.5 h-3.5 text-neutral-600" />
                           ออกแบบโดย {activeDynamicPage.agent_name || 'AI Webmaster'}
                         </span>
                       )}
@@ -1464,24 +1457,24 @@ export default function App() {
                   {activeDynamicPage.layout_type === 'blocks' && activeDynamicPage.layout_data ? (
                     <BlockRenderer blocks={activeDynamicPage.layout_data} />
                   ) : (
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 bg-white rounded-3xl border border-slate-200/80 shadow-xs">
-                      <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-6 pb-4 border-b border-slate-100">
+                    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 bg-white rounded-3xl border border-neutral-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+                      <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-950 mb-6 pb-4 border-b border-neutral-100">
                         {activeDynamicPage.title}
                       </h1>
-                      <div className="prose prose-slate prose-emerald max-w-none text-slate-700 whitespace-pre-line leading-relaxed text-sm sm:text-base">
+                      <div className="prose prose-neutral max-w-none text-neutral-600 whitespace-pre-line leading-relaxed text-sm sm:text-base font-normal">
                         {activeDynamicPage.content}
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="max-w-xl mx-auto px-4 py-20 text-center bg-white rounded-3xl border border-slate-200/80 shadow-xs my-10">
-                  <FileText className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                  <h3 className="text-lg font-bold text-slate-800 mb-2">ไม่พบหน้าที่คุณต้องการ</h3>
-                  <p className="text-sm text-slate-500 mb-6">หน้าเพจนี้อาจยังไม่ได้รับการเผยแพร่ หรือถูกย้ายไปแล้ว</p>
+                <div className="max-w-xl mx-auto px-4 py-20 text-center bg-white rounded-3xl border border-neutral-200/80 shadow-xs my-10">
+                  <FileText className="w-10 h-10 text-neutral-400 mx-auto mb-3" />
+                  <h3 className="text-base font-semibold text-neutral-900 mb-2">ไม่พบหน้าที่คุณต้องการ</h3>
+                  <p className="text-xs text-neutral-500 mb-6">หน้าเพจนี้อาจยังไม่ได้รับการเผยแพร่ หรือถูกย้ายไปแล้ว</p>
                   <button 
                     onClick={() => navigateTo('home')}
-                    className="px-6 py-2.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold transition shadow-xs cursor-pointer"
+                    className="px-6 py-2.5 rounded-full bg-neutral-950 hover:bg-neutral-800 text-white text-xs font-medium transition cursor-pointer"
                   >
                     กลับสู่หน้าแรก
                   </button>
@@ -1493,33 +1486,33 @@ export default function App() {
         </main>
       )}
 
-      {/* 6. Post Reader Modal */}
+      {/* 6. Post Reader Modal (Apple Minimal) */}
       {readingPost && (
         <div 
           className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
           onClick={() => setReadingPost(null)}
         >
           <div 
-            className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] overflow-y-auto shadow-2xl border border-slate-200 relative my-auto animate-in fade-in duration-150"
+            className="bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] overflow-y-auto shadow-2xl border border-neutral-200 relative my-auto animate-in fade-in duration-150"
             onClick={(e) => e.stopPropagation()}
           >
             {loadingPost && (
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 py-1 bg-white/95 rounded-full text-xs text-slate-600 border border-slate-200">
-                <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
+              <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 py-1 bg-white/95 rounded-full text-xs text-neutral-600 border border-neutral-200">
+                <Loader2 className="w-3 h-3 animate-spin text-neutral-900" />
                 กำลังโหลด...
               </div>
             )}
 
             <button 
               onClick={() => setReadingPost(null)}
-              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition cursor-pointer"
+              className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-neutral-900/60 hover:bg-neutral-900 text-white flex items-center justify-center transition cursor-pointer"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
             </button>
 
             {readingPost.image_url && (
-              <div className="aspect-16/9 w-full overflow-hidden bg-slate-100">
+              <div className="aspect-16/9 w-full overflow-hidden bg-neutral-100">
                 <img 
                   src={readingPost.image_url} 
                   alt={readingPost.title} 
@@ -1530,8 +1523,8 @@ export default function App() {
 
             <div className="p-6 sm:p-10 space-y-6">
               <div>
-                <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                  <span className="text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded">
+                <div className="flex items-center gap-2 text-xs text-neutral-400 mb-2">
+                  <span className="text-neutral-900 font-medium bg-neutral-100 px-2.5 py-0.5 rounded-full">
                     {readingPost.category}
                   </span>
                   <span>•</span>
@@ -1540,26 +1533,26 @@ export default function App() {
                   <span>ผู้เขียน: {readingPost.author || 'โรงเรียนโพนงามพิทยานุกูล'}</span>
                 </div>
 
-                <h3 className="text-xl sm:text-2xl font-bold text-slate-900 leading-snug">
+                <h3 className="text-xl sm:text-2xl font-semibold text-neutral-950 leading-snug">
                   {readingPost.title}
                 </h3>
               </div>
 
               {readingPost.summary && (
-                <div className="p-4 rounded-2xl bg-slate-50 border-l-4 border-emerald-600 text-slate-700 text-sm sm:text-base leading-relaxed font-medium">
+                <div className="p-4 rounded-2xl bg-neutral-50 border-l-2 border-neutral-900 text-neutral-700 text-xs sm:text-sm leading-relaxed font-normal">
                   {readingPost.summary}
                 </div>
               )}
 
-              <div className="text-slate-700 text-sm sm:text-base leading-loose whitespace-pre-line font-normal">
+              <div className="text-neutral-600 text-xs sm:text-sm leading-loose whitespace-pre-line font-normal">
                 {readingPost.content}
               </div>
 
-              <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+              <div className="pt-6 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-400">
                 <span>ยอดเข้าชม {readingPost.views || 0} ครั้ง</span>
                 <button 
                   onClick={() => setReadingPost(null)}
-                  className="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full font-medium transition cursor-pointer"
+                  className="px-5 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-full font-medium transition cursor-pointer"
                 >
                   ปิด (ESC)
                 </button>
@@ -1569,35 +1562,39 @@ export default function App() {
         </div>
       )}
 
-      {/* 7. Minimal Footer */}
-      <footer className="border-t border-slate-100 bg-white py-12 px-4 sm:px-6 text-slate-400 text-xs mt-auto">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 p-0.5 flex items-center justify-center shrink-0">
-              <img src="/images/logo.png" alt="PPKS" className="w-full h-full object-contain" />
+      {/* 7. Footer (Akat Coding Center Warm Dark Footer) */}
+      <footer className="border-t-2 border-[#FD9800] bg-[#141006] py-14 px-4 sm:px-6 text-[#FEF9E1]/70 text-xs mt-auto">
+        <div className="max-w-6xl mx-auto space-y-10">
+          
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-8">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md">
+                <img src="/images/logo.png" alt="PPKS" className="w-full h-full object-contain" />
+              </div>
+              <div>
+                <p className="text-white font-bold text-base">
+                  {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
+                </p>
+                <p className="text-[#FEDB3B] text-xs mt-0.5">
+                  สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-slate-800 font-bold text-sm">
-                {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'} (พ.พ.ก.)
-              </p>
-              <p className="text-slate-400 text-xs mt-0.5">
-                สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
-              </p>
+
+            <div className="flex flex-wrap items-center gap-6 text-xs text-[#FEF9E1]/80 font-medium">
+              <button onClick={() => navigateTo('home')} className="hover:text-[#FEDB3B] transition cursor-pointer">หน้าแรก</button>
+              <button onClick={() => navigateTo('about')} className="hover:text-[#FEDB3B] transition cursor-pointer">เกี่ยวกับโรงเรียน</button>
+              <button onClick={() => navigateTo('eservice')} className="hover:text-[#FEDB3B] transition cursor-pointer">ระบบ E-Service</button>
+              <button onClick={() => navigateTo('news')} className="hover:text-[#FEDB3B] transition cursor-pointer">บทความ & ข่าวสาร</button>
+              <button onClick={() => navigateTo('contact')} className="hover:text-[#FEDB3B] transition cursor-pointer">ติดต่อเรา</button>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 text-xs text-slate-500 font-medium">
-            <button onClick={() => navigateTo('home')} className="hover:text-emerald-700 cursor-pointer">หน้าแรก</button>
-            <button onClick={() => navigateTo('about')} className="hover:text-emerald-700 cursor-pointer">เกี่ยวกับโรงเรียน</button>
-            <button onClick={() => navigateTo('eservice')} className="hover:text-emerald-700 cursor-pointer">E-Service</button>
-            <button onClick={() => navigateTo('news')} className="hover:text-emerald-700 cursor-pointer">ข่าวสาร</button>
-            <button onClick={() => navigateTo('contact')} className="hover:text-emerald-700 cursor-pointer">ติดต่อเรา</button>
+          <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-[#FEF9E1]/50 gap-4 text-xs">
+            <p>Copyright © 2026 {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'} (พ.พ.ก.)</p>
+            <p>Powered by Smart School CMS • เว็บไซต์ทางการ: <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="text-[#FEDB3B] hover:underline">www.ppks.ac.th</a></p>
           </div>
 
-          <div className="text-slate-400 text-xs space-y-1">
-            <p>เว็บไซต์ทางการ: <a href="https://www.ppks.ac.th" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-700 underline font-medium">www.ppks.ac.th</a></p>
-            <p>© 2026 โรงเรียนโพนงามพิทยานุกูล All rights reserved.</p>
-          </div>
         </div>
       </footer>
 

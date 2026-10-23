@@ -20,13 +20,30 @@ type Post struct {
 }
 
 type Page struct {
-	ID        uint      `gorm:"primaryKey" json:"id"`
-	Title     string    `gorm:"not null" json:"title"`
-	Slug      string    `gorm:"uniqueIndex;not null" json:"slug"`
-	Content   string    `gorm:"not null" json:"content"`
-	Status    string    `gorm:"default:'published'" json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID             uint      `gorm:"primaryKey" json:"id"`
+	Title          string    `gorm:"not null" json:"title"`
+	Slug           string    `gorm:"uniqueIndex;not null" json:"slug"`
+	LayoutType     string    `gorm:"default:'blocks'" json:"layout_type"` // 'standard', 'blocks'
+	LayoutData     string    `gorm:"type:text" json:"layout_data"`       // JSON Array of blocks
+	Content        string    `gorm:"not null" json:"content"`            // fallback/searchable text
+	Status         string    `gorm:"default:'published'" json:"status"`
+	CreatedByAgent bool      `gorm:"default:false" json:"created_by_agent"`
+	AgentName      string    `json:"agent_name,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type Media struct {
+	ID             uint      `gorm:"primaryKey" json:"id"`
+	Filename       string    `gorm:"not null" json:"filename"`
+	OriginalName   string    `json:"original_name"`
+	URL            string    `gorm:"not null" json:"url"`
+	MimeType       string    `json:"mime_type"`
+	SizeBytes      int64     `json:"size_bytes"`
+	AltText        string    `json:"alt_text"`
+	CreatedByAgent bool      `gorm:"default:false" json:"created_by_agent"`
+	AgentName      string    `json:"agent_name,omitempty"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type Setting struct {
@@ -56,10 +73,28 @@ type AgentCreatePostRequest struct {
 }
 
 type CreatePageRequest struct {
-	Title   string `json:"title"`
-	Slug    string `json:"slug"`
-	Content string `json:"content"`
-	Status  string `json:"status"`
+	Title      string `json:"title"`
+	Slug       string `json:"slug"`
+	LayoutType string `json:"layout_type"`
+	LayoutData string `json:"layout_data"`
+	Content    string `json:"content"`
+	Status     string `json:"status"`
+}
+
+type AgentCreatePageRequest struct {
+	Title      string `json:"title"`
+	Slug       string `json:"slug"`
+	LayoutType string `json:"layout_type"`
+	LayoutData any    `json:"layout_data"` // Accepts string or JSON structure
+	Content    string `json:"content"`
+	AgentName  string `json:"agent_name"`
+	Publish    bool   `json:"publish"`
+}
+
+type AgentFetchMediaRequest struct {
+	SourceURL string `json:"source_url"`
+	AltText   string `json:"alt_text"`
+	AgentName string `json:"agent_name"`
 }
 
 type LoginRequest struct {

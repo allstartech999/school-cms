@@ -24,6 +24,10 @@ frontend/.vite/
 *.db-wal
 *.db-journal
 
+# Uploads directory
+uploads/*
+!uploads/.gitkeep
+
 # OS & Editor files
 .DS_Store
 Thumbs.db

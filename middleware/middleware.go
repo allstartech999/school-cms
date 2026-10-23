@@ -49,12 +49,25 @@ func AdminAuth(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// AgentAuth middleware verifies the X-Agent-Key
+// AgentAuth middleware verifies the X-Agent-Key (from header, query param, or Bearer auth)
 func AgentAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		key := r.Header.Get("X-Agent-Key")
 		if key == "" {
-			http.Error(w, `{"error": "Unauthorized: Missing X-Agent-Key header"}`, http.StatusUnauthorized)
+			key = r.URL.Query().Get("key")
+		}
+		if key == "" {
+			key = r.URL.Query().Get("agent_key")
+		}
+		if key == "" {
+			authHeader := r.Header.Get("Authorization")
+			if strings.HasPrefix(authHeader, "Bearer ") {
+				key = strings.TrimPrefix(authHeader, "Bearer ")
+			}
+		}
+
+		if key == "" {
+			http.Error(w, `{"error": "Unauthorized: Missing Agent Key (Header X-Agent-Key, Bearer token, or ?key= param)"}`, http.StatusUnauthorized)
 			return
 		}
 
@@ -65,7 +78,7 @@ func AgentAuth(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		if key != storedKey {
-			http.Error(w, `{"error": "Unauthorized: Invalid X-Agent-Key"}`, http.StatusUnauthorized)
+			http.Error(w, `{"error": "Unauthorized: Invalid Agent Key"}`, http.StatusUnauthorized)
 			return
 		}
 

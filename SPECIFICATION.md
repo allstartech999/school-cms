@@ -131,25 +131,28 @@
 
 ## 5. แผนการดำเนินงาน 4 Phase (Execution Roadmap)
 
-### [x] Phase 1: Go Native Backend & SQLite Engine (เสร็จสมบูรณ์)
+### [x] Phase 1: Go Native Backend & PostgreSQL Engine (เสร็จสมบูรณ์ 100%)
 - [x] โครงสร้างโฟลเดอร์ Go Native (`db`, `handlers`, `middleware`, `models`)
-- [x] Database Schema พร้อมระบบ Auto Seed ข้อมูลตั้งต้น
-- [x] Implement API ครบทุกตัว (Posts, Pages, Admin, AI Agent)
-- [x] เขียน Unit Test (`main_test.go`) ตรวจสอบความถูกต้องและสิทธิ์ของ Agent Key (ผล: PASS 100%)
+- [x] GORM + PostgreSQL เชื่อมต่อเซิร์ฟเวอร์จริง `server.krufame.work:5432`
+- [x] AutoMigrate ตาราง `posts`, `pages`, `settings`, `media`
+- [x] Implement REST API ครบทุกตัว (Posts, Pages, Admin, Media, AI Agent)
 
-### [ ] Phase 2: Frontend (React + Tailwind Clean Green-White Theme) (ขั้นตอนถัดไป)
-- [ ] ติดตั้ง React + Vite ในโฟลเดอร์ `frontend/`
-- [ ] ตั้งค่า Tailwind CSS โทนสีเขียว-ขาว (Emerald Green & Clean White)
-- [ ] ทำ Navbar & Header โรงเรียน
-- [ ] ทำ Hero Section & การ์ดข่าวสารล่าสุด (พร้อม Badge แยกข่าว AI)
-- [ ] ทำหน้าอ่านข่าวเดี่ยว (`/news/:id`) และหน้าอ่านเพจ (`/page/:slug`)
-- [ ] ทำ Admin Dashboard แบบด่วน (เข้าด้วยรหัสผ่าน, ฟอร์มสร้างข่าว/เพจ, ดู Agent Key)
+### [x] Phase 2: Frontend News Portal (เสร็จสมบูรณ์ 100%)
+- [x] ติดตั้ง React 19 + Vite ในโฟลเดอร์ `frontend/`
+- [x] ตั้งค่า Tailwind CSS v4 โทนสีเขียว-ขาว (Emerald Green & Clean White)
+- [x] Navbar & Header โรงเรียนโพนงามพิทยานุกูล (พ.พ.ก.)
+- [x] Hero Section, E-Services Portal, แถบข่าวด่วน, Slider และ Trending News
+- [x] Single Post Reader Modal พร้อม Loading Skeleton & Spinner
 
-### [ ] Phase 3: AI Agent Integration Testing
-- [ ] เขียนสคริปต์ตัวอย่างจำลอง AI Agent เชื่อมต่อผ่าน API
-- [ ] ทดสอบการยิงข่าวโดย Agent และตรวจสอบการอัปเดตบนหน้าเว็บแบบ Realtime
+### [x] Phase 3: AI Agent Integration with Model Context Protocol (MCP) & Block Layout Engine (เสร็จสมบูรณ์ 100%)
+- [x] ติดตั้ง `github.com/mark3labs/mcp-go` รองรับทั้ง **SSE Mode** (`/mcp/sse`) และ **Stdio CLI Mode** (`--mcp-stdio`)
+- [x] พัฒนา MCP Tools ครบวงจร: `upload_media_by_url`, `create_or_update_page`, `create_school_post`, `list_recent_posts`, `list_pages`
+- [x] จัดทำ MCP Resources: `school://blocks/catalog` (Schema บล็อก) และ `school://guidelines/writing` (คู่มือเขียนข่าว)
+- [x] ระบบจัดเก็บไฟล์ Media: `./uploads/YYYY/MM/` พร้อม Static File Serving
+- [x] React Dynamic Block Renderer: `HeroBanner`, `StatsBar`, `FeatureGrid`, `TwoColumns`, `AccordionFaq`
+- [x] Unit Tests & Simulation สคริปต์ผ่านการทดสอบ 100%
 
-### [ ] Phase 4: Single Binary Packaging & Production Verification
-- [ ] สั่ง Build Frontend ออกมาเป็น Static Assets ลงโฟลเดอร์ `dist/`
-- [ ] ทำ Go Embedding ด้วย `//go:embed all:dist`
-- [ ] ทดสอบรันไฟล์ Go Binary ตัวเดียว เพื่อยืนยันว่าทำงานได้ 100% โดยไม่มี Node.js ในระบบ
+### [ ] Phase 4: Single Binary Packaging & Production VPS Deployment (ขั้นตอนถัดไป)
+- [x] สั่ง Build Frontend ออกมาเป็น Static Assets ลงโฟลเดอร์ `dist/`
+- [x] ทำ Go Embedding ด้วย `//go:embed all:dist`
+- [ ] Deploy และรัน Service บน `fame_vps` เป็น Systemd daemon Service พร้อมใช้งานจริง

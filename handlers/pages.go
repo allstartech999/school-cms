@@ -72,12 +72,17 @@ func CreatePage(w http.ResponseWriter, r *http.Request) {
 	if req.Status == "" {
 		req.Status = "published"
 	}
+	if req.LayoutType == "" {
+		req.LayoutType = "standard"
+	}
 
 	page := models.Page{
-		Title:   req.Title,
-		Slug:    req.Slug,
-		Content: req.Content,
-		Status:  req.Status,
+		Title:      req.Title,
+		Slug:       req.Slug,
+		LayoutType: req.LayoutType,
+		LayoutData: req.LayoutData,
+		Content:    req.Content,
+		Status:     req.Status,
 	}
 
 	if err := db.DB.Create(&page).Error; err != nil {
@@ -118,10 +123,12 @@ func UpdatePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updates := map[string]any{
-		"title":      req.Title,
-		"content":    req.Content,
-		"status":     req.Status,
-		"updated_at": time.Now(),
+		"title":       req.Title,
+		"content":     req.Content,
+		"status":      req.Status,
+		"layout_type": req.LayoutType,
+		"layout_data": req.LayoutData,
+		"updated_at":  time.Now(),
 	}
 	if req.Slug != "" {
 		updates["slug"] = req.Slug

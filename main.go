@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"errors"
+	"flag"
 	"io/fs"
 	"log"
 	"net/http"
@@ -11,18 +12,23 @@ import (
 	"os/signal"
 	"school-cms/db"
 	"school-cms/handlers"
+	schoolmcp "school-cms/mcp"
 	"school-cms/middleware"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/joho/godotenv"
+	mcpserver "github.com/mark3labs/mcp-go/server"
 )
 
 //go:embed all:dist
 var embeddedFS embed.FS
 
 func main() {
+	mcpStdio := flag.Bool("mcp-stdio", false, "Run in MCP Stdio mode for local AI Agent CLI / Claude Desktop")
+	flag.Parse()
+
 	// Load .env file if it exists
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using system environment variables")
@@ -39,8 +45,22 @@ func main() {
 		defer sqlDB.Close()
 	}
 
+	// If running in MCP Stdio mode, start and block here
+	if *mcpStdio {
+		log.Println("🤖 Starting School CMS MCP Server in Stdio mode...")
+		mcpEngine := schoolmcp.NewSchoolMCPServer()
+		if err := mcpserver.ServeStdio(mcpEngine); err != nil {
+			log.Fatalf("MCP Stdio server error: %v", err)
+		}
+		return
+	}
+
 	// 2. Setup Go Native Router (net/http ServeMux)
 	mux := http.NewServeMux()
+
+	// --- Uploads Static Directory ---
+	handlers.EnsureUploadDir()
+	mux.Handle("GET /uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(handlers.UploadBaseDir))))
 
 	// --- Public APIs ---
 	mux.HandleFunc("GET /api/v1/posts", handlers.ListPosts)
@@ -48,6 +68,7 @@ func main() {
 	mux.HandleFunc("GET /api/v1/pages", handlers.ListPages)
 	mux.HandleFunc("GET /api/v1/pages/{slug}", handlers.GetPage)
 	mux.HandleFunc("GET /api/v1/stats", handlers.GetStats)
+	mux.HandleFunc("GET /api/v1/media", handlers.ListMedia)
 
 	// --- Admin APIs (Protected by AdminAuth) ---
 	mux.HandleFunc("POST /api/v1/admin/login", handlers.AdminLogin)
@@ -57,10 +78,24 @@ func main() {
 	mux.HandleFunc("POST /api/v1/pages", middleware.AdminAuth(handlers.CreatePage))
 	mux.HandleFunc("PUT /api/v1/pages/{id}", middleware.AdminAuth(handlers.UpdatePage))
 	mux.HandleFunc("DELETE /api/v1/pages/{id}", middleware.AdminAuth(handlers.DeletePage))
+	mux.HandleFunc("POST /api/v1/media/upload", middleware.AdminAuth(handlers.UploadMedia))
 
 	// --- AI Agent APIs (Protected by AgentAuth: X-Agent-Key) ---
 	mux.HandleFunc("GET /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentListPosts))
 	mux.HandleFunc("POST /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentCreatePost))
+	mux.HandleFunc("GET /api/v1/agent/pages", middleware.AgentAuth(handlers.AgentListPages))
+	mux.HandleFunc("POST /api/v1/agent/pages", middleware.AgentAuth(handlers.AgentCreateOrUpdatePage))
+	mux.HandleFunc("POST /api/v1/agent/media/fetch", middleware.AgentAuth(handlers.AgentFetchMedia))
+
+	// --- MCP SSE Server (/mcp/sse & /mcp/messages) ---
+	mcpEngine := schoolmcp.NewSchoolMCPServer()
+	sseServer := mcpserver.NewSSEServer(
+		mcpEngine,
+		mcpserver.WithSSEEndpoint("/mcp/sse"),
+		mcpserver.WithMessageEndpoint("/mcp/messages"),
+	)
+	mux.HandleFunc("/mcp/sse", middleware.AgentAuth(sseServer.SSEHandler().ServeHTTP))
+	mux.HandleFunc("/mcp/messages", middleware.AgentAuth(sseServer.MessageHandler().ServeHTTP))
 
 	// 3. Static Web Handler (SPA Fallback + Static files with Cache-Control)
 	distFS, err := fs.Sub(embeddedFS, "dist")

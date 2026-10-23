@@ -2,22 +2,24 @@
 
 @layer base {
   body {
-    font-family: 'Prompt', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    line-height: 1.65;
-    background-color: #f8fafc;
-    color: #0f172a;
+    font-family: 'Anuphan', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.7;
+    background-color: #ffffff;
+    color: #1e293b;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     overflow-x: hidden;
   }
 
-  /* Improve readability for Thai text */
   h1, h2, h3, h4, h5, h6 {
-    line-height: 1.35;
-    letter-spacing: -0.01em;
+    font-family: 'Prompt', 'Anuphan', sans-serif;
+    line-height: 1.3;
+    letter-spacing: -0.015em;
+    font-weight: 700;
   }
 
   p {
-    line-height: 1.7;
+    line-height: 1.75;
   }
 }

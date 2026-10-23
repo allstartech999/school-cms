@@ -298,16 +298,16 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-800 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
       
-      {/* 1. Header (Clean Green & White with Official Logo) */}
-      <header className="bg-white border-b border-slate-200/80 sticky top-0 z-40 shadow-2xs">
+      {/* 1. Header (Clean Minimalist with Official Logo) */}
+      <header className="bg-white/95 backdrop-blur-md border-b border-slate-100 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           
           {/* Logo & School Name */}
           <div 
-            className="flex items-center gap-3.5 cursor-pointer select-none" 
+            className="flex items-center gap-3.5 cursor-pointer select-none group" 
             onClick={() => navigateTo('home')}
           >
-            <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center p-0.5 border border-slate-100 shadow-xs shrink-0 overflow-hidden">
+            <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center p-0.5 border border-slate-100 shadow-2xs shrink-0 overflow-hidden group-hover:scale-105 transition">
               <img 
                 src="/images/logo.png" 
                 alt="ตราสัญลักษณ์โรงเรียนโพนงามพิทยานุกูล" 
@@ -320,21 +320,21 @@ export default function App() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-bold text-base sm:text-lg text-slate-900 leading-tight">
+                <span className="font-bold text-base sm:text-lg text-slate-900 leading-tight tracking-tight group-hover:text-emerald-700 transition">
                   {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
-                </h1>
-                <span className="hidden sm:inline-block px-2 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-700 rounded-md border border-emerald-200/70">
+                </span>
+                <span className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold bg-emerald-50 text-emerald-700 rounded border border-emerald-200/60">
                   พ.พ.ก.
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม
+              <p className="text-xs text-slate-400 mt-0.5 font-normal">
+                สพม.มหาสารคาม • อ.โกสุมพิสัย
               </p>
             </div>
           </div>
 
-          {/* Desktop Navigation Tabs */}
-          <nav className="hidden lg:flex items-center gap-1 bg-slate-100/80 p-1.5 rounded-xl border border-slate-200/70">
+          {/* Desktop Navigation Links (Clean, No bulky grey border, No stacked text) */}
+          <nav className="hidden lg:flex items-center gap-1.5">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
@@ -344,32 +344,24 @@ export default function App() {
             ]).map((item) => {
               const active = currentPage === item.path || 
                 (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, ''));
-              
-              const icon = item.id === 'home' ? <Home className="w-4 h-4" /> :
-                item.id === 'about' ? <Building2 className="w-4 h-4" /> :
-                item.id === 'eservice' ? <Globe className="w-4 h-4" /> :
-                item.id === 'news' ? <Award className="w-4 h-4" /> :
-                item.id === 'contact' ? <Phone className="w-4 h-4" /> :
-                <FileText className="w-4 h-4 text-emerald-600" />;
 
               if (item.children && item.children.length > 0) {
                 return (
                   <div className="relative group" key={item.id || item.path}>
                     <button
                       onClick={() => navigateTo(item.path)}
-                      className={`px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-3.5 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-colors flex items-center gap-1 cursor-pointer ${
                         active
-                          ? 'bg-white text-emerald-800 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                          ? 'text-emerald-800 bg-emerald-50 font-semibold'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                       }`}
                     >
-                      {icon}
-                      {item.title}
-                      <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-700 transition" />
+                      <span>{item.title}</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition" />
                     </button>
                     {/* Dropdown Menu */}
-                    <div className="absolute left-0 top-full pt-1.5 hidden group-hover:block z-50 min-w-[210px] animate-in fade-in duration-100">
-                      <div className="bg-white rounded-xl shadow-lg border border-slate-200/80 p-1.5 space-y-0.5">
+                    <div className="absolute left-0 top-full pt-1.5 hidden group-hover:block z-50 min-w-[200px] animate-in fade-in duration-100">
+                      <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-1.5 space-y-0.5">
                         {item.children.map((child) => (
                           <button
                             key={child.id || child.path}
@@ -390,25 +382,28 @@ export default function App() {
                 <button
                   key={item.id || item.path}
                   onClick={() => navigateTo(item.path)}
-                  className={`px-3.5 py-2 text-xs sm:text-sm font-semibold rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3.5 py-2 text-sm font-medium whitespace-nowrap rounded-lg transition-colors cursor-pointer ${
                     active
-                      ? item.id === 'eservice' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-emerald-800 shadow-xs'
-                      : item.id === 'eservice' ? 'text-emerald-700 hover:text-emerald-800 hover:bg-white/50' : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                      ? item.id === 'eservice'
+                        ? 'bg-emerald-600 text-white font-semibold shadow-2xs'
+                        : 'text-emerald-800 bg-emerald-50 font-semibold'
+                      : item.id === 'eservice'
+                        ? 'text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50/50'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  {icon}
                   {item.title}
                 </button>
               );
             })}
           </nav>
 
-          {/* Admin portal shortcut */}
-          <div className="hidden lg:flex items-center">
+          {/* Admin shortcut */}
+          <div className="hidden lg:flex items-center gap-2">
             <button 
               type="button"
               onClick={() => alert('ระบบบริหารจัดการแอดมิน (Admin Portal)\nสามารถเข้าใช้งานผ่าน API หรือหลังบ้านผู้ดูแลระบบ')}
-              className="px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition cursor-pointer flex items-center gap-1.5"
+              className="text-xs font-medium text-slate-400 hover:text-slate-700 hover:bg-slate-50 px-2.5 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1"
             >
               <Shield className="w-3.5 h-3.5" />
               แอดมิน
@@ -430,7 +425,7 @@ export default function App() {
 
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-2 shadow-lg">
+          <div className="lg:hidden border-t border-slate-100 bg-white px-6 py-4 space-y-1.5 shadow-lg">
             {(menuItems && menuItems.length > 0 ? menuItems : [
               { id: 'home', title: 'หน้าแรก', path: 'home' },
               { id: 'about', title: 'เกี่ยวกับโรงเรียน', path: 'about' },
@@ -445,7 +440,7 @@ export default function App() {
                   <button 
                     onClick={() => navigateTo(item.path)}
                     className={`block w-full text-left py-2.5 px-3 rounded-lg text-sm font-medium flex items-center justify-between ${
-                      active ? 'bg-emerald-50 text-emerald-700 font-bold' : 'text-slate-700'
+                      active ? 'bg-emerald-50 text-emerald-800 font-bold' : 'text-slate-700 hover:bg-slate-50'
                     }`}
                   >
                     <span>{item.title}</span>
@@ -457,7 +452,7 @@ export default function App() {
                         <button
                           key={child.id || child.path}
                           onClick={() => navigateTo(child.path)}
-                          className="block w-full text-left py-1.5 px-2.5 text-xs text-slate-600 hover:text-emerald-700 font-medium rounded"
+                          className="block w-full text-left py-1.5 px-2.5 text-xs text-slate-600 hover:text-emerald-700 font-medium rounded hover:bg-slate-50"
                         >
                           • {child.title}
                         </button>
@@ -488,99 +483,126 @@ export default function App() {
           {currentPage === 'home' && (
             <div className="animate-in fade-in duration-200">
               
-              {/* Optional Announcement Ticker */}
+              {/* Minimal Clean Announcement Bar */}
               {(homepageConfig?.show_ticker !== false) && (
-                <div className="bg-emerald-800 text-white py-2 px-4 text-xs">
-                  <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <span className="bg-emerald-600 font-bold px-2 py-0.5 rounded text-[11px] shrink-0 uppercase tracking-wider">
+                <div className="bg-emerald-50/70 border-b border-emerald-100/60 text-slate-700 py-2.5 px-4 text-xs">
+                  <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                      <span className="flex h-2 w-2 relative shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="font-semibold text-emerald-800 text-[11px] bg-emerald-100/60 px-1.5 py-0.5 rounded border border-emerald-200/50 shrink-0">
                         ประกาศด่วน
                       </span>
-                      <p className="truncate text-emerald-50">
+                      <p className="truncate text-slate-600 text-xs font-normal">
                         {homepageConfig?.announcement || 'ขอเชิญชวนศิษย์เก่าทุกท่านร่วมลงทะเบียนเครือข่ายศิษย์เก่าออนไลน์ (PPK Alumni) เพื่อร่วมพัฒนาโรงเรียน'}
                       </p>
                     </div>
                     <button 
                       onClick={() => navigateTo('news')}
-                      className="text-[11px] underline text-emerald-200 hover:text-white shrink-0 hidden sm:inline-block cursor-pointer"
+                      className="text-xs font-medium text-emerald-700 hover:text-emerald-900 shrink-0 hidden sm:inline-flex items-center gap-1 cursor-pointer hover:underline"
                     >
-                      ดูประกาศทั้งหมด
+                      ดูข่าวทั้งหมด →
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Hero Banner with REAL photo */}
-              <section className="bg-gradient-to-b from-emerald-50/60 to-white pt-10 pb-16 border-b border-slate-100">
+              {/* Ultra-Clean Minimal Hero */}
+              <section className="pt-14 pb-16 sm:pt-20 sm:pb-24 border-b border-slate-100 bg-white">
                 <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center">
                   
-                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold text-emerald-800 bg-white rounded-full border border-emerald-200/80 shadow-2xs mb-6">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-emerald-800 bg-emerald-50/80 rounded-full border border-emerald-200/60 shadow-2xs mb-6">
                     <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    {homepageConfig?.hero?.badge || 'ยินดีต้อนรับสู่ โรงเรียนโพนงามพิทยานุกูล (พ.พ.ก.)'}
+                    <span>{homepageConfig?.hero?.badge || 'โรงเรียนคุณภาพมาตรฐานสากล • สพม.มหาสารคาม'}</span>
                   </div>
 
-                  <h2 className="text-3xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight sm:leading-tight mb-4 whitespace-pre-line">
-                    {homepageConfig?.hero?.heading || (
-                      <>
-                        องค์กรคุณภาพ สืบสานศาสตร์พระราชา <br className="hidden sm:inline" />
-                        <span className="text-emerald-700">จัดการศึกษาสู่ความเป็นเลิศ</span>
-                      </>
-                    )}
-                  </h2>
+                  <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.25] sm:leading-[1.2] mb-6 whitespace-pre-line">
+                    {homepageConfig?.hero?.heading || 'โรงเรียนโพนงามพิทยานุกูล'}
+                  </h1>
 
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto mb-8 font-normal whitespace-pre-line">
+                  <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed font-normal whitespace-pre-line">
                     {homepageConfig?.hero?.subheading || (
                       <>
-                        “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์” <br />
-                        ตำบลโพนงาม อำเภอโกสุมพิสัย จังหวัดมหาสารคาม สังกัด สพม.มหาสารคาม
+                        “ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์” <br className="hidden sm:inline" />
+                        เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ
                       </>
                     )}
                   </p>
 
-                  <div className="flex flex-wrap items-center justify-center gap-3">
+                  <div className="flex flex-wrap items-center justify-center gap-3.5 mb-14">
                     <button 
                       onClick={() => navigateTo(homepageConfig?.hero?.primary_url || 'eservice')}
-                      className="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold transition cursor-pointer shadow-sm shadow-emerald-200 flex items-center gap-2"
+                      className="px-7 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition shadow-sm hover:shadow-md cursor-pointer flex items-center gap-2"
                     >
                       <Globe className="w-4 h-4" />
-                      {homepageConfig?.hero?.primary_cta || 'เข้าระบบ E-Service ออนไลน์'}
+                      {homepageConfig?.hero?.primary_cta || 'บริการออนไลน์ (E-Service)'}
                     </button>
                     <button 
                       onClick={() => navigateTo('about')}
-                      className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm font-medium transition cursor-pointer shadow-2xs"
+                      className="px-7 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer shadow-2xs"
                     >
                       เกี่ยวกับโรงเรียน
                     </button>
                     <button 
                       onClick={() => navigateTo('news')}
-                      className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs sm:text-sm font-medium transition cursor-pointer shadow-2xs"
+                      className="px-7 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-medium transition cursor-pointer shadow-2xs"
                     >
                       ข่าวสารและกิจกรรม
                     </button>
                   </div>
 
-                  {/* Real School Banner Image */}
-                  <div className="mt-10 rounded-2xl overflow-hidden border border-slate-200 shadow-md aspect-21/9 bg-slate-100 relative group">
+                  {/* High Quality Minimal Campus Photo */}
+                  <div className="rounded-3xl overflow-hidden border border-slate-200/80 shadow-md aspect-21/9 bg-slate-100 relative group">
                     <img 
-                      src={homepageConfig?.hero?.image_url || "/images/hero-banner.jpg"} 
+                      src={homepageConfig?.hero?.image_url || "https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80"} 
                       alt="โรงเรียนโพนงามพิทยานุกูล" 
                       className="w-full h-full object-cover group-hover:scale-102 transition duration-700"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/images/artboard-1.png';
+                      }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-6 sm:p-8 text-left">
-                      <div className="text-white">
-                        <span className="text-[11px] uppercase tracking-wider font-semibold text-emerald-300 bg-emerald-950/70 px-2.5 py-1 rounded-md backdrop-blur-xs">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent flex items-end p-6 sm:p-10 text-left">
+                      <div className="text-white max-w-xl">
+                        <span className="text-[11px] font-semibold tracking-wider uppercase text-emerald-300 bg-emerald-950/60 px-2.5 py-1 rounded-md border border-emerald-500/30 backdrop-blur-xs">
                           อำเภอโกสุมพิสัย จังหวัดมหาสารคาม
                         </span>
-                        <h3 className="text-lg sm:text-2xl font-bold mt-1.5">
+                        <h3 className="text-xl sm:text-2xl font-bold mt-2 text-white drop-shadow-xs">
                           {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'} (พ.พ.ก.)
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-200 mt-1 font-light">
-                          เปิดสอนระดับมัธยมศึกษาปีที่ 1 ถึงมัธยมศึกษาปีที่ 6 บนเนื้อที่ 32 ไร่ 3 งาน 72 ตารางวา โคกหนองเรือ
+                        <p className="text-xs sm:text-sm text-slate-200 mt-1 font-light leading-relaxed">
+                          เปิดสอนระดับมัธยมศึกษาปีที่ 1 ถึงมัธยมศึกษาปีที่ 6 มุ่งสู่ความเป็นเลิศทางวิชาการและทักษะชีวิต บนเนื้อที่ 32 ไร่ โคกหนองเรือ
                         </p>
                       </div>
                     </div>
                   </div>
 
+                </div>
+              </section>
+
+              {/* Minimal Clean Stats Cards */}
+              <section className="py-12 bg-slate-50/70 border-b border-slate-100">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
+                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">100%</div>
+                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">อัตราการศึกษาต่อ</div>
+                    </div>
+                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
+                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">15+</div>
+                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">รางวัลระดับชาติ & เขต</div>
+                    </div>
+                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
+                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">32 ไร่</div>
+                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">พื้นที่สถานศึกษา โคกหนองเรือ</div>
+                    </div>
+                    <div className="p-6 bg-white rounded-2xl border border-slate-200/70 shadow-2xs text-center">
+                      <div className="text-3xl sm:text-4xl font-extrabold text-emerald-700 tracking-tight">30+ ปี</div>
+                      <div className="text-xs sm:text-sm text-slate-600 mt-1.5 font-medium">สถาปนาสถานศึกษา</div>
+                    </div>
+                  </div>
                 </div>
               </section>
 
@@ -793,13 +815,13 @@ export default function App() {
               </div>
 
               {/* Subtabs */}
-              <div className="flex flex-wrap items-center justify-center gap-2 mb-10 border-b border-slate-200 pb-4">
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
                 <button
                   onClick={() => setAboutActiveTab('history')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
                     aboutActiveTab === 'history'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
                   }`}
                 >
                   <Building2 className="w-4 h-4" />
@@ -807,10 +829,10 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setAboutActiveTab('admin')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
                     aboutActiveTab === 'admin'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
                   }`}
                 >
                   <Users className="w-4 h-4" />
@@ -818,10 +840,10 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setAboutActiveTab('teachers')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
                     aboutActiveTab === 'teachers'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
                   }`}
                 >
                   <Award className="w-4 h-4" />
@@ -829,10 +851,10 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setAboutActiveTab('vision')}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition cursor-pointer flex items-center gap-2 ${
+                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium transition cursor-pointer flex items-center gap-2 ${
                     aboutActiveTab === 'vision'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200/80'
+                      ? 'bg-emerald-600 text-white shadow-xs font-semibold'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
                   }`}
                 >
                   <Compass className="w-4 h-4" />

@@ -95,6 +95,7 @@ export default function App() {
 
   const handleAdminLogout = () => {
     localStorage.removeItem('school_admin_token');
+    localStorage.removeItem('school_admin_user');
     setAdminToken('');
     setIsAdminLoggedIn(false);
     navigateTo('home');

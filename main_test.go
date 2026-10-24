@@ -26,6 +26,7 @@ func setupTestApp(t *testing.T) http.Handler {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/posts", handlers.ListPosts)
+	mux.HandleFunc("POST /api/v1/posts", middleware.AdminAuth(handlers.CreatePost))
 	mux.HandleFunc("GET /api/v1/posts/{id}", handlers.GetPost)
 	mux.HandleFunc("GET /api/v1/pages/{slug}", handlers.GetPage)
 	mux.HandleFunc("GET /api/v1/homepage", handlers.GetHomepageConfig)
@@ -33,8 +34,13 @@ func setupTestApp(t *testing.T) http.Handler {
 	mux.HandleFunc("GET /api/v1/settings", handlers.GetSiteSettings)
 	mux.HandleFunc("PUT /api/v1/settings", middleware.AgentOrAdminAuth(handlers.UpdateSiteSettings))
 	mux.HandleFunc("POST /api/v1/admin/login", handlers.AdminLogin)
+	mux.HandleFunc("POST /api/v1/admin/verify", middleware.AdminAuth(handlers.AdminVerify))
+	mux.HandleFunc("POST /api/v1/admin/change-password", middleware.AdminAuth(handlers.AdminChangePassword))
+	mux.HandleFunc("GET /api/v1/stats", handlers.GetStats)
 	mux.HandleFunc("GET /api/v1/users", middleware.AdminAuth(handlers.ListUsers))
 	mux.HandleFunc("POST /api/v1/users", middleware.AdminAuth(handlers.CreateUser))
+	mux.HandleFunc("PUT /api/v1/users/{id}", middleware.AdminAuth(handlers.UpdateUser))
+	mux.HandleFunc("DELETE /api/v1/users/{id}", middleware.AdminAuth(handlers.DeleteUser))
 	mux.HandleFunc("GET /api/v1/agent-keys", middleware.AdminAuth(handlers.ListAgentKeys))
 	mux.HandleFunc("POST /api/v1/agent-keys", middleware.AdminAuth(handlers.CreateAgentKey))
 	mux.HandleFunc("POST /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentCreatePost))
@@ -389,3 +395,175 @@ func TestAgentKeyManagement(t *testing.T) {
 		t.Fatalf("expected 200 for listing agent keys, got %d", wList.Code)
 	}
 }
+
+func TestMultiUserAuthAndSecurity(t *testing.T) {
+	app := setupTestApp(t)
+	if app == nil {
+		return
+	}
+
+	// 1. Verify that settings table has NO legacy plaintext password keys
+	var legacyPassCount int64
+	db.DB.Model(&models.Setting{}).Where("key IN ?", []string{"admin_password", "admin_password_changed"}).Count(&legacyPassCount)
+	if legacyPassCount > 0 {
+		t.Fatalf("expected 0 legacy password settings in database, found %d", legacyPassCount)
+	}
+
+	// 2. Test login with non-existent user
+	invalidUserBody := []byte(`{"username": "non_existent_user_999", "password": "any"}`)
+	reqInvUser := httptest.NewRequest("POST", "/api/v1/admin/login", bytes.NewReader(invalidUserBody))
+	wInvUser := httptest.NewRecorder()
+	app.ServeHTTP(wInvUser, reqInvUser)
+	if wInvUser.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 for non-existent user, got %d", wInvUser.Code)
+	}
+
+	// 3. Test login with admin and wrong password
+	wrongPassBody := []byte(`{"username": "admin", "password": "wrongpassword"}`)
+	reqWrong := httptest.NewRequest("POST", "/api/v1/admin/login", bytes.NewReader(wrongPassBody))
+	wWrong := httptest.NewRecorder()
+	app.ServeHTTP(wWrong, reqWrong)
+	if wWrong.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 for wrong password, got %d", wWrong.Code)
+	}
+
+	// 4. Test login with correct admin password (44012012)
+	adminLoginBody := []byte(`{"username": "admin", "password": "44012012"}`)
+	reqAdmin := httptest.NewRequest("POST", "/api/v1/admin/login", bytes.NewReader(adminLoginBody))
+	wAdmin := httptest.NewRecorder()
+	app.ServeHTTP(wAdmin, reqAdmin)
+	if wAdmin.Code != http.StatusOK {
+		t.Fatalf("expected 200 for valid admin login, got %d. Body: %s", wAdmin.Code, wAdmin.Body.String())
+	}
+	var loginRes map[string]any
+	if err := json.Unmarshal(wAdmin.Body.Bytes(), &loginRes); err != nil {
+		t.Fatalf("failed to decode login response: %v", err)
+	}
+	adminToken := loginRes["token"].(string)
+	if adminToken != "authenticated-admin" {
+		t.Fatalf("expected token authenticated-admin, got %s", adminToken)
+	}
+
+	// 5. Test token verification with valid admin token
+	reqVerify := httptest.NewRequest("POST", "/api/v1/admin/verify", nil)
+	reqVerify.Header.Set("X-Admin-Token", adminToken)
+	wVerify := httptest.NewRecorder()
+	app.ServeHTTP(wVerify, reqVerify)
+	if wVerify.Code != http.StatusOK {
+		t.Fatalf("expected 200 for verify token, got %d", wVerify.Code)
+	}
+
+	// 6. Test token verification with forged / unknown user tokens -> must strictly be 401
+	bogusTokens := []string{
+		"authenticated-nonexistentuser",
+		"authenticated-",
+		"random_token_12345",
+		"invalid",
+		"Bearer invalid",
+	}
+	for _, fakeToken := range bogusTokens {
+		reqFakeVerify := httptest.NewRequest("POST", "/api/v1/admin/verify", nil)
+		reqFakeVerify.Header.Set("X-Admin-Token", fakeToken)
+		wFakeVerify := httptest.NewRecorder()
+		app.ServeHTTP(wFakeVerify, reqFakeVerify)
+		if wFakeVerify.Code != http.StatusUnauthorized {
+			t.Fatalf("expected 401 for forged/invalid token '%s', got %d", fakeToken, wFakeVerify.Code)
+		}
+
+		// Also verify protected endpoint (POST /api/v1/posts) rejects bogus token
+		reqPost := httptest.NewRequest("POST", "/api/v1/posts", bytes.NewReader([]byte(`{"title":"fake"}`)))
+		reqPost.Header.Set("X-Admin-Token", fakeToken)
+		wPost := httptest.NewRecorder()
+		app.ServeHTTP(wPost, reqPost)
+		if wPost.Code != http.StatusUnauthorized {
+			t.Fatalf("expected 401 for AdminAuth on posts with bogus token '%s', got %d", fakeToken, wPost.Code)
+		}
+	}
+
+	// 7. Test multi-user lifecycle: create user, login, change user's own password
+	testUsername := "multiuser_test_runner"
+	db.DB.Where("username = ?", testUsername).Delete(&models.User{})
+	t.Cleanup(func() {
+		db.DB.Where("username = ?", testUsername).Delete(&models.User{})
+	})
+
+	createReq := []byte(`{
+		"username": "multiuser_test_runner",
+		"password": "initialPass999",
+		"name": "ทดสอบระบบหลายผู้ใช้",
+		"role": "editor"
+	}`)
+	reqCreate := httptest.NewRequest("POST", "/api/v1/users", bytes.NewReader(createReq))
+	reqCreate.Header.Set("X-Admin-Token", adminToken)
+	wCreate := httptest.NewRecorder()
+	app.ServeHTTP(wCreate, reqCreate)
+	if wCreate.Code != http.StatusCreated {
+		t.Fatalf("expected 201 for user creation, got %d. Body: %s", wCreate.Code, wCreate.Body.String())
+	}
+
+	// Login with new user
+	userLoginBody := []byte(`{"username": "multiuser_test_runner", "password": "initialPass999"}`)
+	reqUserLogin := httptest.NewRequest("POST", "/api/v1/admin/login", bytes.NewReader(userLoginBody))
+	wUserLogin := httptest.NewRecorder()
+	app.ServeHTTP(wUserLogin, reqUserLogin)
+	if wUserLogin.Code != http.StatusOK {
+		t.Fatalf("expected 200 for new user login, got %d. Body: %s", wUserLogin.Code, wUserLogin.Body.String())
+	}
+	var userLoginRes map[string]any
+	_ = json.Unmarshal(wUserLogin.Body.Bytes(), &userLoginRes)
+	userToken := userLoginRes["token"].(string)
+
+	// 8. Test role restriction: Non-admin ('editor') cannot create other users (must return 403 Forbidden)
+	unauthCreateUser := []byte(`{"username": "forbidden_user", "password": "pass123", "name": "Fake", "role": "editor"}`)
+	reqForbiddenUser := httptest.NewRequest("POST", "/api/v1/users", bytes.NewReader(unauthCreateUser))
+	reqForbiddenUser.Header.Set("X-Admin-Token", userToken)
+	wForbiddenUser := httptest.NewRecorder()
+	app.ServeHTTP(wForbiddenUser, reqForbiddenUser)
+	if wForbiddenUser.Code != http.StatusForbidden {
+		t.Fatalf("expected 403 for non-admin user creation, got %d", wForbiddenUser.Code)
+	}
+
+	// 9. Test role restriction: Non-admin ('editor') cannot create agent keys (must return 403 Forbidden)
+	unauthCreateKey := []byte(`{"name": "Forbidden Key", "description": "Should fail"}`)
+	reqForbiddenKey := httptest.NewRequest("POST", "/api/v1/agent-keys", bytes.NewReader(unauthCreateKey))
+	reqForbiddenKey.Header.Set("X-Admin-Token", userToken)
+	wForbiddenKey := httptest.NewRecorder()
+	app.ServeHTTP(wForbiddenKey, reqForbiddenKey)
+	if wForbiddenKey.Code != http.StatusForbidden {
+		t.Fatalf("expected 403 for non-admin agent key creation, got %d", wForbiddenKey.Code)
+	}
+
+	// 10. Change password for this user (allowed for own account)
+	changePassBody := []byte(`{"old_password": "initialPass999", "new_password": "updatedPass999"}`)
+	reqChange := httptest.NewRequest("POST", "/api/v1/admin/change-password", bytes.NewReader(changePassBody))
+	reqChange.Header.Set("X-Admin-Token", userToken)
+	wChange := httptest.NewRecorder()
+	app.ServeHTTP(wChange, reqChange)
+	if wChange.Code != http.StatusOK {
+		t.Fatalf("expected 200 for changing password, got %d. Body: %s", wChange.Code, wChange.Body.String())
+	}
+
+	// Old password should fail
+	reqOldFail := httptest.NewRequest("POST", "/api/v1/admin/login", bytes.NewReader(userLoginBody))
+	wOldFail := httptest.NewRecorder()
+	app.ServeHTTP(wOldFail, reqOldFail)
+	if wOldFail.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 when logging in with old password, got %d", wOldFail.Code)
+	}
+
+	// New password should succeed
+	newLoginBody := []byte(`{"username": "multiuser_test_runner", "password": "updatedPass999"}`)
+	reqNewLogin := httptest.NewRequest("POST", "/api/v1/admin/login", bytes.NewReader(newLoginBody))
+	wNewLogin := httptest.NewRecorder()
+	app.ServeHTTP(wNewLogin, reqNewLogin)
+	if wNewLogin.Code != http.StatusOK {
+		t.Fatalf("expected 200 when logging in with new password, got %d", wNewLogin.Code)
+	}
+
+	// Confirm settings table still has zero legacy password keys
+	db.DB.Model(&models.Setting{}).Where("key IN ?", []string{"admin_password", "admin_password_changed"}).Count(&legacyPassCount)
+	if legacyPassCount > 0 {
+		t.Fatalf("expected 0 legacy password settings in database after user operations, found %d", legacyPassCount)
+	}
+}
+

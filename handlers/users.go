@@ -52,6 +52,12 @@ func ListUsers(w http.ResponseWriter, r *http.Request) {
 
 // CreateUser handles POST /api/v1/users (AdminAuth)
 func CreateUser(w http.ResponseWriter, r *http.Request) {
+	requester := GetAuthenticatedUser(r)
+	if requester == nil || requester.Role != "admin" {
+		WriteError(w, http.StatusForbidden, "สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น")
+		return
+	}
+
 	var req models.CreateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		WriteError(w, http.StatusBadRequest, "Invalid JSON payload")
@@ -115,6 +121,12 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUser handles PUT /api/v1/users/{id} (AdminAuth)
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
+	requester := GetAuthenticatedUser(r)
+	if requester == nil {
+		WriteError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
@@ -132,6 +144,12 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Non-admin can only update themselves and cannot change their role
+	if requester.Role != "admin" && requester.ID != user.ID {
+		WriteError(w, http.StatusForbidden, "สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น")
+		return
+	}
+
 	var req models.UpdateUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		WriteError(w, http.StatusBadRequest, "Invalid JSON payload")
@@ -142,6 +160,10 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 		user.Name = name
 	}
 	if role := strings.TrimSpace(req.Role); role != "" {
+		if requester.Role != "admin" && role != user.Role {
+			WriteError(w, http.StatusForbidden, "คุณไม่มีสิทธิ์เปลี่ยนระดับสิทธิ์ของผู้ใช้งาน")
+			return
+		}
 		user.Role = role
 	}
 
@@ -168,6 +190,12 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 // DeleteUser handles DELETE /api/v1/users/{id} (AdminAuth)
 func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	requester := GetAuthenticatedUser(r)
+	if requester == nil || requester.Role != "admin" {
+		WriteError(w, http.StatusForbidden, "สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น")
+		return
+	}
+
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {

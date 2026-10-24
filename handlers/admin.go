@@ -23,20 +23,62 @@ func GetAdminDefaultPassword() string {
 	return pass
 }
 
-// IsPasswordChangeRequired checks if the administrator has changed their initial password
-func IsPasswordChangeRequired() bool {
-	var changed models.Setting
-	if err := db.DB.Where("key = ?", "admin_password_changed").First(&changed).Error; err == nil {
-		return changed.Value != "true"
+// GetAuthenticatedUser extracts the User from X-Admin-Token or Authorization header
+func GetAuthenticatedUser(r *http.Request) *models.User {
+	token := r.Header.Get("X-Admin-Token")
+	if token == "" {
+		authHeader := r.Header.Get("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			token = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			token = authHeader
+		}
+	}
+	token = strings.TrimSpace(token)
+	if token == "" {
+		return nil
 	}
 
-	var passSetting models.Setting
+	var username string
+	if token == "authenticated" || token == "authenticated-admin" {
+		username = "admin"
+	} else if strings.HasPrefix(token, "authenticated-") {
+		username = strings.TrimPrefix(token, "authenticated-")
+	} else {
+		return nil
+	}
+
+	username = strings.TrimSpace(username)
+	if username == "" {
+		return nil
+	}
+
+	var user models.User
+	if err := db.DB.Where("LOWER(username) = LOWER(?)", username).First(&user).Error; err == nil {
+		return &user
+	}
+	return nil
+}
+
+// IsPasswordChangeRequiredForUser checks if the user is still using the default system password
+func IsPasswordChangeRequiredForUser(user *models.User) bool {
+	if user == nil {
+		return false
+	}
 	defaultPass := GetAdminDefaultPassword()
-	if err := db.DB.Where("key = ?", "admin_password").First(&passSetting).Error; err == nil && passSetting.Value != "" {
-		return passSetting.Value == defaultPass
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(defaultPass)) == nil || user.Password == defaultPass {
+		return true
 	}
+	return false
+}
 
-	return true
+// IsPasswordChangeRequired checks if the default admin user is still using the default system password
+func IsPasswordChangeRequired() bool {
+	var adminUser models.User
+	if err := db.DB.Where("LOWER(username) = LOWER(?)", "admin").First(&adminUser).Error; err == nil {
+		return IsPasswordChangeRequiredForUser(&adminUser)
+	}
+	return false
 }
 
 // AdminLogin handles POST /api/v1/admin/login
@@ -58,93 +100,77 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Try finding user in users table
+	// Find user in users table
 	var user models.User
 	err := db.DB.Where("LOWER(username) = LOWER(?)", username).First(&user).Error
-	if err == nil {
-		// Verify bcrypt hash
-		matchErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
-		if matchErr != nil {
-			// Fallback check if stored password is plain text
-			if user.Password == password {
-				// Upgrade to bcrypt
-				if hashed, hErr := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost); hErr == nil {
-					user.Password = string(hashed)
-					_ = db.DB.Save(&user)
-				}
-			} else {
-				WriteError(w, http.StatusUnauthorized, "รหัสผ่านไม่ถูกต้อง")
-				return
-			}
-		}
-
-		mustChange := IsPasswordChangeRequired()
-		token := "authenticated-" + user.Username
-
-		WriteJSON(w, http.StatusOK, map[string]any{
-			"token":                token,
-			"message":              "เข้าสู่ระบบสำเร็จ",
-			"must_change_password": mustChange,
-			"user": map[string]any{
-				"id":       user.ID,
-				"username": user.Username,
-				"name":     user.Name,
-				"role":     user.Role,
-			},
-		})
+	if err != nil {
+		WriteError(w, http.StatusUnauthorized, "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง")
 		return
 	}
 
-	// 2. Fallback for legacy admin if user not found and username is admin
-	if strings.EqualFold(username, "admin") {
-		defaultPassword := GetAdminDefaultPassword()
-		storedPassword := defaultPassword
-
-		var setting models.Setting
-		if err := db.DB.Where("key = ?", "admin_password").First(&setting).Error; err == nil && setting.Value != "" {
-			storedPassword = setting.Value
+	// Verify password
+	matchErr := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if matchErr != nil {
+		// Fallback check if stored password is plain text
+		if user.Password == password {
+			// Upgrade to bcrypt
+			if hashed, hErr := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost); hErr == nil {
+				user.Password = string(hashed)
+				_ = db.DB.Save(&user)
+				matchErr = nil
+			}
 		}
 
-		if password == storedPassword {
-			// Auto create the admin user with bcrypt
-			hashedPass, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-			newUser := models.User{
-				Username: "admin",
-				Password: string(hashedPass),
-				Name:     "ผู้ดูแลระบบ (Super Admin)",
-				Role:     "admin",
-			}
-			_ = db.DB.Create(&newUser)
-
-			mustChange := IsPasswordChangeRequired()
-			WriteJSON(w, http.StatusOK, map[string]any{
-				"token":                "authenticated-admin",
-				"message":              "เข้าสู่ระบบสำเร็จ",
-				"must_change_password": mustChange,
-				"user": map[string]any{
-					"id":       newUser.ID,
-					"username": newUser.Username,
-					"name":     newUser.Name,
-					"role":     newUser.Role,
-				},
-			})
+		if matchErr != nil {
+			WriteError(w, http.StatusUnauthorized, "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง")
 			return
 		}
 	}
 
-	WriteError(w, http.StatusUnauthorized, "ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง")
+	mustChange := IsPasswordChangeRequiredForUser(&user)
+	token := "authenticated-" + user.Username
+
+	WriteJSON(w, http.StatusOK, map[string]any{
+		"token":                token,
+		"message":              "เข้าสู่ระบบสำเร็จ",
+		"must_change_password": mustChange,
+		"user": map[string]any{
+			"id":       user.ID,
+			"username": user.Username,
+			"name":     user.Name,
+			"role":     user.Role,
+		},
+	})
 }
 
 // AdminVerify handles POST /api/v1/admin/verify (Protected by AdminAuth)
 func AdminVerify(w http.ResponseWriter, r *http.Request) {
-	WriteJSON(w, http.StatusOK, map[string]any{
+	user := GetAuthenticatedUser(r)
+	mustChange := false
+	if user != nil {
+		mustChange = IsPasswordChangeRequiredForUser(user)
+	} else {
+		mustChange = IsPasswordChangeRequired()
+	}
+
+	resp := map[string]any{
 		"valid":                true,
 		"message":              "Token is valid",
-		"must_change_password": IsPasswordChangeRequired(),
-	})
+		"must_change_password": mustChange,
+	}
+	if user != nil {
+		resp["user"] = map[string]any{
+			"id":       user.ID,
+			"username": user.Username,
+			"name":     user.Name,
+			"role":     user.Role,
+		}
+	}
+
+	WriteJSON(w, http.StatusOK, resp)
 }
 
-// ChangePasswordRequest represents the payload for changing admin password
+// ChangePasswordRequest represents the payload for changing user password
 type ChangePasswordRequest struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
@@ -164,63 +190,39 @@ func AdminChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defaultPassword := GetAdminDefaultPassword()
-	storedPassword := defaultPassword
-
-	var setting models.Setting
-	if err := db.DB.Where("key = ?", "admin_password").First(&setting).Error; err == nil && setting.Value != "" {
-		storedPassword = setting.Value
+	user := GetAuthenticatedUser(r)
+	if user == nil {
+		WriteError(w, http.StatusUnauthorized, "ไม่พบข้อมูลผู้ใช้ในระบบหรือยังไม่ได้เข้าสู่ระบบ")
+		return
 	}
 
-	// Check if old password matches setting or admin user
-	oldMatches := req.OldPassword == storedPassword
-	var adminUser models.User
-	if !oldMatches {
-		if err := db.DB.Where("username = ?", "admin").First(&adminUser).Error; err == nil {
-			if bcrypt.CompareHashAndPassword([]byte(adminUser.Password), []byte(req.OldPassword)) == nil || adminUser.Password == req.OldPassword {
-				oldMatches = true
-			}
-		}
-	}
-
-	if !oldMatches {
+	// Check if old password matches
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword)) != nil && user.Password != req.OldPassword {
 		WriteError(w, http.StatusUnauthorized, "รหัสผ่านเดิมไม่ถูกต้อง")
 		return
 	}
 
+	defaultPassword := GetAdminDefaultPassword()
 	if newPassword == defaultPassword {
 		WriteError(w, http.StatusBadRequest, "รหัสผ่านใหม่ต้องไม่ตรงกับรหัสผ่านเริ่มต้นของระบบ")
 		return
 	}
 
-	// Update admin password in database
-	setting.Key = "admin_password"
-	setting.Value = newPassword
-	if err := db.DB.Save(&setting).Error; err != nil {
+	// Hash and save new password to users table
+	hashed, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
 		WriteError(w, http.StatusInternalServerError, "ไม่สามารถบันทึกรหัสผ่านใหม่ได้: "+err.Error())
 		return
 	}
 
-	// Also update admin user if exists
-	if adminUser.ID == 0 {
-		_ = db.DB.Where("username = ?", "admin").First(&adminUser)
+	user.Password = string(hashed)
+	if err := db.DB.Save(user).Error; err != nil {
+		WriteError(w, http.StatusInternalServerError, "ไม่สามารถบันทึกรหัสผ่านใหม่ได้: "+err.Error())
+		return
 	}
-	if adminUser.ID != 0 {
-		if hashed, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost); err == nil {
-			adminUser.Password = string(hashed)
-			_ = db.DB.Save(&adminUser)
-		}
-	}
-
-	// Mark password as changed
-	changedSetting := models.Setting{
-		Key:   "admin_password_changed",
-		Value: "true",
-	}
-	_ = db.DB.Save(&changedSetting)
 
 	WriteJSON(w, http.StatusOK, map[string]any{
-		"message":              "เปลี่ยนรหัสผ่านแอดมินสำเร็จแล้ว",
+		"message":              "เปลี่ยนรหัสผ่านสำเร็จแล้ว",
 		"must_change_password": false,
 	})
 }
@@ -239,11 +241,9 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 	var activeKeyCount int64
 	db.DB.Model(&models.AgentKey{}).Where("is_active = ?", true).Count(&activeKeyCount)
 
-	// Check if requester is Admin
-	token := r.Header.Get("X-Admin-Token")
-	authHeader := r.Header.Get("Authorization")
-	isAdmin := token == "authenticated-admin" || strings.HasPrefix(token, "authenticated-") ||
-		strings.HasSuffix(authHeader, "authenticated-admin") || strings.Contains(authHeader, "authenticated-")
+	// Check if requester is authenticated user
+	user := GetAuthenticatedUser(r)
+	isAdmin := user != nil
 
 	previewKey := ""
 	fullKey := ""
@@ -259,6 +259,13 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	mustChange := false
+	if user != nil {
+		mustChange = IsPasswordChangeRequiredForUser(user)
+	} else {
+		mustChange = IsPasswordChangeRequired()
+	}
+
 	stats := map[string]any{
 		"total_posts":          totalPosts,
 		"total_pages":          totalPages,
@@ -272,7 +279,7 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 		"agent_keys_count":     activeKeyCount,
 		"agent_key_preview":    previewKey,
 		"agent_key":            fullKey,
-		"must_change_password": IsPasswordChangeRequired(),
+		"must_change_password": mustChange,
 	}
 
 	WriteJSON(w, http.StatusOK, stats)

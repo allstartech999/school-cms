@@ -157,7 +157,6 @@ func seedInitialData(database *gorm.DB) {
 
 	// Seed settings if not present
 	defaultSettings := []models.Setting{
-		{Key: "admin_password", Value: "admin123"},
 		{Key: "school_name", Value: "โรงเรียนโพนงามพิทยานุกูล"},
 		{Key: "school_name_en", Value: "Phon-ngam Pittayanukun School"},
 		{Key: "school_area", Value: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม"},
@@ -181,6 +180,24 @@ func seedInitialData(database *gorm.DB) {
 	// Remove default agent key if it exists in settings
 	database.Where("key = ? AND value = ?", "agent_key", "agent-school-secret-key-2026").Delete(&models.Setting{})
 
+	// Migrate & clean up legacy plaintext passwords from settings table
+	var legacyPassSetting models.Setting
+	if err := database.Where("key = ?", "admin_password").First(&legacyPassSetting).Error; err == nil && legacyPassSetting.Value != "" {
+		var adminUser models.User
+		if uErr := database.Where("LOWER(username) = LOWER(?)", "admin").First(&adminUser).Error; uErr == nil {
+			// Ensure admin user password matches before purging
+			if bcrypt.CompareHashAndPassword([]byte(adminUser.Password), []byte(legacyPassSetting.Value)) != nil && adminUser.Password != legacyPassSetting.Value {
+				if hashed, hErr := bcrypt.GenerateFromPassword([]byte(legacyPassSetting.Value), bcrypt.DefaultCost); hErr == nil {
+					adminUser.Password = string(hashed)
+					database.Save(&adminUser)
+					log.Println("Migrated legacy admin_password from settings into users table.")
+				}
+			}
+		}
+	}
+	// Delete legacy keys from settings table completely
+	database.Where("key IN ?", []string{"admin_password", "admin_password_changed"}).Delete(&models.Setting{})
+
 	// Seed default admin user if users table is empty
 	var userCount int64
 	database.Model(&models.User{}).Count(&userCount)
@@ -190,12 +207,7 @@ func seedInitialData(database *gorm.DB) {
 			adminPass = os.Getenv("ADMIN_PASSWORD")
 		}
 		if adminPass == "" {
-			var passSetting models.Setting
-			if err := database.Where("key = ?", "admin_password").First(&passSetting).Error; err == nil && passSetting.Value != "" {
-				adminPass = passSetting.Value
-			} else {
-				adminPass = "admin123"
-			}
+			adminPass = "admin123"
 		}
 
 		hashedPass, err := bcrypt.GenerateFromPassword([]byte(adminPass), bcrypt.DefaultCost)

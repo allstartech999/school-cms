@@ -36,6 +36,12 @@ func ListAgentKeys(w http.ResponseWriter, r *http.Request) {
 
 // CreateAgentKey handles POST /api/v1/agent-keys (AdminAuth)
 func CreateAgentKey(w http.ResponseWriter, r *http.Request) {
+	requester := GetAuthenticatedUser(r)
+	if requester == nil || requester.Role != "admin" {
+		WriteError(w, http.StatusForbidden, "สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น")
+		return
+	}
+
 	var req models.CreateAgentKeyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		WriteError(w, http.StatusBadRequest, "Invalid JSON payload")
@@ -74,6 +80,12 @@ func CreateAgentKey(w http.ResponseWriter, r *http.Request) {
 
 // DeleteAgentKey handles DELETE /api/v1/agent-keys/{id} (AdminAuth)
 func DeleteAgentKey(w http.ResponseWriter, r *http.Request) {
+	requester := GetAuthenticatedUser(r)
+	if requester == nil || requester.Role != "admin" {
+		WriteError(w, http.StatusForbidden, "สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น")
+		return
+	}
+
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
@@ -103,6 +115,12 @@ func DeleteAgentKey(w http.ResponseWriter, r *http.Request) {
 
 // ToggleAgentKey handles PUT /api/v1/agent-keys/{id}/toggle (AdminAuth)
 func ToggleAgentKey(w http.ResponseWriter, r *http.Request) {
+	requester := GetAuthenticatedUser(r)
+	if requester == nil || requester.Role != "admin" {
+		WriteError(w, http.StatusForbidden, "สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้น")
+		return
+	}
+
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {

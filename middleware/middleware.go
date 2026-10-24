@@ -34,14 +34,50 @@ func CORS(next http.Handler) http.Handler {
 	})
 }
 
-// AdminAuth middleware verifies that the user is an authorized admin
+func extractUserToken(r *http.Request) string {
+	token := r.Header.Get("X-Admin-Token")
+	if token == "" {
+		authHeader := r.Header.Get("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			token = strings.TrimPrefix(authHeader, "Bearer ")
+		} else {
+			token = authHeader
+		}
+	}
+	return strings.TrimSpace(token)
+}
+
+func validateUserToken(r *http.Request) bool {
+	token := extractUserToken(r)
+	if token == "" {
+		return false
+	}
+
+	var username string
+	if token == "authenticated" || token == "authenticated-admin" {
+		username = "admin"
+	} else if strings.HasPrefix(token, "authenticated-") {
+		username = strings.TrimPrefix(token, "authenticated-")
+	} else {
+		return false
+	}
+
+	username = strings.TrimSpace(username)
+	if username == "" {
+		return false
+	}
+
+	var user models.User
+	if err := db.DB.Where("LOWER(username) = LOWER(?)", username).First(&user).Error; err == nil {
+		return true
+	}
+	return false
+}
+
+// AdminAuth middleware verifies that the user is an authorized user in the database
 func AdminAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("X-Admin-Token")
-		authHeader := r.Header.Get("Authorization")
-
-		if token == "authenticated-admin" || strings.HasPrefix(token, "authenticated-") ||
-			strings.HasSuffix(authHeader, "authenticated-admin") || strings.Contains(authHeader, "authenticated-") {
+		if validateUserToken(r) {
 			next(w, r)
 			return
 		}
@@ -112,13 +148,10 @@ func AgentAuth(next http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-// AgentOrAdminAuth allows either Admin token or Agent Key
+// AgentOrAdminAuth allows either User token or Agent Key
 func AgentOrAdminAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("X-Admin-Token")
-		authHeader := r.Header.Get("Authorization")
-		if token == "authenticated-admin" || strings.HasPrefix(token, "authenticated-") ||
-			strings.HasSuffix(authHeader, "authenticated-admin") || strings.Contains(authHeader, "authenticated-") {
+		if validateUserToken(r) {
 			next(w, r)
 			return
 		}

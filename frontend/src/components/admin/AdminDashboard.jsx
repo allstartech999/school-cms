@@ -66,6 +66,13 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('school_admin_user') || 'null');
+    } catch {
+      return null;
+    }
+  });
 
   // Force Change Password State (on first login)
   const [mustChangePassword, setMustChangePassword] = useState(initialMustChangePassword);
@@ -461,7 +468,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
     setPasswordLoading(true);
     try {
       await adminChangePassword(oldPassword, newPassword, token);
-      showNotification('เปลี่ยนรหัสผ่านแอดมินสำเร็จแล้ว กรุณาจำรหัสผ่านใหม่ของคุณ');
+      showNotification('เปลี่ยนรหัสผ่านสำเร็จแล้ว กรุณาจำรหัสผ่านใหม่ของคุณ');
       setOldPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -686,7 +693,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                   {stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}
                 </span>
                 <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
-                  Admin
+                  {currentUser?.name || currentUser?.username || 'Admin'} ({currentUser?.role || 'admin'})
                 </span>
               </div>
               <p className="text-[10px] sm:text-[11px] text-neutral-400 truncate hidden xs:block">ระบบบริหารจัดการเว็บไซต์และเนื้อหาหลังบ้าน</p>
@@ -785,29 +792,33 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
               <span>ปรับแต่งหน้าแรก</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition cursor-pointer whitespace-nowrap ${
-                activeTab === 'users'
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span>ผู้ใช้งาน ({users.length})</span>
-            </button>
+            {(!currentUser || currentUser.role === 'admin') && (
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition cursor-pointer whitespace-nowrap ${
+                  activeTab === 'users'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span>ผู้ใช้งาน ({users.length})</span>
+              </button>
+            )}
 
-            <button
-              onClick={() => setActiveTab('agent_keys')}
-              className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition cursor-pointer whitespace-nowrap ${
-                activeTab === 'agent_keys'
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
-              }`}
-            >
-              <Bot className="w-3.5 h-3.5" />
-              <span>AI API Keys ({agentKeys.length})</span>
-            </button>
+            {(!currentUser || currentUser.role === 'admin') && (
+              <button
+                onClick={() => setActiveTab('agent_keys')}
+                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition cursor-pointer whitespace-nowrap ${
+                  activeTab === 'agent_keys'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5" />
+                <span>AI API Keys ({agentKeys.length})</span>
+              </button>
+            )}
 
             <button
               onClick={() => setActiveTab('settings')}
@@ -2041,7 +2052,9 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
               <div className="bg-white rounded-2xl p-4 sm:p-6 border border-neutral-200/80 shadow-xs">
                 <div className="flex items-center gap-2 mb-1">
                   <Key className="w-4 h-4 text-emerald-600" />
-                  <h3 className="text-sm font-bold text-neutral-900">เปลี่ยนรหัสผ่านแอดมิน (Change Password)</h3>
+                  <h3 className="text-sm font-bold text-neutral-900">
+                    เปลี่ยนรหัสผ่านผู้ใช้งาน ({currentUser?.name || currentUser?.username || 'ผู้ดูแลระบบ'})
+                  </h3>
                 </div>
                 <p className="text-xs text-neutral-500 mb-5">เพื่อความปลอดภัย แนะนำให้เปลี่ยนรหัสผ่านเป็นประจำ</p>
 

@@ -1544,7 +1544,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                         loading="lazy"
                         onError={(e) => {
                           e.target.onerror = null;
-                          e.target.src = '/images/ppk-emblem-2d.png';
+                          e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
                         }}
                       />
                     </div>

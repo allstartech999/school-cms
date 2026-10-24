@@ -47,8 +47,8 @@ export default function App() {
     school_name: "โรงเรียนโพนงามพิทยานุกูล",
     school_name_en: "Phon-ngam Pittayanukun School",
     school_subtitle: "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม",
-    logo_url: "/images/ppk-emblem-2d.png",
-    favicon_url: "/images/ppk-emblem-2d.png",
+    logo_url: "/uploads/2026/10/1792825601083477305-ai.png",
+    favicon_url: "/uploads/2026/10/1792825601083477305-ai.png",
     total_posts: 0,
     total_pages: 0
   });
@@ -354,7 +354,7 @@ export default function App() {
       name: 'นายดนุพล คำชมภู',
       role: 'หัวหน้ากลุ่มบริหารงานวิชาการ',
       position: 'ครูชำนาญการ',
-      photo: '/images/head-academic.jpg',
+      photo: '/uploads/2026/10/1792825707114914547-ai.jfif',
       group: 'กลุ่มบริหารงานวิชาการ',
       badge: 'ฝ่ายวิชาการ',
       duties: [
@@ -368,7 +368,7 @@ export default function App() {
       name: 'นางสุปราณี อันทรินทร์',
       role: 'หัวหน้ากลุ่มบริหารงานบุคคล',
       position: 'ครูชำนาญการ',
-      photo: '/images/head-personnel.jpg',
+      photo: '/uploads/2026/10/1792825718445051488-ai.jfif',
       group: 'กลุ่มบริหารงานบุคคล',
       badge: 'ฝ่ายบุคคล',
       duties: [
@@ -382,7 +382,7 @@ export default function App() {
       name: 'น.ส. สุดารัตน์ กองเพชร',
       role: 'หัวหน้ากลุ่มบริหารงบประมาณ',
       position: 'ครูชำนาญการ',
-      photo: '/images/head-budget.jpg',
+      photo: '/uploads/2026/10/1792825719567880192-ai.jfif',
       group: 'กลุ่มบริหารงบประมาณ',
       badge: 'ฝ่ายงบประมาณ',
       duties: [
@@ -396,7 +396,7 @@ export default function App() {
       name: 'นายณรงค์ศักดิ์ บัวลาด',
       role: 'หัวหน้ากลุ่มบริหารทั่วไป',
       position: 'ครูชำนาญการ',
-      photo: '/images/head-general.jpg',
+      photo: '/uploads/2026/10/1792825719806958850-ai.jfif',
       group: 'กลุ่มบริหารงานทั่วไป',
       badge: 'ฝ่ายทั่วไป',
       duties: [
@@ -416,7 +416,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้ภาษาไทย', 
       subject: 'กลุ่มสาระภาษาไทย',
       category: 'teacher',
-      photo: '/images/teacher-sodchuen.jpg' 
+      photo: '/uploads/2026/10/1792825720045790953-ai.jfif' 
     },
     { 
       name: 'นายยธิน อสุริยิน', 
@@ -424,7 +424,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้คณิตศาสตร์', 
       subject: 'กลุ่มสาระคณิตศาสตร์',
       category: 'teacher',
-      photo: '/images/teacher-yathin.jpg' 
+      photo: '/uploads/2026/10/1792825720240762293-ai.jfif' 
     },
     { 
       name: 'นายปรมินทร์ อัตตะเนย์', 
@@ -432,7 +432,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี', 
       subject: 'กลุ่มสาระวิทยาศาสตร์ฯ',
       category: 'teacher',
-      photo: '/images/teacher-poramin.jpg' 
+      photo: '/uploads/2026/10/1792825720471807597-ai.jfif' 
     },
     { 
       name: 'นางสาวพัชรินทร์ โมหา', 
@@ -440,7 +440,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้ภาษาต่างประเทศ', 
       subject: 'กลุ่มสาระภาษาต่างประเทศ',
       category: 'teacher',
-      photo: '/images/teacher-patcharin.jpg' 
+      photo: '/uploads/2026/10/1792825721062810425-ai.jfif' 
     },
     { 
       name: 'นายเกียรติยศ ชมเชย', 
@@ -448,7 +448,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้สังคมศึกษาฯ', 
       subject: 'กลุ่มสาระสังคมศึกษาฯ',
       category: 'teacher',
-      photo: '/images/teacher-kiattiyos.jpg' 
+      photo: '/uploads/2026/10/1792825721246164453-ai.jfif' 
     },
     { 
       name: 'นายทินกร นิลพุฒ', 
@@ -456,7 +456,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา', 
       subject: 'กลุ่มสาระสุขศึกษาและพลศึกษา',
       category: 'teacher',
-      photo: '/images/teacher-thinnakorn.jpg' 
+      photo: '/uploads/2026/10/1792825721472141397-ai.jfif' 
     },
     { 
       name: 'นางสาวอโนทัย พึ่งเปี่ยม', 
@@ -464,7 +464,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้ศิลปะและการงานอาชีพ', 
       subject: 'กลุ่มสาระศิลปะ & การงานฯ',
       category: 'teacher',
-      photo: '/images/teacher-anothai.jpg' 
+      photo: '/uploads/2026/10/1792825721696068022-ai.jfif' 
     },
     { 
       name: 'นายบุญเรือง ดวงสุฤทธิ์', 
@@ -472,7 +472,7 @@ export default function App() {
       department: 'ฝ่ายบริการและสนับสนุนการศึกษา', 
       subject: 'บริการ อาคารสถานที่ และยานพาหนะ',
       category: 'staff',
-      photo: '/images/staff-boonrueng.jpg' 
+      photo: '/uploads/2026/10/1792825721899201512-ai.jfif' 
     },
   ];
 
@@ -526,7 +526,7 @@ export default function App() {
 
   // Dynamic Favicon and Document Title & SEO tags sync
   useEffect(() => {
-    const faviconUrl = stats?.favicon_url || stats?.logo_url || '/images/ppk-emblem-2d.png';
+    const faviconUrl = stats?.favicon_url || stats?.logo_url || '/uploads/2026/10/1792825601083477305-ai.png';
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
       link = document.createElement('link');
@@ -734,12 +734,12 @@ export default function App() {
           >
             <div className="w-12 h-12 rounded-2xl bg-[#F0FDF4] flex items-center justify-center p-1 border border-[#D1FAE5] shadow-xs shrink-0 overflow-hidden group-hover:scale-105 transition">
               <img 
-                src={stats?.logo_url || "/images/ppk-emblem-2d.png"} 
+                src={stats?.logo_url || "/uploads/2026/10/1792825601083477305-ai.png"} 
                 alt={`ตราสัญลักษณ์${stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล'}`} 
                 className="w-full h-full object-contain"
                 onError={(e) => {
                   e.target.onerror = null;
-                  e.target.src = '/images/ppk-emblem-2d.png';
+                  e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
                 }}
               />
             </div>
@@ -1488,7 +1488,7 @@ export default function App() {
                             className="w-full h-full object-cover object-top"
                             onError={(e) => {
                               e.target.onerror = null;
-                              e.target.src = '/images/director.jpg';
+                              e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
                             }}
                           />
                         </div>
@@ -1603,7 +1603,7 @@ export default function App() {
                               className="w-full h-full object-cover object-top"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = '/images/director.jpg';
+                                e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
                               }}
                             />
                           </div>
@@ -2360,12 +2360,12 @@ export default function App() {
             <div className="flex items-center gap-3.5">
               <div className="w-11 h-11 rounded-2xl bg-white p-1 flex items-center justify-center shrink-0 shadow-md overflow-hidden">
                 <img 
-                  src={stats?.logo_url || "/images/ppk-emblem-2d.png"} 
+                  src={stats?.logo_url || "/uploads/2026/10/1792825601083477305-ai.png"} 
                   alt={stats?.school_name || "PPKS"} 
                   className="w-full h-full object-contain" 
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/images/ppk-emblem-2d.png';
+                    e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
                   }}
                 />
               </div>

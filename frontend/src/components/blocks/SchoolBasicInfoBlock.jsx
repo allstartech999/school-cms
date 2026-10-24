@@ -14,8 +14,8 @@ import {
 export default function SchoolBasicInfoBlock({
   title = 'ข้อมูลพื้นฐานโรงเรียน',
   subtitle = 'โรงเรียนโพนงามพิทยานุกูล อำเภอโกสุมพิสัย จังหวัดมหาสารคาม',
-  emblem2d = '/images/ppk-emblem-2d.png',
-  emblem3d = '/images/ppk-emblem-3d.png',
+  emblem2d = '/uploads/2026/10/1792825601083477305-ai.png',
+  emblem3d = '/uploads/2026/10/1792825608287537044-ai.png',
   abbreviation = 'พ.พ.ก.',
   schoolFullName = 'โรงเรียนโพนงามพิทยานุกูล',
   emblemMeaning = 'คบเพลิงและจักร หมายถึง แสงสว่างแห่งชีวิต และการปรับปรุงเปลี่ยนแปลงที่ดีขึ้น',

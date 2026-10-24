@@ -35,7 +35,7 @@ export default function PersonCardsBlock({ title, subtitle, members = [] }) {
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition duration-300"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = '/images/head-academic.jpg';
+                      e.target.src = '/images/ppk-emblem-2d.png';
                     }}
                   />
                 ) : (

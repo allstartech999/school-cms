@@ -1141,11 +1141,11 @@ export default function App() {
                     <div className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-white shadow-xl border border-[#E2E8F0] p-3">
                       <div className="rounded-[24px] overflow-hidden aspect-4/5 bg-[#F0FDF4]">
                         <OptimizedImage 
-                          src="/images/director.jpg" 
+                          src="/uploads/2026/10/1792823594077728192-ai.jfif" 
                           alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการ"
                           width={400}
                           quality={80}
-                          fallbackSrc="/images/head-academic.jpg"
+                          fallbackSrc=""
                           className="w-full h-full object-cover object-top"
                         />
                       </div>
@@ -1410,13 +1410,9 @@ export default function App() {
                 <div className="max-w-2xl mx-auto akat-card p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center sm:text-left relative z-10 shadow-lg border-2 border-[#D1FAE5]">
                   <div className="w-36 h-48 sm:w-44 sm:h-56 rounded-2xl overflow-hidden bg-[#F0FDF4] border-2 border-[#10B981]/40 shadow-md shrink-0">
                     <img 
-                      src="/images/director.jpg" 
+                      src="/uploads/2026/10/1792823594077728192-ai.jfif" 
                       alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการโรงเรียน" 
                       className="w-full h-full object-cover object-top"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = '/images/head-academic.jpg';
-                      }}
                     />
                   </div>
                   <div className="flex-1 space-y-2.5">

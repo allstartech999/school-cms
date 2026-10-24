@@ -797,11 +797,11 @@ export default function App() {
                 {/* Background Photo with Gradient Tint & Atmosphere */}
                 <div className="absolute inset-0 z-0">
                   <img 
-                    src="/images/news-active-learning.jpg" 
+                    src={homepageConfig?.hero?.image_url || "/images/hero-banner.jpg"} 
                     alt="บรรยากาศการเรียนรู้โรงเรียนโพนงามพิทยานุกูล"
-                    className="w-full h-full object-cover opacity-20 scale-105 blur-[3px]"
+                    className="w-full h-full object-cover opacity-50 scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#032017] via-[#032017]/85 to-black/60"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#032017] via-[#032017]/65 to-black/40"></div>
                 </div>
 
                 {/* Floating Glass Chips (Emerald Theme) */}

@@ -31,7 +31,8 @@ import {
   KeyRound,
   Shield,
   UserCheck,
-  Power
+  Power,
+  Lock
 } from 'lucide-react';
 import {
   fetchPosts,
@@ -1768,7 +1769,19 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                           </div>
                         </td>
                         <td className="py-3.5 px-4 font-mono text-neutral-600 font-medium">
-                          @{u.username}
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span>@{u.username}</span>
+                            {u.username === 'admin' && (
+                              <span className="px-1.5 py-0.5 text-[9px] bg-amber-50 text-amber-700 border border-amber-200/80 rounded font-sans font-semibold">
+                                Super Admin
+                              </span>
+                            )}
+                            {u.id === currentUser?.id && (
+                              <span className="px-1.5 py-0.5 text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded font-sans font-semibold">
+                                คุณ
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4">
                           <span
@@ -1802,13 +1815,22 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                             >
                               <Edit className="w-3.5 h-3.5" />
                             </button>
-                            <button
-                              onClick={() => handleDeleteUser(u)}
-                              className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                              title="ลบผู้ใช้"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            {u.username !== 'admin' && u.id !== currentUser?.id ? (
+                              <button
+                                onClick={() => handleDeleteUser(u)}
+                                className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition cursor-pointer"
+                                title="ลบผู้ใช้"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            ) : (
+                              <span
+                                className="p-1.5 text-neutral-300 cursor-not-allowed"
+                                title={u.username === 'admin' ? "บัญชี Super Admin ได้รับการปกป้อง ห้ามลบ" : "ไม่สามารถลบบัญชีของตนเองได้"}
+                              >
+                                <Lock className="w-3.5 h-3.5" />
+                              </span>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -2457,13 +2479,28 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                 </label>
                 <select
                   value={userFormData.role}
+                  disabled={editingUser && (editingUser.username === 'admin' || editingUser.id === currentUser?.id)}
                   onChange={(e) => setUserFormData({ ...userFormData, role: e.target.value })}
-                  className="w-full py-2.5 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none cursor-pointer"
+                  className={`w-full py-2.5 px-3 rounded-xl border text-xs outline-none ${
+                    editingUser && (editingUser.username === 'admin' || editingUser.id === currentUser?.id)
+                      ? 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed'
+                      : 'bg-neutral-50 border-neutral-200 focus:bg-white focus:border-emerald-500 cursor-pointer'
+                  }`}
                 >
                   <option value="admin">ผู้ดูแลระบบ (Admin) - จัดการได้ทุกส่วน</option>
                   <option value="editor">ผู้แก้ไขเนื้อหา (Editor) - จัดการข่าวสารและหน้าเพจ</option>
                   <option value="teacher">คุณครู / เจ้าหน้าที่ (Teacher)</option>
                 </select>
+                {editingUser && editingUser.username === 'admin' && (
+                  <p className="text-[10px] text-amber-600 mt-1">
+                    * บัญชีผู้ดูแลระบบหลัก (Super Admin) ได้รับการคุ้มครอง ไม่สามารถเปลี่ยนระดับสิทธิ์ได้
+                  </p>
+                )}
+                {editingUser && editingUser.username !== 'admin' && editingUser.id === currentUser?.id && (
+                  <p className="text-[10px] text-amber-600 mt-1">
+                    * ไม่สามารถลดหรือเปลี่ยนระดับสิทธิ์ของบัญชีตนเองที่กำลังใช้งานอยู่ได้
+                  </p>
+                )}
               </div>
 
               <div>

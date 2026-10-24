@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"school-cms/db"
@@ -564,6 +565,37 @@ func TestMultiUserAuthAndSecurity(t *testing.T) {
 	db.DB.Model(&models.Setting{}).Where("key IN ?", []string{"admin_password", "admin_password_changed"}).Count(&legacyPassCount)
 	if legacyPassCount > 0 {
 		t.Fatalf("expected 0 legacy password settings in database after user operations, found %d", legacyPassCount)
+	}
+}
+
+func TestAdminUserProtections(t *testing.T) {
+	app := setupTestApp(t)
+	if app == nil {
+		return
+	}
+
+	var rootAdmin models.User
+	if err := db.DB.Where("LOWER(username) = LOWER(?)", "admin").First(&rootAdmin).Error; err != nil {
+		t.Fatalf("root admin user not found: %v", err)
+	}
+
+	// 1. Attempt to delete root admin (should fail with 400 Bad Request)
+	reqDeleteRoot := httptest.NewRequest("DELETE", fmt.Sprintf("/api/v1/users/%d", rootAdmin.ID), nil)
+	reqDeleteRoot.Header.Set("X-Admin-Token", "authenticated-admin")
+	wDeleteRoot := httptest.NewRecorder()
+	app.ServeHTTP(wDeleteRoot, reqDeleteRoot)
+	if wDeleteRoot.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request when deleting root admin, got %d. Body: %s", wDeleteRoot.Code, wDeleteRoot.Body.String())
+	}
+
+	// 2. Attempt to demote root admin role to editor (should fail with 400 Bad Request)
+	demoteJSON := []byte(`{"name": "Admin", "role": "editor"}`)
+	reqDemoteRoot := httptest.NewRequest("PUT", fmt.Sprintf("/api/v1/users/%d", rootAdmin.ID), bytes.NewReader(demoteJSON))
+	reqDemoteRoot.Header.Set("X-Admin-Token", "authenticated-admin")
+	wDemoteRoot := httptest.NewRecorder()
+	app.ServeHTTP(wDemoteRoot, reqDemoteRoot)
+	if wDemoteRoot.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 Bad Request when demoting root admin, got %d. Body: %s", wDemoteRoot.Code, wDemoteRoot.Body.String())
 	}
 }
 

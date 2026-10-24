@@ -164,7 +164,32 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 			WriteError(w, http.StatusForbidden, "คุณไม่มีสิทธิ์เปลี่ยนระดับสิทธิ์ของผู้ใช้งาน")
 			return
 		}
-		user.Role = role
+
+		if role != user.Role {
+			// Protection 1: Super Admin username="admin" cannot be demoted
+			if strings.EqualFold(user.Username, "admin") && role != "admin" {
+				WriteError(w, http.StatusBadRequest, "ไม่สามารถลดระดับสิทธิ์ของบัญชีผู้ดูแลระบบหลัก (Super Admin) ได้")
+				return
+			}
+
+			// Protection 2: Admin cannot demote their own account
+			if user.Role == "admin" && requester.ID == user.ID && role != "admin" {
+				WriteError(w, http.StatusBadRequest, "ไม่สามารถลดระดับสิทธิ์ของบัญชีตนเองได้")
+				return
+			}
+
+			// Protection 3: Cannot demote the last remaining admin
+			if user.Role == "admin" && role != "admin" {
+				var adminCount int64
+				db.DB.Model(&models.User{}).Where("role = ?", "admin").Count(&adminCount)
+				if adminCount <= 1 {
+					WriteError(w, http.StatusBadRequest, "ไม่สามารถลดระดับสิทธิ์ของผู้ดูแลระบบคนสุดท้ายได้")
+					return
+				}
+			}
+
+			user.Role = role
+		}
 	}
 
 	if pass := strings.TrimSpace(req.Password); pass != "" {
@@ -213,7 +238,19 @@ func DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Prevent deleting if it's the last admin
+	// Protection 1: Cannot delete own account currently logged in
+	if requester.ID == user.ID {
+		WriteError(w, http.StatusBadRequest, "ไม่สามารถลบบัญชีของตนเองที่กำลังใช้งานอยู่ได้")
+		return
+	}
+
+	// Protection 2: Root super admin (username "admin") is permanently protected
+	if strings.EqualFold(user.Username, "admin") {
+		WriteError(w, http.StatusBadRequest, "ไม่สามารถลบบัญชีผู้ดูแลระบบหลัก (Super Admin) ของระบบได้")
+		return
+	}
+
+	// Protection 3: Prevent deleting if it's the last admin
 	var adminCount int64
 	db.DB.Model(&models.User{}).Where("role = ?", "admin").Count(&adminCount)
 	if user.Role == "admin" && adminCount <= 1 {

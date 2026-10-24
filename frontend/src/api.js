@@ -425,7 +425,8 @@ export async function updateSiteSettings(settings, authHeader = {}) {
     const data = await res.json().catch(() => ({}));
     throw new Error(data.error || 'Failed to update site settings');
   }
-  return res.json();
+  const data = await res.json();
+  return data.settings || data;
 }
 
 /**

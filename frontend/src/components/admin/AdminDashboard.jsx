@@ -487,7 +487,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
     setSavingSettings(true);
     try {
       const updated = await updateSiteSettings(siteSettings, { 'X-Admin-Token': token });
-      setSiteSettingsState(updated);
+      setSiteSettingsState(updated?.settings || updated);
       showNotification('บันทึกการตั้งค่าเว็บไซต์สำเร็จ');
     } catch (err) {
       console.error('Failed to save settings:', err);
@@ -503,7 +503,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
     setSavingHomepage(true);
     try {
       const updated = await updateHomepageConfig(homepageConfig, token);
-      setHomepageConfigState(updated);
+      setHomepageConfigState(updated?.config || updated);
       showNotification('บันทึกการตั้งค่าหน้าแรกสำเร็จ');
     } catch (err) {
       console.error('Failed to save homepage config:', err);
@@ -2053,6 +2053,99 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                     />
                   </div>
 
+                  {/* SEO & Open Graph Section */}
+                  <div className="pt-4 border-t border-neutral-200/80 space-y-4">
+                    <div>
+                      <h4 className="text-xs font-bold text-neutral-900 flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>การตั้งค่า SEO & Social Sharing (Open Graph)</span>
+                      </h4>
+                      <p className="text-[11px] text-neutral-500 mt-0.5">
+                        ปรับแต่งข้อมูลที่จะปรากฏบนผลการค้นหา Google และภาพตัวอย่างเมื่อแชร์ลิงก์บน Facebook, LINE, Discord
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-neutral-700 mb-1">SEO Title (พาดหัวเว็บไซต์สำหรับ Google & โซเชียล)</label>
+                      <input
+                        type="text"
+                        value={siteSettings.seo_title || ''}
+                        placeholder="เช่น โรงเรียนโพนงามพิทยานุกูล – สพม.มหาสารคาม"
+                        onChange={(e) => setSiteSettingsState({ ...siteSettings, seo_title: e.target.value })}
+                        className="w-full py-2 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-neutral-700 mb-1">SEO Meta Description (คำอธิบายเว็บไซต์ย่อ)</label>
+                      <textarea
+                        rows={2}
+                        value={siteSettings.seo_description || ''}
+                        placeholder="คำอธิบายสั้นๆ แนะนำโรงเรียน จะปรากฏใต้ชื่อเว็บในหน้าค้นหา Google"
+                        onChange={(e) => setSiteSettingsState({ ...siteSettings, seo_description: e.target.value })}
+                        className="w-full py-2 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none resize-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-neutral-700 mb-1">SEO Keywords (คำค้นหาหลัก คั่นด้วยเครื่องหมายจุลภาค)</label>
+                      <input
+                        type="text"
+                        value={siteSettings.seo_keywords || ''}
+                        placeholder="เช่น โรงเรียนโพนงามพิทยานุกูล, สพม.มหาสารคาม, มหาสารคาม, การศึกษา"
+                        onChange={(e) => setSiteSettingsState({ ...siteSettings, seo_keywords: e.target.value })}
+                        className="w-full py-2 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-neutral-700 mb-1">URL ภาพพรีวิวเริ่มต้น (Default Open Graph Image)</label>
+                      <input
+                        type="text"
+                        value={siteSettings.og_default_image || ''}
+                        placeholder="เช่น /images/hero-banner.jpg หรือ URL รูปภาพ"
+                        onChange={(e) => setSiteSettingsState({ ...siteSettings, og_default_image: e.target.value })}
+                        className="w-full py-2 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-neutral-700 mb-1">Google Search Console Verification Tag</label>
+                      <input
+                        type="text"
+                        value={siteSettings.google_site_verification || ''}
+                        placeholder="เช่น google-site-verification token หรือ meta content code"
+                        onChange={(e) => setSiteSettingsState({ ...siteSettings, google_site_verification: e.target.value })}
+                        className="w-full py-2 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none"
+                      />
+                    </div>
+
+                    {/* Sitemap & Robots.txt links */}
+                    <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-600">
+                      <span className="font-medium text-neutral-700">เครื่องมือสำหรับ Search Engine Crawler:</span>
+                      <div className="flex items-center gap-3">
+                        <a
+                          href="/sitemap.xml"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-emerald-700 hover:text-emerald-800 underline inline-flex items-center gap-1 font-semibold"
+                        >
+                          <FileText className="w-3 h-3" />
+                          <span>sitemap.xml</span>
+                        </a>
+                        <a
+                          href="/robots.txt"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-emerald-700 hover:text-emerald-800 underline inline-flex items-center gap-1 font-semibold"
+                        >
+                          <FileText className="w-3 h-3" />
+                          <span>robots.txt</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex justify-end pt-2">
                     <button
                       type="submit"
@@ -2060,7 +2153,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                       className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer disabled:opacity-50"
                     >
                       <Save className="w-3.5 h-3.5" />
-                      <span>{savingSettings ? 'กำลังบันทึก...' : 'บันทึกข้อมูลโรงเรียน'}</span>
+                      <span>{savingSettings ? 'กำลังบันทึก...' : 'บันทึกข้อมูลโรงเรียนและ SEO'}</span>
                     </button>
                   </div>
                 </form>

@@ -25,7 +25,9 @@ import {
   ArrowUpRight,
   UserCheck,
   Lock,
-  LayoutDashboard
+  LayoutDashboard,
+  Share2,
+  Check
 } from 'lucide-react';
 import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage } from './api';
 import BlockRenderer from './components/BlockRenderer';
@@ -101,9 +103,15 @@ export default function App() {
     navigateTo('home');
   };
 
-  const loadDynamicPage = async (slug) => {
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const loadDynamicPage = async (slug, updateHistory = false) => {
     setLoadingDynamicPage(true);
     setCurrentPage('dynamic_page');
+    setReadingPost(null);
+    if (updateHistory && window.history && window.history.pushState) {
+      window.history.pushState(null, '', `/pages/${slug}`);
+    }
     try {
       const pageData = await fetchPage(slug);
       setActiveDynamicPage(pageData);
@@ -115,36 +123,116 @@ export default function App() {
     }
   };
 
-  // Sync hash routing
+  const openPostByIdOrSlug = async (idOrSlug) => {
+    setLoadingPost(true);
+    setCurrentPage('news');
+    setActiveDynamicPage(null);
+    try {
+      const fullPost = await fetchPost(idOrSlug);
+      setReadingPost(fullPost);
+    } catch (err) {
+      console.error('Failed to load post by URL:', err);
+    } finally {
+      setLoadingPost(false);
+    }
+  };
+
+  // Sync routing: support both clean pathnames (/posts/:id, /pages/:slug) and hash routes (#page/...)
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleLocationChange = () => {
+      const pathname = window.location.pathname;
       const hash = window.location.hash.replace('#', '');
-      if (hash.startsWith('page/')) {
-        const slug = hash.replace('page/', '');
-        loadDynamicPage(slug);
-      } else if (hash === 'basic-info') {
+
+      // 1. Direct post URL: /posts/:id or /post/:id or #post/:id
+      if (pathname.startsWith('/posts/') || pathname.startsWith('/post/') || hash.startsWith('post/')) {
+        let identifier = '';
+        if (hash.startsWith('post/')) {
+          identifier = hash.replace(/^post\//, '');
+        } else if (pathname.startsWith('/posts/')) {
+          identifier = pathname.replace(/^\/posts\//, '');
+        } else {
+          identifier = pathname.replace(/^\/post\//, '');
+        }
+        identifier = identifier.split('/')[0].split('?')[0];
+        if (identifier) {
+          openPostByIdOrSlug(identifier);
+          return;
+        }
+      }
+
+      // 2. Direct dynamic page URL: /pages/:slug or /page/:slug or #page/:slug
+      if (pathname.startsWith('/pages/') || pathname.startsWith('/page/') || hash.startsWith('page/')) {
+        let slug = '';
+        if (hash.startsWith('page/')) {
+          slug = hash.replace(/^page\//, '');
+        } else if (pathname.startsWith('/pages/')) {
+          slug = pathname.replace(/^\/pages\//, '');
+        } else {
+          slug = pathname.replace(/^\/page\//, '');
+        }
+        slug = slug.split('/')[0].split('?')[0];
+        if (slug) {
+          loadDynamicPage(slug);
+          return;
+        }
+      }
+
+      if (pathname === '/basic-info' || hash === 'basic-info') {
         loadDynamicPage('basic-info');
-      } else if (hash === 'history' || hash === 'history-vision') {
+        return;
+      }
+
+      if (pathname === '/history' || pathname === '/history-vision' || hash === 'history' || hash === 'history-vision') {
         setCurrentPage('history');
         setActiveDynamicPage(null);
-      } else if (hash === 'admin' || hash === 'login') {
+        setReadingPost(null);
+        return;
+      }
+
+      if (pathname === '/admin' || hash === 'admin' || hash === 'login') {
         const token = localStorage.getItem('school_admin_token');
         if (token) {
           setIsAdminLoggedIn(true);
           setAdminToken(token);
           setCurrentPage('admin');
           setActiveDynamicPage(null);
+          setReadingPost(null);
         } else {
           setShowAdminLoginModal(true);
         }
-      } else if (['home', 'about', 'history', 'eservice', 'news', 'contact'].includes(hash)) {
+        return;
+      }
+
+      const cleanPath = pathname.replace(/^\//, '');
+      if (cleanPath === '' || cleanPath === 'home' || (!cleanPath && !hash) || hash === 'home') {
+        setCurrentPage('home');
+        setActiveDynamicPage(null);
+        setReadingPost(null);
+        return;
+      }
+
+      const knownSections = ['about', 'eservice', 'news', 'contact'];
+      if (knownSections.includes(cleanPath)) {
+        setCurrentPage(cleanPath);
+        setActiveDynamicPage(null);
+        setReadingPost(null);
+        return;
+      }
+      if (knownSections.includes(hash)) {
         setCurrentPage(hash);
         setActiveDynamicPage(null);
+        setReadingPost(null);
+        return;
       }
     };
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    handleLocationChange();
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('popstate', handleLocationChange);
+    return () => {
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('popstate', handleLocationChange);
+    };
   }, []);
 
   const navigateTo = (target) => {
@@ -158,32 +246,39 @@ export default function App() {
         setIsAdminLoggedIn(true);
         setAdminToken(token);
         setCurrentPage('admin');
-        window.location.hash = 'admin';
+        if (window.history && window.history.pushState) {
+          window.history.pushState(null, '', '/admin');
+        }
         setActiveDynamicPage(null);
+        setReadingPost(null);
       } else {
         setShowAdminLoginModal(true);
       }
       return;
     }
 
-    if (target.startsWith('/page/') || target.startsWith('page/')) {
-      const slug = target.replace(/^\/?page\//, '');
-      window.location.hash = 'page/' + slug;
-      loadDynamicPage(slug);
+    if (target.startsWith('/page/') || target.startsWith('page/') || target.startsWith('/pages/') || target.startsWith('pages/')) {
+      const slug = target.replace(/^\/?(pages|page)\//, '');
+      loadDynamicPage(slug, true);
     } else if (target === 'basic-info' || target === '/basic-info') {
-      window.location.hash = 'page/basic-info';
-      loadDynamicPage('basic-info');
+      loadDynamicPage('basic-info', true);
     } else if (target === 'history' || target === '/history' || target === 'history-vision' || target === '/history-vision') {
       setCurrentPage('history');
-      window.location.hash = 'history';
+      if (window.history && window.history.pushState) {
+        window.history.pushState(null, '', '/history');
+      }
       setActiveDynamicPage(null);
+      setReadingPost(null);
     } else if (target.startsWith('http://') || target.startsWith('https://')) {
       window.open(target, '_blank');
     } else {
-      const cleanRoute = target.replace(/^#/, '');
+      const cleanRoute = target.replace(/^#/, '').replace(/^\//, '');
       setCurrentPage(cleanRoute);
-      window.location.hash = cleanRoute;
+      if (window.history && window.history.pushState) {
+        window.history.pushState(null, '', cleanRoute === 'home' ? '/' : `/${cleanRoute}`);
+      }
       setActiveDynamicPage(null);
+      setReadingPost(null);
     }
   };
 
@@ -408,7 +503,28 @@ export default function App() {
       });
   }, []);
 
-  // Dynamic Favicon and Document Title sync
+  const handleClosePost = () => {
+    setReadingPost(null);
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    if (path.startsWith('/posts/') || path.startsWith('/post/') || hash.startsWith('#post/')) {
+      if (window.history && window.history.pushState) {
+        window.history.pushState(null, '', currentPage === 'news' ? '/news' : '/');
+      }
+    }
+  };
+
+  const handleCopyPostLink = (post) => {
+    const targetUrl = `${window.location.origin}/posts/${post?.id || post?.slug}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(targetUrl).then(() => {
+        setCopiedLink(true);
+        setTimeout(() => setCopiedLink(false), 2000);
+      });
+    }
+  };
+
+  // Dynamic Favicon and Document Title & SEO tags sync
   useEffect(() => {
     const faviconUrl = stats?.favicon_url || stats?.logo_url || '/images/ppk-emblem-2d.png';
     let link = document.querySelector("link[rel~='icon']");
@@ -419,21 +535,81 @@ export default function App() {
     }
     link.href = faviconUrl;
 
-    if (stats?.school_name) {
-      document.title = `${stats.school_name} – ${stats.school_subtitle || 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม'}`;
+    const schoolName = stats?.school_name || 'โรงเรียนโพนงามพิทยานุกูล';
+    let title = stats?.seo_title || `${schoolName} – ${stats?.school_subtitle || 'สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม'}`;
+    let canonical = window.location.origin + '/';
+    let description = stats?.seo_description || stats?.school_subtitle || 'เว็บไซต์อย่างเป็นทางการของโรงเรียนโพนงามพิทยานุกูล';
+
+    if (readingPost) {
+      title = `${readingPost.title} | ${schoolName}`;
+      canonical = `${window.location.origin}/posts/${readingPost.id}`;
+      if (readingPost.summary) {
+        description = readingPost.summary;
+      } else if (readingPost.content) {
+        description = readingPost.content.replace(/<[^>]*>/g, ' ').trim().slice(0, 160);
+      }
+    } else if (activeDynamicPage) {
+      title = `${activeDynamicPage.title} | ${schoolName}`;
+      canonical = `${window.location.origin}/pages/${activeDynamicPage.slug}`;
+      if (activeDynamicPage.content) {
+        description = activeDynamicPage.content.replace(/<[^>]*>/g, ' ').trim().slice(0, 160);
+      }
+    } else if (currentPage === 'about') {
+      title = `เกี่ยวกับโรงเรียน | ${schoolName}`;
+      canonical = `${window.location.origin}/about`;
+    } else if (currentPage === 'history') {
+      title = `ประวัติความเป็นมาและวิสัยทัศน์ | ${schoolName}`;
+      canonical = `${window.location.origin}/history`;
+    } else if (currentPage === 'news') {
+      title = `ข่าวสารและกิจกรรม | ${schoolName}`;
+      canonical = `${window.location.origin}/news`;
+    } else if (currentPage === 'eservice') {
+      title = `ระบบบริการออนไลน์ (E-Service) | ${schoolName}`;
+      canonical = `${window.location.origin}/eservice`;
+    } else if (currentPage === 'contact') {
+      title = `ติดต่อเรา | ${schoolName}`;
+      canonical = `${window.location.origin}/contact`;
     }
-  }, [stats?.favicon_url, stats?.logo_url, stats?.school_name, stats?.school_subtitle]);
+
+    document.title = title;
+
+    // Canonical Link
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement('link');
+      canonicalEl.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute('href', canonical);
+
+    // Meta Description
+    let metaDescEl = document.querySelector('meta[name="description"]');
+    if (!metaDescEl) {
+      metaDescEl = document.createElement('meta');
+      metaDescEl.setAttribute('name', 'description');
+      document.head.appendChild(metaDescEl);
+    }
+    metaDescEl.setAttribute('content', description);
+
+    // Open Graph dynamic tags sync
+    const ogTitleEl = document.querySelector('meta[property="og:title"]');
+    if (ogTitleEl) ogTitleEl.setAttribute('content', title);
+    const ogDescEl = document.querySelector('meta[property="og:description"]');
+    if (ogDescEl) ogDescEl.setAttribute('content', description);
+    const ogUrlEl = document.querySelector('meta[property="og:url"]');
+    if (ogUrlEl) ogUrlEl.setAttribute('content', canonical);
+  }, [stats?.favicon_url, stats?.logo_url, stats?.school_name, stats?.school_subtitle, stats?.seo_title, stats?.seo_description, readingPost, activeDynamicPage, currentPage]);
 
   // Keyboard shortcut: ESC to close reading modal
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
-        setReadingPost(null);
+        handleClosePost();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [currentPage]);
 
   // Filtered posts
   const filteredPosts = posts.filter(post => {
@@ -448,6 +624,9 @@ export default function App() {
   const handleOpenPost = async (post) => {
     setLoadingPost(true);
     setReadingPost(post);
+    if (window.history && window.history.pushState) {
+      window.history.pushState({ postId: post.id }, '', `/posts/${post.id}`);
+    }
     try {
       const fullPost = await fetchPost(post.id || post.slug);
       setReadingPost(fullPost);
@@ -2080,7 +2259,7 @@ export default function App() {
               ? 'items-end justify-center p-0'
               : 'items-center justify-center p-3 sm:p-6 md:p-8'
           }`}
-          onClick={() => setReadingPost(null)}
+          onClick={handleClosePost}
         >
           <div 
             className={`bg-white shadow-2xl border border-neutral-200 relative animate-in fade-in duration-200 overflow-y-auto ${
@@ -2105,7 +2284,7 @@ export default function App() {
             )}
 
             <button 
-              onClick={() => setReadingPost(null)}
+              onClick={handleClosePost}
               className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-neutral-900/70 hover:bg-neutral-900 text-white flex items-center justify-center backdrop-blur-sm shadow-md transition cursor-pointer"
               aria-label="Close modal"
             >
@@ -2153,14 +2332,24 @@ export default function App() {
                 {readingPost.content}
               </div>
 
-              <div className="pt-6 border-t border-neutral-100 flex items-center justify-between text-xs sm:text-sm text-neutral-400">
+              <div className="pt-6 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-neutral-400">
                 <span>ยอดเข้าชม {readingPost.views || 0} ครั้ง</span>
-                <button 
-                  onClick={() => setReadingPost(null)}
-                  className="px-6 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm"
-                >
-                  ปิด (ESC)
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleCopyPostLink(readingPost)}
+                    className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm flex items-center gap-1.5"
+                    title="คัดลอกลิงก์สำหรับแชร์บน Facebook, Line"
+                  >
+                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-emerald-600" />}
+                    <span>{copiedLink ? 'คัดลอกลิงก์แล้ว!' : 'แชร์ลิงก์'}</span>
+                  </button>
+                  <button 
+                    onClick={handleClosePost}
+                    className="px-6 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm"
+                  >
+                    ปิด (ESC)
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -348,12 +348,17 @@ func registerTools(s *server.MCPServer) {
 	// 16. Tool: update_site_settings
 	s.AddTool(
 		mcp.NewTool("update_site_settings",
-			mcp.WithDescription("ปรับปรุงการตั้งค่าอัตลักษณ์ของโรงเรียน เช่น เปลี่ยน URL โลโก้โรงเรียน (logo_url), URL Favicon สำหรับแท็บเบราว์เซอร์ (favicon_url), ชื่อโรงเรียนภาษาไทย (school_name), ชื่อภาษาอังกฤษ (school_name_en) หรือสังกัด (school_subtitle)"),
+			mcp.WithDescription("ปรับปรุงการตั้งค่าอัตลักษณ์และ SEO ของโรงเรียน เช่น โลโก้, Favicon, ชื่อโรงเรียน, สังกัด, SEO Title, Description, Keywords, OG Image, Google Site Verification"),
 			mcp.WithString("logo_url", mcp.Description("URL รูปภาพโลโก้/ตราสัญลักษณ์โรงเรียน (เช่น /images/ppk-emblem-2d.png หรือ URL ที่อัปโหลดผ่าน upload_media_by_url)")),
 			mcp.WithString("favicon_url", mcp.Description("URL รูปภาพ Favicon สำหรับแท็บเบราว์เซอร์ (เช่น /images/ppk-emblem-2d.png หรือ URL ที่อัปโหลดผ่าน upload_media_by_url)")),
 			mcp.WithString("school_name", mcp.Description("ชื่อโรงเรียนภาษาไทย")),
 			mcp.WithString("school_name_en", mcp.Description("ชื่อโรงเรียนภาษาอังกฤษ")),
 			mcp.WithString("school_subtitle", mcp.Description("ข้อความสังกัดหรือคำขวัญย่อย")),
+			mcp.WithString("seo_title", mcp.Description("พาดหัว SEO ประจำเว็บไซต์")),
+			mcp.WithString("seo_description", mcp.Description("คำอธิบายเว็บไซต์สำหรับผลการค้นหาบน Search Engine และการแชร์ลิงก์โซเชียล")),
+			mcp.WithString("seo_keywords", mcp.Description("คำค้นหาหลัก (Keywords) คั่นด้วยเครื่องหมายจุลภาค")),
+			mcp.WithString("og_default_image", mcp.Description("URL รูปภาพเริ่มต้นสำหรับ Open Graph เมื่อแชร์ลิงก์")),
+			mcp.WithString("google_site_verification", mcp.Description("รหัสยืนยันตัวตนสำหรับ Google Search Console")),
 		),
 		handleUpdateSiteSettings,
 	)
@@ -917,6 +922,36 @@ func handleUpdateSiteSettings(ctx context.Context, request mcp.CallToolRequest) 
 			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
 				v := strings.TrimSpace(s)
 				req.FaviconURL = &v
+			}
+		}
+		if val, ok := args["seo_title"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.SeoTitle = &v
+			}
+		}
+		if val, ok := args["seo_description"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.SeoDescription = &v
+			}
+		}
+		if val, ok := args["seo_keywords"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.SeoKeywords = &v
+			}
+		}
+		if val, ok := args["og_default_image"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.OgDefaultImage = &v
+			}
+		}
+		if val, ok := args["google_site_verification"]; ok {
+			if s, ok := val.(string); ok && strings.TrimSpace(s) != "" {
+				v := strings.TrimSpace(s)
+				req.GoogleSiteVerification = &v
 			}
 		}
 	}

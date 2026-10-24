@@ -177,19 +177,29 @@ type SystemStats struct {
 }
 
 type SiteSettings struct {
-	SchoolName     string `json:"school_name"`
-	SchoolNameEn   string `json:"school_name_en"`
-	SchoolSubtitle string `json:"school_subtitle"`
-	LogoURL        string `json:"logo_url"`
-	FaviconURL     string `json:"favicon_url"`
+	SchoolName             string `json:"school_name"`
+	SchoolNameEn           string `json:"school_name_en"`
+	SchoolSubtitle         string `json:"school_subtitle"`
+	LogoURL                string `json:"logo_url"`
+	FaviconURL             string `json:"favicon_url"`
+	SeoTitle               string `json:"seo_title"`
+	SeoDescription         string `json:"seo_description"`
+	SeoKeywords            string `json:"seo_keywords"`
+	OgDefaultImage         string `json:"og_default_image"`
+	GoogleSiteVerification string `json:"google_site_verification"`
 }
 
 type UpdateSiteSettingsRequest struct {
-	SchoolName     *string `json:"school_name,omitempty"`
-	SchoolNameEn   *string `json:"school_name_en,omitempty"`
-	SchoolSubtitle *string `json:"school_subtitle,omitempty"`
-	LogoURL        *string `json:"logo_url,omitempty"`
-	FaviconURL     *string `json:"favicon_url,omitempty"`
+	SchoolName             *string `json:"school_name,omitempty"`
+	SchoolNameEn           *string `json:"school_name_en,omitempty"`
+	SchoolSubtitle         *string `json:"school_subtitle,omitempty"`
+	LogoURL                *string `json:"logo_url,omitempty"`
+	FaviconURL             *string `json:"favicon_url,omitempty"`
+	SeoTitle               *string `json:"seo_title,omitempty"`
+	SeoDescription         *string `json:"seo_description,omitempty"`
+	SeoKeywords            *string `json:"seo_keywords,omitempty"`
+	OgDefaultImage         *string `json:"og_default_image,omitempty"`
+	GoogleSiteVerification *string `json:"google_site_verification,omitempty"`
 }
 
 // Navigation Menu item definition

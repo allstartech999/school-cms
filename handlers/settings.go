@@ -14,16 +14,25 @@ const (
 	DefaultSchoolSubtitle = "สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม"
 	DefaultLogoURL        = "/images/ppk-emblem-2d.png"
 	DefaultFaviconURL     = "/images/ppk-emblem-2d.png"
+	DefaultSeoTitle       = "โรงเรียนโพนงามพิทยานุกูล – สำนักงานเขตพื้นที่การศึกษามัธยมศึกษาจังหวัดมหาสารคาม"
+	DefaultSeoDescription = "เว็บไซต์อย่างเป็นทางการของโรงเรียนโพนงามพิทยานุกูล สพม.มหาสารคาม เป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ"
+	DefaultSeoKeywords    = "โรงเรียนโพนงามพิทยานุกูล, สพม.มหาสารคาม, มหาสารคาม, การศึกษา, โรงเรียนมัธยม"
+	DefaultOgDefaultImage = "/images/hero-banner.jpg"
 )
 
 // GetSiteSettingsInternal retrieves current site identity settings with fallback to defaults
 func GetSiteSettingsInternal() models.SiteSettings {
 	cfg := models.SiteSettings{
-		SchoolName:     DefaultSchoolName,
-		SchoolNameEn:   DefaultSchoolNameEn,
-		SchoolSubtitle: DefaultSchoolSubtitle,
-		LogoURL:        DefaultLogoURL,
-		FaviconURL:     DefaultFaviconURL,
+		SchoolName:             DefaultSchoolName,
+		SchoolNameEn:           DefaultSchoolNameEn,
+		SchoolSubtitle:         DefaultSchoolSubtitle,
+		LogoURL:                DefaultLogoURL,
+		FaviconURL:             DefaultFaviconURL,
+		SeoTitle:               DefaultSeoTitle,
+		SeoDescription:         DefaultSeoDescription,
+		SeoKeywords:            DefaultSeoKeywords,
+		OgDefaultImage:         DefaultOgDefaultImage,
+		GoogleSiteVerification: "",
 	}
 
 	var settings []models.Setting
@@ -33,6 +42,11 @@ func GetSiteSettingsInternal() models.SiteSettings {
 		"school_subtitle",
 		"logo_url",
 		"favicon_url",
+		"seo_title",
+		"seo_description",
+		"seo_keywords",
+		"og_default_image",
+		"google_site_verification",
 	}).Find(&settings).Error; err == nil {
 		for _, s := range settings {
 			val := strings.TrimSpace(s.Value)
@@ -50,6 +64,16 @@ func GetSiteSettingsInternal() models.SiteSettings {
 				cfg.LogoURL = val
 			case "favicon_url":
 				cfg.FaviconURL = val
+			case "seo_title":
+				cfg.SeoTitle = val
+			case "seo_description":
+				cfg.SeoDescription = val
+			case "seo_keywords":
+				cfg.SeoKeywords = val
+			case "og_default_image":
+				cfg.OgDefaultImage = val
+			case "google_site_verification":
+				cfg.GoogleSiteVerification = val
 			}
 		}
 	}
@@ -60,11 +84,16 @@ func GetSiteSettingsInternal() models.SiteSettings {
 // SaveSiteSettingsInternal saves site settings keys into the settings table
 func SaveSiteSettingsInternal(req models.UpdateSiteSettingsRequest) (models.SiteSettings, error) {
 	pairs := map[string]*string{
-		"school_name":     req.SchoolName,
-		"school_name_en":   req.SchoolNameEn,
-		"school_subtitle": req.SchoolSubtitle,
-		"logo_url":        req.LogoURL,
-		"favicon_url":     req.FaviconURL,
+		"school_name":              req.SchoolName,
+		"school_name_en":            req.SchoolNameEn,
+		"school_subtitle":          req.SchoolSubtitle,
+		"logo_url":                 req.LogoURL,
+		"favicon_url":              req.FaviconURL,
+		"seo_title":                req.SeoTitle,
+		"seo_description":          req.SeoDescription,
+		"seo_keywords":             req.SeoKeywords,
+		"og_default_image":         req.OgDefaultImage,
+		"google_site_verification": req.GoogleSiteVerification,
 	}
 
 	for key, valPtr := range pairs {

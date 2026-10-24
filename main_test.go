@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"school-cms/db"
 	"school-cms/handlers"
 	schoolmcp "school-cms/mcp"
 	"school-cms/middleware"
 	"school-cms/models"
+	"strings"
 	"testing"
 
 	"github.com/joho/godotenv"
@@ -48,6 +50,15 @@ func setupTestApp(t *testing.T) http.Handler {
 	mux.HandleFunc("GET /api/v1/agent/pages", middleware.AgentAuth(handlers.AgentListPages))
 	mux.HandleFunc("POST /api/v1/agent/pages", middleware.AgentAuth(handlers.AgentCreateOrUpdatePage))
 	mux.HandleFunc("GET /api/v1/media", handlers.ListMedia)
+	mux.HandleFunc("GET /sitemap.xml", handlers.GetSitemapXML)
+	mux.HandleFunc("GET /robots.txt", handlers.GetRobotsTxt)
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasPrefix(r.URL.Path, "/api/") {
+			handlers.WriteError(w, http.StatusNotFound, "API endpoint not found")
+			return
+		}
+		handlers.ServeSEOPage(w, r, os.DirFS("dist"))
+	})
 
 	return middleware.CORS(mux)
 }
@@ -598,4 +609,98 @@ func TestAdminUserProtections(t *testing.T) {
 		t.Fatalf("expected 400 Bad Request when demoting root admin, got %d. Body: %s", wDemoteRoot.Code, wDemoteRoot.Body.String())
 	}
 }
+
+func TestSEORoutesAndSettings(t *testing.T) {
+	app := setupTestApp(t)
+	if app == nil {
+		return
+	}
+
+	// 1. Test GET /robots.txt
+	reqRobots := httptest.NewRequest("GET", "/robots.txt", nil)
+	wRobots := httptest.NewRecorder()
+	app.ServeHTTP(wRobots, reqRobots)
+
+	if wRobots.Code != http.StatusOK {
+		t.Fatalf("expected 200 from GET /robots.txt, got %d", wRobots.Code)
+	}
+	if !strings.Contains(wRobots.Body.String(), "sitemap.xml") {
+		t.Fatalf("robots.txt should reference sitemap.xml, got: %s", wRobots.Body.String())
+	}
+
+	// 2. Test GET /sitemap.xml
+	reqSitemap := httptest.NewRequest("GET", "/sitemap.xml", nil)
+	wSitemap := httptest.NewRecorder()
+	app.ServeHTTP(wSitemap, reqSitemap)
+
+	if wSitemap.Code != http.StatusOK {
+		t.Fatalf("expected 200 from GET /sitemap.xml, got %d", wSitemap.Code)
+	}
+	sitemapBody := wSitemap.Body.String()
+	if !strings.Contains(sitemapBody, "<urlset") || !strings.Contains(sitemapBody, "<loc>") {
+		t.Fatalf("sitemap.xml missing valid xml urlset structure, got: %s", sitemapBody)
+	}
+
+	// 3. Test Updating SEO Settings
+	seoUpdateJSON := []byte(`{
+		"seo_title": "โรงเรียนโพนงามพิทยานุกูล ทดสอบ SEO",
+		"seo_description": "คำอธิบาย SEO สำหรับการทดสอบระบบ",
+		"seo_keywords": "การศึกษา, ทดสอบ, สพม.มหาสารคาม",
+		"og_default_image": "/images/test-og.jpg",
+		"google_site_verification": "google-test-token"
+	}`)
+	reqPutSEO := httptest.NewRequest("PUT", "/api/v1/settings", bytes.NewReader(seoUpdateJSON))
+	reqPutSEO.Header.Set("X-Admin-Token", "authenticated-admin")
+	wPutSEO := httptest.NewRecorder()
+	app.ServeHTTP(wPutSEO, reqPutSEO)
+
+	if wPutSEO.Code != http.StatusOK {
+		t.Fatalf("expected 200 from PUT /api/v1/settings with SEO fields, got %d. Body: %s", wPutSEO.Code, wPutSEO.Body.String())
+	}
+
+	// 4. Verify settings retrieved
+	reqGetSEO := httptest.NewRequest("GET", "/api/v1/settings", nil)
+	wGetSEO := httptest.NewRecorder()
+	app.ServeHTTP(wGetSEO, reqGetSEO)
+
+	var settings map[string]any
+	_ = json.Unmarshal(wGetSEO.Body.Bytes(), &settings)
+	if settings["seo_title"] != "โรงเรียนโพนงามพิทยานุกูล ทดสอบ SEO" {
+		t.Errorf("expected updated seo_title, got: %v", settings["seo_title"])
+	}
+	if settings["google_site_verification"] != "google-test-token" {
+		t.Errorf("expected updated google_site_verification, got: %v", settings["google_site_verification"])
+	}
+
+	// 5. Test Web Root HTML serving with injected SEO tags
+	reqRoot := httptest.NewRequest("GET", "/", nil)
+	wRoot := httptest.NewRecorder()
+	app.ServeHTTP(wRoot, reqRoot)
+	if wRoot.Code != http.StatusOK {
+		t.Fatalf("expected 200 from GET /, got %d", wRoot.Code)
+	}
+	rootHTML := wRoot.Body.String()
+	if !strings.Contains(rootHTML, "โรงเรียนโพนงามพิทยานุกูล ทดสอบ SEO") {
+		t.Errorf("expected updated seo_title injected in HTML, got: %s", rootHTML)
+	}
+	if !strings.Contains(rootHTML, `<meta property="og:title"`) {
+		t.Errorf("og:title meta tag missing in root HTML")
+	}
+	if !strings.Contains(rootHTML, "EducationalOrganization") {
+		t.Errorf("JSON-LD EducationalOrganization schema missing in root HTML")
+	}
+
+	// 6. Test Non-existent post URL returns 404 with noindex for crawlers
+	reqMissingPost := httptest.NewRequest("GET", "/posts/999999", nil)
+	wMissingPost := httptest.NewRecorder()
+	app.ServeHTTP(wMissingPost, reqMissingPost)
+	if wMissingPost.Code != http.StatusNotFound {
+		t.Errorf("expected 404 Not Found from GET /posts/999999, got %d", wMissingPost.Code)
+	}
+	missingHTML := wMissingPost.Body.String()
+	if !strings.Contains(missingHTML, `<meta name="robots" content="noindex, nofollow" />`) {
+		t.Errorf("expected noindex tag in 404 HTML, got: %s", missingHTML)
+	}
+}
+
 

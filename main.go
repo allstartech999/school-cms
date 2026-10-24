@@ -74,6 +74,10 @@ func main() {
 	mux.HandleFunc("GET /api/v1/homepage", handlers.GetHomepageConfig)
 	mux.HandleFunc("GET /api/v1/menu", handlers.GetNavigationMenu)
 
+	// --- SEO & Crawlers Endpoints ---
+	mux.HandleFunc("GET /sitemap.xml", handlers.GetSitemapXML)
+	mux.HandleFunc("GET /robots.txt", handlers.GetRobotsTxt)
+
 	// --- Site Customizer & Menu APIs (Protected by Admin or Agent) ---
 	mux.HandleFunc("PUT /api/v1/settings", middleware.AgentOrAdminAuth(handlers.UpdateSiteSettings))
 	mux.HandleFunc("PUT /api/v1/homepage", middleware.AgentOrAdminAuth(handlers.UpdateHomepageConfig))
@@ -155,9 +159,9 @@ func main() {
 				w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			}
 
-			// Check if file exists in embedded dist
+			// Check if static file (other than index.html) exists in dist
 			trimmedPath := strings.TrimPrefix(path, "/")
-			if trimmedPath != "" {
+			if trimmedPath != "" && trimmedPath != "index.html" {
 				f, err := distFS.Open(trimmedPath)
 				if err == nil {
 					f.Close()
@@ -166,23 +170,13 @@ func main() {
 				}
 			}
 
-			// SPA Fallback: serve index.html for unknown frontend routes
-			r.URL.Path = "/"
-			http.FileServer(http.FS(distFS)).ServeHTTP(w, r)
+			// Serve HTML with dynamic SEO, Open Graph & JSON-LD tags injected
+			handlers.ServeSEOPage(w, r, distFS)
 			return
 		}
 
-		// Fallback message if dist has not yet been embedded
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.Write([]byte(`<!DOCTYPE html>
-<html>
-<head><title>School CMS API</title></head>
-<body style="font-family: sans-serif; text-align: center; padding: 50px;">
-  <h1 style="color: #15803d;">🌿 School CMS Backend (Go + PostgreSQL)</h1>
-  <p>Backend API is running successfully on port 8080.</p>
-  <p>Available endpoints: <code>/api/v1/posts</code>, <code>/api/v1/pages</code>, <code>/api/v1/stats</code></p>
-</body>
-</html>`))
+		// Fallback if dist is not available: still render SEO shell
+		handlers.ServeSEOPage(w, r, nil)
 	})
 
 	// Wrap router with CORS and Logging middlewares

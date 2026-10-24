@@ -69,6 +69,19 @@ func TestListPosts(t *testing.T) {
 		return
 	}
 
+	var existingCount int64
+	db.DB.Model(&models.Post{}).Count(&existingCount)
+	if existingCount < 2 {
+		tp1 := models.Post{Title: "Seed Test 1", Content: "Content 1", Slug: "seed-test-1", Status: "published"}
+		tp2 := models.Post{Title: "Seed Test 2", Content: "Content 2", Slug: "seed-test-2", Status: "published"}
+		db.DB.Create(&tp1)
+		db.DB.Create(&tp2)
+		t.Cleanup(func() {
+			db.DB.Delete(&models.Post{}, tp1.ID)
+			db.DB.Delete(&models.Post{}, tp2.ID)
+		})
+	}
+
 	req := httptest.NewRequest("GET", "/api/v1/posts", nil)
 	w := httptest.NewRecorder()
 	app.ServeHTTP(w, req)

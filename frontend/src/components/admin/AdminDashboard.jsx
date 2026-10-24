@@ -32,13 +32,20 @@ import {
   Shield,
   UserCheck,
   Power,
-  Lock
+  Lock,
+  Tag,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import {
   fetchPosts,
   createPost,
   updatePost,
   deletePost,
+  fetchCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
   fetchPages,
   createPage,
   updatePage,
@@ -61,6 +68,12 @@ import {
   deleteAgentKey,
   toggleAgentKey
 } from '../../api';
+import {
+  Skeleton,
+  AdminStatCardSkeleton,
+  AdminTableSkeleton,
+  MediaGridSkeleton
+} from '../skeleton';
 
 export default function AdminDashboard({ onLogout, onViewSite, token, initialMustChangePassword = false }) {
   const [activeTab, setActiveTab] = useState('overview'); // overview, posts, pages, media, customizer, settings
@@ -85,14 +98,22 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
 
   // Data States
   const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [categoryLoading, setCategoryLoading] = useState(false);
   const [pages, setPages] = useState([]);
   const [mediaList, setMediaList] = useState([]);
   const [homepageConfig, setHomepageConfigState] = useState(null);
   const [siteSettings, setSiteSettingsState] = useState(null);
 
-  // Posts Filters
+  // Posts Filters & Pagination
   const [postSearch, setPostSearch] = useState('');
   const [postCategoryFilter, setPostCategoryFilter] = useState('ทั้งหมด');
+  const [adminPostPage, setAdminPostPage] = useState(1);
+  const adminPostsPerPage = 10;
 
   // Modals
   const [postModalOpen, setPostModalOpen] = useState(false);
@@ -169,9 +190,10 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const [statsData, postsData, pagesData, mediaData, homeData, settingsData, usersData, keysData] = await Promise.all([
+      const [statsData, postsData, categoriesData, pagesData, mediaData, homeData, settingsData, usersData, keysData] = await Promise.all([
         fetchAdminStats(token).catch(() => null),
         fetchPosts({ limit: 100 }).catch(() => []),
+        fetchCategories().catch(() => []),
         fetchPages().catch(() => []),
         fetchMedia(100).catch(() => []),
         fetchHomepageConfig().catch(() => null),
@@ -187,6 +209,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
         }
       }
       if (postsData) setPosts(Array.isArray(postsData) ? postsData : []);
+      if (categoriesData) setCategories(Array.isArray(categoriesData) ? categoriesData : []);
       if (pagesData) setPages(Array.isArray(pagesData) ? pagesData : []);
       if (mediaData) setMediaList(Array.isArray(mediaData) ? mediaData : []);
       if (homeData) setHomepageConfigState(homeData);
@@ -247,7 +270,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
     setPostFormData({
       title: '',
       slug: '',
-      category: 'วิชาการ',
+      category: categories[0]?.name || 'วิชาการ',
       summary: '',
       content: '',
       image_url: '',
@@ -262,7 +285,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
     setPostFormData({
       title: post.title || '',
       slug: post.slug || '',
-      category: post.category || 'วิชาการ',
+      category: post.category || categories[0]?.name || 'วิชาการ',
       summary: post.summary || '',
       content: post.content || '',
       image_url: post.image_url || '',
@@ -322,6 +345,78 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
     } catch (err) {
       console.error('Failed to delete post:', err);
       showNotification(err.message || 'ลบข่าวสารไม่สำเร็จ', 'error');
+    }
+  };
+
+  // Category Management Handlers
+  const handleCreateCategory = async (e) => {
+    e?.preventDefault();
+    const name = newCategoryName.trim();
+    if (!name) {
+      showNotification('กรุณาระบุชื่อหมวดหมู่', 'error');
+      return;
+    }
+    setCategoryLoading(true);
+    try {
+      await createCategory({ name }, token);
+      showNotification(`เพิ่มหมวดหมู่ "${name}" สำเร็จ`);
+      setNewCategoryName('');
+      const updatedCats = await fetchCategories();
+      setCategories(Array.isArray(updatedCats) ? updatedCats : []);
+    } catch (err) {
+      console.error('Failed to create category:', err);
+      showNotification(err.message || 'เพิ่มหมวดหมู่ไม่สำเร็จ', 'error');
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  const handleUpdateCategory = async (catId, newName) => {
+    const name = newName.trim();
+    if (!name) return;
+    setCategoryLoading(true);
+    try {
+      await updateCategory(catId, { name }, token);
+      showNotification('แก้ไขหมวดหมู่สำเร็จ');
+      setEditingCategoryId(null);
+      setEditingCategoryName('');
+      const [updatedCats, updatedPosts] = await Promise.all([
+        fetchCategories().catch(() => []),
+        fetchPosts({ limit: 100 }).catch(() => [])
+      ]);
+      setCategories(Array.isArray(updatedCats) ? updatedCats : []);
+      setPosts(Array.isArray(updatedPosts) ? updatedPosts : []);
+    } catch (err) {
+      console.error('Failed to update category:', err);
+      showNotification(err.message || 'แก้ไขหมวดหมู่ไม่สำเร็จ', 'error');
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  const handleDeleteCategory = async (cat) => {
+    if (cat.name === 'ทั่วไป') {
+      showNotification('ไม่สามารถลบหมวดหมู่เริ่มต้น "ทั่วไป" ได้', 'error');
+      return;
+    }
+    if (!window.confirm(`ยืนยันการลบหมวดหมู่ "${cat.name}" หรือไม่?\n\nหมายเหตุ: ข่าวสารที่อยู่ในหมวดหมู่นี้ทั้งหมด (${cat.posts_count || 0} ข่าว) จะถูกย้ายไปอยู่หมวดหมู่ "ทั่วไป" โดยอัตโนมัติ`)) {
+      return;
+    }
+    setCategoryLoading(true);
+    try {
+      await deleteCategory(cat.id, token);
+      showNotification(`ลบหมวดหมู่ "${cat.name}" สำเร็จ`);
+      const [updatedCats, updatedPosts] = await Promise.all([
+        fetchCategories().catch(() => []),
+        fetchPosts({ limit: 100 }).catch(() => [])
+      ]);
+      setCategories(Array.isArray(updatedCats) ? updatedCats : []);
+      setPosts(Array.isArray(updatedPosts) ? updatedPosts : []);
+    } catch (err) {
+      console.error('Failed to delete category:', err);
+      showNotification(err.message || 'ลบหมวดหมู่ไม่สำเร็จ', 'error');
+    } finally {
+      setCategoryLoading(false);
     }
   };
 
@@ -503,7 +598,11 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
     setSavingHomepage(true);
     try {
       const updated = await updateHomepageConfig(homepageConfig, token);
-      setHomepageConfigState(updated?.config || updated);
+      const savedConfig = updated?.config || updated;
+      setHomepageConfigState(savedConfig);
+      try {
+        localStorage.setItem('ppk_homepage_config', JSON.stringify(savedConfig));
+      } catch (_) {}
       showNotification('บันทึกการตั้งค่าหน้าแรกสำเร็จ');
     } catch (err) {
       console.error('Failed to save homepage config:', err);
@@ -664,6 +763,17 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
       p.summary?.toLowerCase().includes(postSearch.toLowerCase());
     return matchCategory && matchSearch;
   });
+
+  // Reset admin post page when filter changes
+  useEffect(() => {
+    setAdminPostPage(1);
+  }, [postCategoryFilter, postSearch]);
+
+  const totalAdminPostPages = Math.ceil(filteredPosts.length / adminPostsPerPage) || 1;
+  const paginatedAdminPosts = filteredPosts.slice(
+    (adminPostPage - 1) * adminPostsPerPage,
+    adminPostPage * adminPostsPerPage
+  );
 
   return (
     <div className="min-h-screen bg-neutral-100/70 text-neutral-800 flex flex-col font-sans">
@@ -842,71 +952,75 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
         {activeTab === 'overview' && (
           <div className="space-y-4 sm:space-y-6">
             {/* 4 Stat Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">ข่าวสารทั้งหมด</span>
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                    <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            {loading ? (
+              <AdminStatCardSkeleton count={4} />
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">ข่าวสารทั้งหมด</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.total_posts ?? posts.length}</span>
+                    <span className="text-[11px] sm:text-xs text-neutral-400">บทความ</span>
+                  </div>
+                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-emerald-600 font-medium truncate flex items-center gap-1">
+                    <span>สถานะระบบปกติ เผยแพร่ทันที</span>
                   </div>
                 </div>
-                <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.total_posts ?? posts.length}</span>
-                  <span className="text-[11px] sm:text-xs text-neutral-400">บทความ</span>
-                </div>
-                <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-emerald-600 font-medium truncate flex items-center gap-1">
-                  <span>สถานะระบบปกติ เผยแพร่ทันที</span>
-                </div>
-              </div>
 
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">หน้าเพจทั้งหมด</span>
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                    <Files className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">หน้าเพจทั้งหมด</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                      <Files className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.total_pages ?? pages.length}</span>
+                    <span className="text-[11px] sm:text-xs text-neutral-400">หน้า</span>
+                  </div>
+                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-blue-600 font-medium truncate">
+                    <span>รองรับ Block-based</span>
                   </div>
                 </div>
-                <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.total_pages ?? pages.length}</span>
-                  <span className="text-[11px] sm:text-xs text-neutral-400">หน้า</span>
-                </div>
-                <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-blue-600 font-medium truncate">
-                  <span>รองรับ Block-based</span>
-                </div>
-              </div>
 
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">สร้างโดย AI Agent</span>
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                    <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">สร้างโดย AI Agent</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                      <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.agent_posts ?? 0}</span>
+                    <span className="text-[11px] sm:text-xs text-neutral-400">บทความ</span>
+                  </div>
+                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-purple-600 font-medium truncate">
+                    <span>ผ่าน MCP & Agent API</span>
                   </div>
                 </div>
-                <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.agent_posts ?? 0}</span>
-                  <span className="text-[11px] sm:text-xs text-neutral-400">บทความ</span>
-                </div>
-                <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-purple-600 font-medium truncate">
-                  <span>ผ่าน MCP & Agent API</span>
-                </div>
-              </div>
 
-              <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">ยอดเปิดอ่านรวม</span>
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                    <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] sm:text-xs font-medium text-neutral-500 truncate">ยอดเปิดอ่านรวม</span>
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                      <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
+                    <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.total_views ?? 0}</span>
+                    <span className="text-[11px] sm:text-xs text-neutral-400">ครั้ง</span>
+                  </div>
+                  <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-amber-600 font-medium truncate">
+                    <span>สถิติการเข้าชมจริง</span>
                   </div>
                 </div>
-                <div className="mt-2 sm:mt-3 flex items-baseline gap-1.5 sm:gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-neutral-900">{stats?.total_views ?? 0}</span>
-                  <span className="text-[11px] sm:text-xs text-neutral-400">ครั้ง</span>
-                </div>
-                <div className="mt-2 sm:mt-3 text-[10px] sm:text-[11px] text-amber-600 font-medium truncate">
-                  <span>สถิติการเข้าชมจริง</span>
-                </div>
               </div>
-            </div>
+            )}
 
             {/* Quick Actions & AI Status Banner */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -973,38 +1087,97 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                   </div>
 
                   <div className="space-y-2">
-                    {posts.slice(0, 4).map((post) => (
-                      <div
-                        key={post.id}
-                        className="p-2.5 sm:p-3 rounded-xl bg-neutral-50 hover:bg-neutral-100/80 transition flex items-center justify-between gap-2.5 text-xs"
-                      >
-                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                          <span className="px-2 py-0.5 rounded-full bg-neutral-200 text-neutral-700 text-[10px] font-semibold shrink-0">
-                            {post.category}
-                          </span>
-                          <span className="font-medium text-neutral-900 truncate">{post.title}</span>
-                          {post.created_by_agent && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-100 text-purple-700 font-medium shrink-0 flex items-center gap-1">
-                              <Sparkles className="w-2.5 h-2.5" /> AI
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] sm:text-[11px] text-neutral-400 hidden xs:inline">
-                            {post.created_at ? new Date(post.created_at).toLocaleDateString('th-TH') : ''}
-                          </span>
-                          <button
-                            onClick={() => handleOpenEditPost(post)}
-                            className="p-1 text-neutral-400 hover:text-neutral-700 cursor-pointer"
-                            title="แก้ไข"
+                    {loading ? (
+                      <AdminTableSkeleton rows={4} compact={true} />
+                    ) : (
+                      <>
+                        {posts.slice(0, 4).map((post) => (
+                          <div
+                            key={post.id}
+                            className="p-2.5 sm:p-3 rounded-xl bg-neutral-50 hover:bg-neutral-100/80 transition flex items-center justify-between gap-2.5 text-xs"
                           >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {posts.length === 0 && (
-                      <div className="text-center py-6 text-xs text-neutral-400">ยังไม่มีข่าวสารในระบบ</div>
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                              <span className="px-2 py-0.5 rounded-full bg-neutral-200 text-neutral-700 text-[10px] font-semibold shrink-0">
+                                {post.category}
+                              </span>
+                              <span className="font-medium text-neutral-900 truncate">{post.title}</span>
+                              {post.created_by_agent && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] bg-purple-100 text-purple-700 font-medium shrink-0 flex items-center gap-1">
+                                  <Sparkles className="w-2.5 h-2.5" /> AI
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] sm:text-[11px] text-neutral-400 hidden xs:inline">
+                                {post.created_at ? new Date(post.created_at).toLocaleDateString('th-TH') : ''}
+                              </span>
+                              <button
+                                onClick={() => handleOpenEditPost(post)}
+                                className="p-1 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                                title="แก้ไข"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        {posts.length === 0 && (
+                          <div className="text-center py-6 text-xs text-neutral-400">ยังไม่มีข่าวสารในระบบ</div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Recent Pages List */}
+                <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-neutral-100">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-xs font-bold text-neutral-800">หน้าเพจล่าสุดในระบบ</h4>
+                    <button
+                      onClick={() => setActiveTab('pages')}
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                    >
+                      ดูทั้งหมด →
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {loading ? (
+                      <AdminTableSkeleton rows={3} compact={true} hasThumbnail={false} />
+                    ) : (
+                      <>
+                        {pages.slice(0, 3).map((page) => (
+                          <div
+                            key={page.id}
+                            className="p-2.5 sm:p-3 rounded-xl bg-neutral-50 hover:bg-neutral-100/80 transition flex items-center justify-between gap-2.5 text-xs"
+                          >
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-semibold shrink-0">
+                                {page.layout_type === 'blocks' ? 'Blocks' : 'Page'}
+                              </span>
+                              <span className="font-medium text-neutral-900 truncate">{page.title}</span>
+                              <span className="font-mono text-[10px] text-neutral-400 truncate hidden xs:inline">
+                                /{page.slug}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[10px] sm:text-[11px] text-neutral-400 hidden xs:inline">
+                                {page.updated_at ? new Date(page.updated_at).toLocaleDateString('th-TH') : ''}
+                              </span>
+                              <button
+                                onClick={() => handleOpenEditPage(page)}
+                                className="p-1 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                                title="แก้ไข"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        {pages.length === 0 && (
+                          <div className="text-center py-4 text-xs text-neutral-400">ยังไม่มีหน้าเพจในระบบ</div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -1041,7 +1214,12 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                       ) : null}
                     </div>
 
-                    {stats?.agent_key || stats?.agent_key_preview ? (
+                    {loading ? (
+                      <div className="py-2 space-y-1.5">
+                        <Skeleton variant="dark" className="h-4 w-3/4 rounded" />
+                        <Skeleton variant="dark" className="h-3 w-1/2 rounded" />
+                      </div>
+                    ) : stats?.agent_key || stats?.agent_key_preview ? (
                       <div className="font-mono text-xs text-emerald-300 break-all select-all">
                         {stats.agent_key || stats.agent_key_preview}
                       </div>
@@ -1115,23 +1293,42 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                   className="px-3 py-2 bg-neutral-50 rounded-xl border border-neutral-200 text-xs text-neutral-700 outline-none cursor-pointer shrink-0"
                 >
                   <option value="ทั้งหมด">ทุกหมวดหมู่</option>
-                  <option value="วิชาการ">วิชาการ</option>
-                  <option value="กิจกรรม">กิจกรรม</option>
-                  <option value="ทั่วไป">ทั่วไป</option>
+
+
+                  {categories.map((cat) => (
+                    <option key={cat.id || cat.name} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
-              <button
-                onClick={handleOpenCreatePost}
-                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>เขียนข่าวใหม่</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCategoryModalOpen(true)}
+                  className="w-full sm:w-auto px-3.5 py-2.5 sm:py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer shrink-0"
+                  title="จัดการหมวดหมู่ข่าวสาร"
+                >
+                  <Tag className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>จัดการหมวดหมู่</span>
+                </button>
+
+                <button
+                  onClick={handleOpenCreatePost}
+                  className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>เขียนข่าวใหม่</span>
+                </button>
+              </div>
             </div>
 
             {/* Posts Table / Card List */}
-            <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+            {loading ? (
+              <AdminTableSkeleton rows={6} columns={7} />
+            ) : (
+              <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
               {/* Desktop / Tablet Table View */}
               <div className="overflow-x-auto hidden md:block">
                 <table className="w-full text-left text-xs min-w-[700px]">
@@ -1147,7 +1344,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100">
-                    {filteredPosts.map((post) => (
+                    {paginatedAdminPosts.map((post) => (
                       <tr key={post.id} className="hover:bg-neutral-50/80 transition">
                         <td className="py-3 px-4 w-16">
                           <div className="w-12 h-10 rounded-lg bg-neutral-100 overflow-hidden border border-neutral-200 flex items-center justify-center">
@@ -1226,7 +1423,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
 
               {/* Mobile Card List View */}
               <div className="divide-y divide-neutral-100 md:hidden">
-                {filteredPosts.map((post) => (
+                {paginatedAdminPosts.map((post) => (
                   <div key={post.id} className="p-3.5 hover:bg-neutral-50/80 transition space-y-2.5">
                     <div className="flex gap-3">
                       <div className="w-14 h-14 rounded-xl bg-neutral-100 overflow-hidden border border-neutral-200 flex items-center justify-center shrink-0">
@@ -1297,9 +1494,67 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                   </div>
                 )}
               </div>
+
+              {/* Admin Posts Pagination Bar */}
+              {totalAdminPostPages > 1 && (
+                <div className="p-4 border-t border-neutral-200/80 bg-neutral-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                  <div className="text-neutral-500">
+                    แสดง <span className="font-semibold text-neutral-800">{(adminPostPage - 1) * adminPostsPerPage + 1}</span> ถึง{' '}
+                    <span className="font-semibold text-neutral-800">{Math.min(adminPostPage * adminPostsPerPage, filteredPosts.length)}</span> จาก{' '}
+                    <span className="font-semibold text-neutral-800">{filteredPosts.length}</span> ข่าว
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setAdminPostPage(p => Math.max(1, p - 1))}
+                      disabled={adminPostPage === 1}
+                      className="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 text-neutral-700 cursor-pointer"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                      <span>ก่อนหน้า</span>
+                    </button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalAdminPostPages }, (_, i) => i + 1).map((pg) => {
+                        if (
+                          totalAdminPostPages > 7 &&
+                          pg !== 1 &&
+                          pg !== totalAdminPostPages &&
+                          Math.abs(pg - adminPostPage) > 1
+                        ) {
+                          if (pg === 2 || pg === totalAdminPostPages - 1) {
+                            return <span key={pg} className="px-1 text-neutral-400">...</span>;
+                          }
+                          return null;
+                        }
+                        return (
+                          <button
+                            key={pg}
+                            onClick={() => setAdminPostPage(pg)}
+                            className={`w-7 h-7 rounded-lg text-xs font-semibold transition cursor-pointer flex items-center justify-center ${
+                              adminPostPage === pg
+                                ? 'bg-emerald-600 text-white shadow-xs'
+                                : 'bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200'
+                            }`}
+                          >
+                            {pg}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      onClick={() => setAdminPostPage(p => Math.min(totalAdminPostPages, p + 1))}
+                      disabled={adminPostPage === totalAdminPostPages}
+                      className="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-100 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 text-neutral-700 cursor-pointer"
+                    >
+                      <span>ถัดไป</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
         {/* ================= TAB 3: PAGES MANAGEMENT ================= */}
         {activeTab === 'pages' && (
@@ -1318,7 +1573,10 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
               </button>
             </div>
 
-            <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+            {loading ? (
+              <AdminTableSkeleton rows={5} columns={6} hasThumbnail={false} />
+            ) : (
+              <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
               {/* Desktop / Tablet Table View */}
               <div className="overflow-x-auto hidden md:block">
                 <table className="w-full text-left text-xs min-w-[600px]">
@@ -1474,8 +1732,9 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
         {/* ================= TAB 4: MEDIA LIBRARY ================= */}
         {activeTab === 'media' && (
@@ -1530,60 +1789,64 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                 <span className="text-xs text-neutral-400">คลิกที่ปุ่มคัดลอกเพื่อนำ URL ไปใช้ในเนื้อหา</span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4">
-                {mediaList.map((media) => (
-                  <div
-                    key={media.id}
-                    className="group rounded-xl border border-neutral-200 bg-neutral-50 overflow-hidden relative flex flex-col justify-between hover:shadow-md transition"
-                  >
-                    <div className="aspect-square bg-neutral-200/60 overflow-hidden relative flex items-center justify-center">
-                      <img
-                        src={media.url}
-                        alt={media.alt_text || ''}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
-                        }}
-                      />
-                    </div>
-
-                    <div className="p-2 text-[10px] space-y-1.5 bg-white">
-                      <div className="truncate font-medium text-neutral-800" title={media.original_name}>
-                        {media.original_name}
+              {loading ? (
+                <MediaGridSkeleton count={12} />
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4">
+                  {mediaList.map((media) => (
+                    <div
+                      key={media.id}
+                      className="group rounded-xl border border-neutral-200 bg-neutral-50 overflow-hidden relative flex flex-col justify-between hover:shadow-md transition"
+                    >
+                      <div className="aspect-square bg-neutral-200/60 overflow-hidden relative flex items-center justify-center">
+                        <img
+                          src={media.url}
+                          alt={media.alt_text || ''}
+                          className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
+                          }}
+                        />
                       </div>
-                      <div className="flex items-center gap-1 pt-0.5">
-                        <button
-                          onClick={() => copyToClipboard(media.url, media.id)}
-                          className={`flex-1 py-1 px-1 rounded text-[10px] font-semibold flex items-center justify-center gap-1 transition cursor-pointer truncate ${
-                            copiedMediaId === media.id
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
-                          }`}
-                        >
-                          {copiedMediaId === media.id ? <Check className="w-3 h-3 shrink-0" /> : <Copy className="w-3 h-3 shrink-0" />}
-                          <span className="truncate">{copiedMediaId === media.id ? 'คัดลอกแล้ว' : 'คัดลอก URL'}</span>
-                        </button>
 
-                        <button
-                          onClick={() => handleDeleteMedia(media.id)}
-                          className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer shrink-0"
-                          title="ลบรูปภาพนี้"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div className="p-2 text-[10px] space-y-1.5 bg-white">
+                        <div className="truncate font-medium text-neutral-800" title={media.original_name}>
+                          {media.original_name}
+                        </div>
+                        <div className="flex items-center gap-1 pt-0.5">
+                          <button
+                            onClick={() => copyToClipboard(media.url, media.id)}
+                            className={`flex-1 py-1 px-1 rounded text-[10px] font-semibold flex items-center justify-center gap-1 transition cursor-pointer truncate ${
+                              copiedMediaId === media.id
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                            }`}
+                          >
+                            {copiedMediaId === media.id ? <Check className="w-3 h-3 shrink-0" /> : <Copy className="w-3 h-3 shrink-0" />}
+                            <span className="truncate">{copiedMediaId === media.id ? 'คัดลอกแล้ว' : 'คัดลอก URL'}</span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteMedia(media.id)}
+                            className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50 transition cursor-pointer shrink-0"
+                            title="ลบรูปภาพนี้"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                {mediaList.length === 0 && (
-                  <div className="col-span-full py-12 text-center text-xs text-neutral-400">
-                    ยังไม่มีรูปภาพในคลังสื่อ กรุณาอัปโหลดรูปภาพใหม่
-                  </div>
-                )}
-              </div>
+                  {mediaList.length === 0 && (
+                    <div className="col-span-full py-12 text-center text-xs text-neutral-400">
+                      ยังไม่มีรูปภาพในคลังสื่อ กรุณาอัปโหลดรูปภาพใหม่
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1733,7 +1996,10 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
             </div>
 
             {/* Users List */}
-            <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+            {loading ? (
+              <AdminTableSkeleton rows={4} columns={5} />
+            ) : (
+              <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
               <div className="p-4 border-b border-neutral-100 flex items-center justify-between">
                 <span className="text-xs font-semibold text-neutral-700">
                   รายชื่อผู้ใช้ทั้งหมด ({users.length} บัญชี)
@@ -1846,8 +2112,9 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                 </table>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
         {/* ================= TAB 6: AI AGENT API KEYS ================= */}
         {activeTab === 'agent_keys' && (
@@ -1890,106 +2157,133 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
             </div>
 
             {/* API Keys List */}
-            <div className="space-y-3">
-              {agentKeys.map((k) => (
-                <div
-                  key={k.id}
-                  className={`bg-white rounded-2xl p-4 sm:p-5 border transition shadow-xs ${
-                    k.is_active ? 'border-neutral-200/80' : 'border-neutral-200/50 bg-neutral-50/50 opacity-75'
-                  }`}
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2.5">
-                        <h4 className="font-bold text-sm text-neutral-900">{k.name}</h4>
-                        <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2.5">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-4 w-24 rounded-full" />
+                        </div>
+                        <Skeleton className="h-3 w-48" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="h-8 w-24 rounded-xl" />
+                        <Skeleton className="h-8 w-20 rounded-xl" />
+                      </div>
+                    </div>
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                    <div className="flex justify-between pt-2 border-t border-neutral-100">
+                      <Skeleton className="h-3 w-28" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {agentKeys.map((k) => (
+                  <div
+                    key={k.id}
+                    className={`bg-white rounded-2xl p-4 sm:p-5 border transition shadow-xs ${
+                      k.is_active ? 'border-neutral-200/80' : 'border-neutral-200/50 bg-neutral-50/50 opacity-75'
+                    }`}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2.5">
+                          <h4 className="font-bold text-sm text-neutral-900">{k.name}</h4>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                              k.is_active
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                : 'bg-neutral-100 text-neutral-600 border border-neutral-200'
+                            }`}
+                          >
+                            {k.is_active ? 'พร้อมใช้งาน (Active)' : 'ปิดใช้งานชั่วคราว (Disabled)'}
+                          </span>
+                        </div>
+                        {k.description && (
+                          <p className="text-xs text-neutral-500">{k.description}</p>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <button
+                          onClick={() => handleToggleAgentKey(k)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-1.5 cursor-pointer transition ${
                             k.is_active
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                              : 'bg-neutral-100 text-neutral-600 border border-neutral-200'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                           }`}
                         >
-                          {k.is_active ? 'พร้อมใช้งาน (Active)' : 'ปิดใช้งานชั่วคราว (Disabled)'}
-                        </span>
+                          <Power className="w-3.5 h-3.5" />
+                          <span>{k.is_active ? 'ระงับชั่วคราว' : 'เปิดใช้งาน'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteAgentKey(k)}
+                          className="px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center gap-1.5 cursor-pointer transition"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>ลบ/เพิกถอน</span>
+                        </button>
                       </div>
-                      {k.description && (
-                        <p className="text-xs text-neutral-500">{k.description}</p>
-                      )}
                     </div>
 
-                    <div className="flex items-center gap-2 self-end sm:self-auto">
+                    {/* Key Box */}
+                    <div className="mt-3.5 p-3 rounded-xl bg-neutral-900 text-neutral-200 flex flex-col xs:flex-row xs:items-center justify-between gap-2 text-xs font-mono">
+                      <div className="break-all select-all text-emerald-300">
+                        {k.key}
+                      </div>
                       <button
-                        onClick={() => handleToggleAgentKey(k)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-medium border flex items-center gap-1.5 cursor-pointer transition ${
-                          k.is_active
-                            ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-                        }`}
+                        onClick={() => copyToClipboard(k.key)}
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 cursor-pointer transition self-end xs:self-auto shrink-0 text-[11px]"
                       >
-                        <Power className="w-3.5 h-3.5" />
-                        <span>{k.is_active ? 'ระงับชั่วคราว' : 'เปิดใช้งาน'}</span>
+                        {copiedKey ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                        <span>คัดลอก</span>
                       </button>
+                    </div>
 
-                      <button
-                        onClick={() => handleDeleteAgentKey(k)}
-                        className="px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 flex items-center gap-1.5 cursor-pointer transition"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>ลบ/เพิกถอน</span>
-                      </button>
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-400 pt-2 border-t border-neutral-100">
+                      <span>
+                        สร้างเมื่อ:{' '}
+                        <strong className="text-neutral-600">
+                          {k.created_at ? new Date(k.created_at).toLocaleString('th-TH') : '-'}
+                        </strong>
+                      </span>
+                      <span>
+                        ใช้งานล่าสุด:{' '}
+                        <strong className={k.last_used_at ? 'text-emerald-600 font-semibold' : 'text-neutral-500'}>
+                          {k.last_used_at ? new Date(k.last_used_at).toLocaleString('th-TH') : 'ยังไม่เคยใช้งาน'}
+                        </strong>
+                      </span>
                     </div>
                   </div>
+                ))}
 
-                  {/* Key Box */}
-                  <div className="mt-3.5 p-3 rounded-xl bg-neutral-900 text-neutral-200 flex flex-col xs:flex-row xs:items-center justify-between gap-2 text-xs font-mono">
-                    <div className="break-all select-all text-emerald-300">
-                      {k.key}
+                {agentKeys.length === 0 && (
+                  <div className="bg-white rounded-2xl p-8 border border-neutral-200/80 text-center space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
+                      <Bot className="w-6 h-6" />
                     </div>
+                    <h4 className="font-bold text-sm text-neutral-800">ยังไม่มี API Key สำหรับ AI Agent</h4>
+                    <p className="text-xs text-neutral-500 max-w-sm mx-auto">
+                      คลิกปุ่มด้านล่างเพื่อสร้าง API Key สำหรับบอท หรือเครื่องมือ AI Agent ให้สามารถเข้ามาเขียนข่าวสารได้
+                    </p>
                     <button
-                      onClick={() => copyToClipboard(k.key)}
-                      className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 cursor-pointer transition self-end xs:self-auto shrink-0 text-[11px]"
+                      onClick={handleOpenCreateKey}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
                     >
-                      {copiedKey ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                      <span>คัดลอก</span>
+                      <Plus className="w-4 h-4" />
+                      <span>สร้าง API Key แรกของคุณ</span>
                     </button>
                   </div>
-
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-400 pt-2 border-t border-neutral-100">
-                    <span>
-                      สร้างเมื่อ:{' '}
-                      <strong className="text-neutral-600">
-                        {k.created_at ? new Date(k.created_at).toLocaleString('th-TH') : '-'}
-                      </strong>
-                    </span>
-                    <span>
-                      ใช้งานล่าสุด:{' '}
-                      <strong className={k.last_used_at ? 'text-emerald-600 font-semibold' : 'text-neutral-500'}>
-                        {k.last_used_at ? new Date(k.last_used_at).toLocaleString('th-TH') : 'ยังไม่เคยใช้งาน'}
-                      </strong>
-                    </span>
-                  </div>
-                </div>
-              ))}
-
-              {agentKeys.length === 0 && (
-                <div className="bg-white rounded-2xl p-8 border border-neutral-200/80 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-                    <Bot className="w-6 h-6" />
-                  </div>
-                  <h4 className="font-bold text-sm text-neutral-800">ยังไม่มี API Key สำหรับ AI Agent</h4>
-                  <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-                    คลิกปุ่มด้านล่างเพื่อสร้าง API Key สำหรับบอท หรือเครื่องมือ AI Agent ให้สามารถเข้ามาเขียนข่าวสารได้
-                  </p>
-                  <button
-                    onClick={handleOpenCreateKey}
-                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>สร้าง API Key แรกของคุณ</span>
-                  </button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -2239,6 +2533,197 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
         )}
       </main>
 
+      {/* ================= CATEGORY MANAGEMENT MODAL ================= */}
+      {categoryModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+          onClick={() => {
+            setCategoryModalOpen(false);
+            setEditingCategoryId(null);
+            setEditingCategoryName('');
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl sm:rounded-3xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-neutral-200 relative my-auto animate-in fade-in zoom-in-95 duration-150 p-5 sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <Tag className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-neutral-900">จัดการหมวดหมู่ข่าวสาร</h3>
+                  <p className="text-[11px] text-neutral-500">เพิ่ม แก้ไข หรือลบหมวดหมู่สำหรับจัดกลุ่มข่าวสาร</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setCategoryModalOpen(false);
+                  setEditingCategoryId(null);
+                  setEditingCategoryName('');
+                }}
+                className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center transition cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Create Category Form */}
+            <form onSubmit={handleCreateCategory} className="mb-5">
+              <label className="block text-xs font-semibold text-neutral-700 mb-1.5">เพิ่มหมวดหมู่ใหม่</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="เช่น ผลงานและรางวัล, รับสมัครนักเรียน..."
+                  disabled={categoryLoading}
+                  className="flex-1 py-2 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={categoryLoading || !newCategoryName.trim()}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition shadow-xs cursor-pointer disabled:opacity-50 shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>เพิ่ม</span>
+                </button>
+              </div>
+            </form>
+
+            {/* Category List */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-semibold text-neutral-700">หมวดหมู่ทั้งหมด ({categories.length})</span>
+                <span className="text-[11px] text-neutral-400">จำนวนข่าว</span>
+              </div>
+
+              <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                {categoryLoading ? (
+                  <div className="space-y-2 py-1">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/50">
+                        <Skeleton className="h-4 w-28" />
+                        <div className="flex items-center gap-2">
+                          <Skeleton className="h-4 w-12 rounded" />
+                          <Skeleton className="h-6 w-6 rounded-lg" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : categories.length === 0 ? (
+                  <div className="text-center py-6 text-xs text-neutral-400">ยังไม่มีหมวดหมู่</div>
+                ) : (
+                  categories.map((cat) => (
+                    <div
+                      key={cat.id || cat.name}
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 hover:bg-neutral-100/60 transition"
+                    >
+                      {editingCategoryId === cat.id ? (
+                        <div className="flex items-center gap-2 flex-1 mr-2">
+                          <input
+                            type="text"
+                            value={editingCategoryName}
+                            onChange={(e) => setEditingCategoryName(e.target.value)}
+                            className="flex-1 py-1 px-2.5 bg-white rounded-lg border border-emerald-500 text-xs outline-none"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleUpdateCategory(cat.id, editingCategoryName);
+                              } else if (e.key === 'Escape') {
+                                setEditingCategoryId(null);
+                                setEditingCategoryName('');
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateCategory(cat.id, editingCategoryName)}
+                            className="p-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition cursor-pointer"
+                            title="บันทึก"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCategoryId(null);
+                              setEditingCategoryName('');
+                            }}
+                            className="p-1.5 rounded-lg bg-neutral-200 hover:bg-neutral-300 text-neutral-700 transition cursor-pointer"
+                            title="ยกเลิก"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-xs text-neutral-900">{cat.name}</span>
+                          {cat.name === 'ทั่วไป' && (
+                            <span className="text-[10px] text-neutral-400 bg-neutral-200/60 px-1.5 py-0.5 rounded font-normal">
+                              ค่าเริ่มต้น
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {editingCategoryId !== cat.id && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-mono font-medium text-neutral-500 bg-white border border-neutral-200/60 px-2 py-0.5 rounded-md">
+                            {cat.posts_count || 0} ข่าว
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCategoryId(cat.id);
+                              setEditingCategoryName(cat.name);
+                            }}
+                            className="p-1.5 rounded-lg hover:bg-neutral-200 text-neutral-600 hover:text-neutral-900 transition cursor-pointer"
+                            title="แก้ไขชื่อหมวดหมู่"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+
+                          {cat.name !== 'ทั่วไป' ? (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCategory(cat)}
+                              className="p-1.5 rounded-lg hover:bg-red-50 text-neutral-400 hover:text-red-600 transition cursor-pointer"
+                              title="ลบหมวดหมู่"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          ) : (
+                            <div className="w-7 h-7" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="mt-5 pt-3 border-t border-neutral-100 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setCategoryModalOpen(false);
+                  setEditingCategoryId(null);
+                  setEditingCategoryName('');
+                }}
+                className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold transition cursor-pointer"
+              >
+                ปิดหน้าต่าง
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ================= POST MODAL (CREATE / EDIT) ================= */}
       {postModalOpen && (
         <div
@@ -2285,10 +2770,14 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                     onChange={(e) => setPostFormData({ ...postFormData, category: e.target.value })}
                     className="w-full py-2.5 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none cursor-pointer"
                   >
-                    <option value="วิชาการ">วิชาการ</option>
-                    <option value="กิจกรรม">กิจกรรม</option>
-                    <option value="ทั่วไป">ทั่วไป</option>
-                    <option value="ประชาสัมพันธ์">ประชาสัมพันธ์</option>
+  
+  
+                    {categories.map((cat) => (
+                    <option key={cat.id || cat.name} value={cat.name}>
+                      {cat.name}
+                    </option>
+                  ))}
+
                   </select>
                 </div>
 

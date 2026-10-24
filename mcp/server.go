@@ -281,8 +281,9 @@ func registerTools(s *server.MCPServer) {
 	// 11. Tool: list_recent_posts
 	s.AddTool(
 		mcp.NewTool("list_recent_posts",
-			mcp.WithDescription("ดึงรายการข่าวสารล่าสุดของโรงเรียน เพื่อใช้อ่านเป็น Context ในการเขียนข่าวหรือป้องกันการสร้างข่าวซ้ำ"),
+			mcp.WithDescription("ดึงรายการข่าวสารล่าสุดของโรงเรียน เพื่อใช้อ่านเป็น Context ในการเขียนข่าวหรือป้องกันการสร้างข่าวซ้ำ รองรับการแบ่งหน้า (Pagination)"),
 			mcp.WithNumber("limit", mcp.Description("จำนวนข่าวที่ต้องการดึง (ค่าเริ่มต้น 10)")),
+			mcp.WithNumber("page", mcp.Description("เลขหน้าที่ต้องการดึง (ค่าเริ่มต้น 1)")),
 			mcp.WithString("category", mcp.Description("กรองตามหมวดหมู่ (เช่น 'วิชาการ', 'กิจกรรม')")),
 		),
 		handleListPosts,
@@ -323,12 +324,14 @@ func registerTools(s *server.MCPServer) {
 	// 14. Tool: manage_navigation_menu
 	s.AddTool(
 		mcp.NewTool("manage_navigation_menu",
-			mcp.WithDescription("จัดการเมนูนำทาง (Navigation Bar) ของเว็บไซต์: ตรวจสอบเมนู, เพิ่มหน้าเพจเข้าเมนู, ปลดหน้าเพจออก หรือรีเซ็ตเมนู"),
-			mcp.WithString("action", mcp.Required(), mcp.Description("การกระทำ: 'get' (ดูเมนูปัจจุบัน), 'add_page' (เพิ่มเพจเข้าเมนู), 'remove_page' (ปลดเพจออกจากเมนู), 'reset' (รีเซ็ตเป็นค่าเริ่มต้น)")),
+			mcp.WithDescription("จัดการเมนูนำทาง (Navigation Bar) ของเว็บไซต์: ตรวจสอบเมนู, เพิ่มหน้าเพจเข้าเมนู, ปลดหน้าเพจออก, ย้ายเมนูไปไว้ใต้ Parent อื่น, หรือรีเซ็ตเมนู"),
+			mcp.WithString("action", mcp.Required(), mcp.Description("การกระทำ: 'get' (ดูเมนูปัจจุบัน), 'move_item' (ย้ายเมนู เช่น contact ไปไว้ใต้ about), 'add_page' (เพิ่มเพจเข้าเมนู), 'remove_page' (ปลดเพจออกจากเมนู), 'set_menu' (บันทึกโครงสร้างเมนูแบบ JSON), 'reset' (รีเซ็ตเป็นค่าเริ่มต้น)")),
+			mcp.WithString("item_id", mcp.Description("ID หรือ Slug ของเมนูที่ต้องการย้าย เช่น 'contact', 'news'")),
 			mcp.WithString("slug", mcp.Description("Slug ของหน้าเพจ (สำหรับ action 'add_page' หรือ 'remove_page')")),
 			mcp.WithString("title", mcp.Description("ชื่อปุ่มเมนูที่ต้องการแสดง")),
 			mcp.WithString("parent", mcp.Description("ระบุ Parent Dropdown เช่น 'about'")),
 			mcp.WithNumber("order", mcp.Description("ลำดับของเมนู")),
+			mcp.WithString("menu_json", mcp.Description("JSON Array ของ MenuItem ทั้งหมด (สำหรับ action 'set_menu')")),
 		),
 		handleManageNavigationMenu,
 	)
@@ -733,15 +736,20 @@ func handleListPosts(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	if l := request.GetInt("limit", 10); l > 0 && l <= 50 {
 		limit = l
 	}
+	page := 1
+	if p := request.GetInt("page", 1); p > 0 {
+		page = p
+	}
 	category := request.GetString("category", "")
 
-	query := db.DB.Order("created_at DESC")
-	if category != "" {
+	query := db.DB.Model(&models.Post{}).Order("created_at DESC")
+	if category != "" && category != "ทั้งหมด" {
 		query = query.Where("category = ?", category)
 	}
 
+	offset := (page - 1) * limit
 	var posts []models.Post
-	if err := query.Limit(limit).Find(&posts).Error; err != nil {
+	if err := query.Offset(offset).Limit(limit).Find(&posts).Error; err != nil {
 		return mcp.NewToolResultError("Failed to list posts: " + err.Error()), nil
 	}
 
@@ -817,13 +825,97 @@ func handleUpdateHomepageConfig(ctx context.Context, request mcp.CallToolRequest
 func handleManageNavigationMenu(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	action, err := request.RequireString("action")
 	if err != nil {
-		return mcp.NewToolResultError("action is required ('get', 'add_page', 'remove_page', 'reset')"), nil
+		return mcp.NewToolResultError("action is required ('get', 'move_item', 'add_page', 'remove_page', 'set_menu', 'reset')"), nil
 	}
 
 	switch strings.ToLower(action) {
 	case "reset":
 		_ = db.DB.Where("key = ?", "nav_menu").Delete(&models.Setting{})
 		return mcp.NewToolResultText("Navigation menu has been reset to dynamic defaults."), nil
+
+	case "move_item":
+		itemID := request.GetString("item_id", "")
+		if itemID == "" {
+			itemID = request.GetString("slug", "")
+		}
+		if itemID == "" {
+			return mcp.NewToolResultError("item_id (or slug) is required for move_item (e.g. 'contact')"), nil
+		}
+		parentID := request.GetString("parent", "")
+		if parentID == "" {
+			return mcp.NewToolResultError("parent is required for move_item (e.g. 'about')"), nil
+		}
+
+		currentMenu := handlers.GetNavigationMenuInternal()
+		var targetItem *models.MenuItem
+		var newTopMenu []models.MenuItem
+
+		// 1. Find and remove target item from top-level or any child
+		for _, item := range currentMenu {
+			if strings.EqualFold(item.ID, itemID) || strings.EqualFold(item.Path, itemID) {
+				cp := item
+				targetItem = &cp
+				continue
+			}
+			// Also check if it's currently inside a child and needs moving
+			var keptChildren []models.MenuItem
+			for _, child := range item.Children {
+				if strings.EqualFold(child.ID, itemID) || strings.EqualFold(child.Path, itemID) || (itemID == "contact" && child.Path == "contact") {
+					cp := child
+					targetItem = &cp
+					continue
+				}
+				keptChildren = append(keptChildren, child)
+			}
+			item.Children = keptChildren
+			newTopMenu = append(newTopMenu, item)
+		}
+
+		if targetItem == nil {
+			return mcp.NewToolResultError(fmt.Sprintf("Item '%s' not found in navigation menu", itemID)), nil
+		}
+
+		// 2. Attach targetItem into parent
+		parentFound := false
+		for i := range newTopMenu {
+			if strings.EqualFold(newTopMenu[i].ID, parentID) || strings.EqualFold(newTopMenu[i].Path, parentID) {
+				targetItem.Order = len(newTopMenu[i].Children) + 1
+				if customOrder := request.GetInt("order", 0); customOrder != 0 {
+					targetItem.Order = customOrder
+				}
+				if title := request.GetString("title", ""); title != "" {
+					targetItem.Title = title
+				}
+				newTopMenu[i].Children = append(newTopMenu[i].Children, *targetItem)
+				parentFound = true
+				break
+			}
+		}
+
+		if !parentFound {
+			return mcp.NewToolResultError(fmt.Sprintf("Parent '%s' not found in navigation menu", parentID)), nil
+		}
+
+		if err := handlers.SaveNavigationMenuInternal(newTopMenu); err != nil {
+			return mcp.NewToolResultError("Failed to save updated menu: " + err.Error()), nil
+		}
+
+		b, _ := json.MarshalIndent(newTopMenu, "", "  ")
+		return mcp.NewToolResultText(fmt.Sprintf("Successfully moved '%s' under '%s'!\n\nUpdated Navigation Menu:\n%s", targetItem.Title, parentID, string(b))), nil
+
+	case "set_menu":
+		menuJSON, err := request.RequireString("menu_json")
+		if err != nil {
+			return mcp.NewToolResultError("menu_json is required for set_menu"), nil
+		}
+		var items []models.MenuItem
+		if err := json.Unmarshal([]byte(menuJSON), &items); err != nil {
+			return mcp.NewToolResultError("Invalid menu_json: " + err.Error()), nil
+		}
+		if err := handlers.SaveNavigationMenuInternal(items); err != nil {
+			return mcp.NewToolResultError("Failed to save menu: " + err.Error()), nil
+		}
+		return mcp.NewToolResultText("Navigation menu set successfully!"), nil
 
 	case "add_page":
 		slug, err := request.RequireString("slug")
@@ -868,15 +960,8 @@ func handleManageNavigationMenu(ctx context.Context, request mcp.CallToolRequest
 	case "get":
 		fallthrough
 	default:
-		// Return current dynamic menu
-		var pages []models.Page
-		_ = db.DB.Where("show_in_menu = ? AND status = ?", true, "published").Find(&pages)
-
-		res := map[string]any{
-			"base_routes": []string{"home", "about", "eservice", "news", "contact"},
-			"menu_pages":  pages,
-		}
-		b, _ := json.MarshalIndent(res, "", "  ")
+		menu := handlers.GetNavigationMenuInternal()
+		b, _ := json.MarshalIndent(menu, "", "  ")
 		return mcp.NewToolResultText(string(b)), nil
 	}
 }

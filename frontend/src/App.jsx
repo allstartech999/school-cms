@@ -8,7 +8,6 @@ import {
   Search, 
   ArrowRight, 
   Clock, 
-  Loader2, 
   MapPin, 
   Mail, 
   Sparkles,
@@ -19,6 +18,7 @@ import {
   FileText,
   Compass,
   CheckCircle2,
+  ChevronLeft,
   ChevronRight,
   ChevronDown,
   GraduationCap,
@@ -29,7 +29,7 @@ import {
   Share2,
   Check
 } from 'lucide-react';
-import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage } from './api';
+import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage, fetchCategories } from './api';
 import BlockRenderer from './components/BlockRenderer';
 import OptimizedImage from './components/OptimizedImage';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -37,12 +37,15 @@ import AdminLogin from './components/admin/AdminLogin';
 import { useAdaptive } from './context/AdaptiveContext';
 import AdaptiveBottomNav from './components/adaptive/AdaptiveBottomNav';
 import AdaptiveModeSwitcher from './components/adaptive/AdaptiveModeSwitcher';
+import { NewsCardSkeleton, PostDetailSkeleton, DynamicPageSkeleton } from './components/skeleton';
 
 export default function App() {
   const { isMobile, isTablet, isForcedDesktop, isForcedMobile, setMode } = useAdaptive();
   const showMobileNav = (isMobile || isTablet) && !isForcedDesktop;
   const [currentPage, setCurrentPage] = useState('home'); // 'home' | 'about' | 'eservice' | 'news' | 'contact' | 'dynamic_page'
   const [posts, setPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [stats, setStats] = useState({
     school_name: "โรงเรียนโพนงามพิทยานุกูล",
     school_name_en: "Phon-ngam Pittayanukun School",
@@ -52,26 +55,38 @@ export default function App() {
     total_posts: 0,
     total_pages: 0
   });
-  const [homepageConfig, setHomepageConfig] = useState({
-    hero: {
-      badge: "โรงเรียนคุณภาพมาตรฐานสากล • สพม.มหาสารคาม",
-      heading: "โรงเรียนโพนงามพิทยานุกูล",
-      subheading: "“ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”\nเป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ",
-      primary_cta: "บริการออนไลน์ (E-Service)",
-      primary_url: "eservice"
-    },
-    announcement: "ขอเชิญชวนศิษย์เก่าทุกท่านร่วมลงทะเบียนเครือข่ายศิษย์เก่าออนไลน์ (PPK Alumni) เพื่อร่วมพัฒนาโรงเรียน",
-    show_ticker: true,
-    show_slider: true,
-    show_eservices: true,
-    show_recent_news: true,
-    show_trending: true
+  const [homepageConfig, setHomepageConfig] = useState(() => {
+    try {
+      const cached = localStorage.getItem('ppk_homepage_config');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.hero) return parsed;
+      }
+    } catch (_) {}
+    return {
+      hero: {
+        badge: "โรงเรียนคุณภาพมาตรฐานสากล • สพม.มหาสารคาม",
+        heading: "โรงเรียนโพนงามพิทยานุกูล",
+        subheading: "“ส่องความรู้คู่คุณธรรมนำชุมชน พัฒนาคนให้รู้คิดจิตสร้างสรรค์”\nเป็นองค์กรคุณภาพ สืบสานศาสตร์พระราชา จัดการศึกษาสู่ความเป็นเลิศ",
+        primary_cta: "บริการออนไลน์ (E-Service)",
+        primary_url: "eservice",
+        image_url: "https://www.ppks.ac.th/wp-content/uploads/2023/09/www.ppks.ac.th-img20191029155618-768x576.jpg"
+      },
+      announcement: "ขอเชิญชวนศิษย์เก่าทุกท่านร่วมลงทะเบียนเครือข่ายศิษย์เก่าออนไลน์ (PPK Alumni) เพื่อร่วมพัฒนาโรงเรียน",
+      show_ticker: true,
+      show_slider: true,
+      show_eservices: true,
+      show_recent_news: true,
+      show_trending: true
+    };
   });
   const [menuItems, setMenuItems] = useState([]);
   const [activeDynamicPage, setActiveDynamicPage] = useState(null);
   const [loadingDynamicPage, setLoadingDynamicPage] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
   const [searchQuery, setSearchQuery] = useState('');
+  const [newsCurrentPage, setNewsCurrentPage] = useState(1);
+  const postsPerPage = 9;
   const [readingPost, setReadingPost] = useState(null);
   const [loadingPost, setLoadingPost] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -83,8 +98,9 @@ export default function App() {
   const [showAdminLoginModal, setShowAdminLoginModal] = useState(false);
   const [mustChangePassword, setMustChangePassword] = useState(false);
 
-  // Categories list
-  const categories = ['ทั้งหมด', 'วิชาการ', 'กิจกรรม'];
+  // Categories list (Dynamic)
+  const [categoryList, setCategoryList] = useState(['วิชาการ', 'กิจกรรม', 'ประชาสัมพันธ์', 'ทั่วไป']);
+  const categories = ['ทั้งหมด', ...categoryList];
 
   const handleAdminLoginSuccess = (token, mustChange = false) => {
     setAdminToken(token);
@@ -482,29 +498,43 @@ export default function App() {
       fetchPosts({ limit: 50 }).catch(() => null),
       fetchStats().catch(() => null),
       fetchHomepageConfig().catch(() => null),
-      fetchMenu().catch(() => null)
+      fetchMenu().catch(() => null),
+      fetchCategories().catch(() => null)
     ])
-      .then(([postsData, statsData, hpCfg, menuData]) => {
+      .then(([postsData, statsData, hpCfg, menuData, categoriesData]) => {
         if (Array.isArray(postsData)) {
           setPosts(postsData);
+        } else if (postsData && Array.isArray(postsData.data)) {
+          setPosts(postsData.data);
         }
         if (statsData) {
           setStats(statsData);
         }
         if (hpCfg) {
           setHomepageConfig(prev => ({ ...prev, ...hpCfg }));
+          try {
+            localStorage.setItem('ppk_homepage_config', JSON.stringify(hpCfg));
+          } catch (_) {}
         }
         if (Array.isArray(menuData) && menuData.length > 0) {
           setMenuItems(menuData);
         }
+        if (Array.isArray(categoriesData) && categoriesData.length > 0) {
+          setCategoryList(categoriesData.map(c => c.name));
+        }
       })
       .catch(err => {
         console.error('Error fetching data:', err);
+      })
+      .finally(() => {
+        setLoadingPosts(false);
+        setInitialLoading(false);
       });
   }, []);
 
   const handleClosePost = () => {
     setReadingPost(null);
+    setLoadingPost(false);
     const path = window.location.pathname;
     const hash = window.location.hash;
     if (path.startsWith('/posts/') || path.startsWith('/post/') || hash.startsWith('#post/')) {
@@ -621,6 +651,17 @@ export default function App() {
     return matchesCategory && matchesSearch;
   });
 
+  // Reset pagination when filter changes
+  useEffect(() => {
+    setNewsCurrentPage(1);
+  }, [selectedCategory, searchQuery]);
+
+  const totalNewsPages = Math.ceil(filteredPosts.length / postsPerPage) || 1;
+  const paginatedPosts = filteredPosts.slice(
+    (newsCurrentPage - 1) * postsPerPage,
+    newsCurrentPage * postsPerPage
+  );
+
   const handleOpenPost = async (post) => {
     setLoadingPost(true);
     setReadingPost(post);
@@ -666,7 +707,17 @@ export default function App() {
       <>
         <AdminDashboard
           onLogout={handleAdminLogout}
-          onViewSite={() => navigateTo('home')}
+          onViewSite={() => {
+            setLoadingPosts(true);
+            fetchCategories().then(c => { if (Array.isArray(c) && c.length > 0) setCategoryList(c.map(x => x.name)); }).catch(() => {});
+            fetchPosts({ limit: 50 }).then(p => { 
+              if (Array.isArray(p)) setPosts(p); 
+              else if (p && Array.isArray(p.data)) setPosts(p.data); 
+            }).catch(() => {}).finally(() => {
+              setLoadingPosts(false);
+            });
+            navigateTo('home');
+          }}
           token={adminToken}
           initialMustChangePassword={mustChangePassword}
         />
@@ -677,6 +728,13 @@ export default function App() {
 
   const appContent = (
     <div className={`flex flex-col flex-1 ${isForcedDesktop ? 'w-[1200px] min-w-[1200px] mx-auto' : 'w-full'}`}>
+      {/* Top Initial Loading Progress Bar */}
+      {initialLoading && (
+        <div className="fixed top-0 left-0 right-0 h-0.5 z-[100] overflow-hidden bg-emerald-100">
+          <div className="h-full w-full skeleton-strip-emerald" />
+        </div>
+      )}
+
       {/* Forced Desktop Mode Notification Banner */}
       {isForcedDesktop && (
         <div className="bg-emerald-950 text-emerald-100 text-xs py-2 px-4 border-b border-emerald-800 sticky top-0 z-[70] flex items-center justify-between shadow-md">
@@ -975,11 +1033,13 @@ export default function App() {
                 
                 {/* Background Photo with Gradient Tint & Atmosphere */}
                 <div className="absolute inset-0 z-0">
-                  <img 
-                    src={homepageConfig?.hero?.image_url || "/images/hero-banner.jpg"} 
-                    alt="บรรยากาศการเรียนรู้โรงเรียนโพนงามพิทยานุกูล"
-                    className="w-full h-full object-cover opacity-50 scale-105"
-                  />
+                  {homepageConfig?.hero?.image_url && (
+                    <img 
+                      src={homepageConfig.hero.image_url} 
+                      alt="บรรยากาศการเรียนรู้โรงเรียนโพนงามพิทยานุกูล"
+                      className="w-full h-full object-cover opacity-50 scale-105"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#032017] via-[#032017]/65 to-black/40"></div>
                 </div>
 
@@ -1293,44 +1353,52 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {posts.slice(0, 3).map((post) => (
-                    <article 
-                      key={post.id}
-                      onClick={() => handleOpenPost(post)}
-                      className="akat-card overflow-hidden cursor-pointer flex flex-col justify-between group"
-                    >
-                      <div className="aspect-16/10 w-full overflow-hidden bg-[#F0FDF4]">
-                        <OptimizedImage 
-                          src={post.image_url || '/images/news-active-learning.jpg'} 
-                          alt={post.title} 
-                          width={600}
-                          quality={75}
-                          responsive={true}
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                        />
-                      </div>
-                      <div className="p-6 flex-1 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 text-xs text-[#64748B] mb-2.5">
-                            <span className="font-bold text-[#047857] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded-md text-[10px]">
-                              {post.category}
-                            </span>
-                            <span>•</span>
-                            <span>{formatThaiDate(post.created_at)}</span>
+                  {loadingPosts ? (
+                    <NewsCardSkeleton count={3} variant="akat" />
+                  ) : posts.length === 0 ? (
+                    <div className="col-span-full py-12 text-center text-xs text-neutral-400 bg-white rounded-2xl border border-neutral-100">
+                      ยังไม่มีบทความในขณะนี้
+                    </div>
+                  ) : (
+                    posts.slice(0, 3).map((post) => (
+                      <article 
+                        key={post.id}
+                        onClick={() => handleOpenPost(post)}
+                        className="akat-card overflow-hidden cursor-pointer flex flex-col justify-between group"
+                      >
+                        <div className="aspect-16/10 w-full overflow-hidden bg-[#F0FDF4]">
+                          <OptimizedImage 
+                            src={post.image_url || '/images/news-active-learning.jpg'} 
+                            alt={post.title} 
+                            width={600}
+                            quality={75}
+                            responsive={true}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                          />
+                        </div>
+                        <div className="p-6 flex-1 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 text-xs text-[#64748B] mb-2.5">
+                              <span className="font-bold text-[#047857] bg-[#ECFDF5] border border-[#A7F3D0] px-2 py-0.5 rounded-md text-[10px]">
+                                {post.category}
+                              </span>
+                              <span>•</span>
+                              <span>{formatThaiDate(post.created_at)}</span>
+                            </div>
+                            <h4 className="font-bold text-base text-[#0F172A] group-hover:text-[#059669] transition leading-snug line-clamp-2">
+                              {post.title}
+                            </h4>
+                            <p className="text-xs text-[#64748B] mt-2 line-clamp-2 leading-relaxed">
+                              {post.summary || post.content}
+                            </p>
                           </div>
-                          <h4 className="font-bold text-base text-[#0F172A] group-hover:text-[#059669] transition leading-snug line-clamp-2">
-                            {post.title}
-                          </h4>
-                          <p className="text-xs text-[#64748B] mt-2 line-clamp-2 leading-relaxed">
-                            {post.summary || post.content}
-                          </p>
+                          <div className="mt-5 pt-3 border-t border-[#E2E8F0] text-xs font-bold text-[#059669] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                            อ่านต่อ →
+                          </div>
                         </div>
-                        <div className="mt-5 pt-3 border-t border-[#E2E8F0] text-xs font-bold text-[#059669] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                          อ่านต่อ →
-                        </div>
-                      </div>
-                    </article>
-                  ))}
+                      </article>
+                    ))
+                  )}
                 </div>
 
               </section>
@@ -2004,48 +2072,126 @@ export default function App() {
               </div>
 
               {/* News Grid */}
-              {filteredPosts.length === 0 ? (
+              {loadingPosts ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <NewsCardSkeleton count={6} variant="archive" />
+                </div>
+              ) : filteredPosts.length === 0 ? (
                 <div className="py-20 text-center bg-white rounded-3xl border border-neutral-200/80 p-8">
                   <FileText className="w-10 h-10 text-neutral-300 mx-auto mb-3" />
                   <p className="text-xs font-medium text-neutral-500">ไม่พบข่าวสารในหมวดหมู่นี้</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {filteredPosts.map((post) => (
-                    <article 
-                      key={post.id}
-                      onClick={() => handleOpenPost(post)}
-                      className="group cursor-pointer flex flex-col justify-between"
-                    >
-                      <div className="aspect-16/10 w-full overflow-hidden rounded-2xl bg-neutral-100 border border-neutral-200/70 mb-4">
-                        <img 
-                          src={post.image_url || '/images/news-active-learning.jpg'} 
-                          alt={post.title} 
-                          className="w-full h-full object-cover group-hover:scale-103 transition duration-300"
-                        />
-                      </div>
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 text-[11px] text-neutral-400 mb-2">
-                            <span className="font-medium text-neutral-900">{post.category}</span>
-                            <span>•</span>
-                            <span>{formatThaiDate(post.created_at)}</span>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {paginatedPosts.map((post) => (
+                      <article 
+                        key={post.id}
+                        onClick={() => handleOpenPost(post)}
+                        className="group cursor-pointer flex flex-col justify-between"
+                      >
+                        <div className="aspect-16/10 w-full overflow-hidden rounded-2xl bg-neutral-100 border border-neutral-200/70 mb-4">
+                          <OptimizedImage 
+                            src={post.image_url || '/images/news-active-learning.jpg'} 
+                            alt={post.title} 
+                            width={600}
+                            quality={75}
+                            responsive={true}
+                            className="w-full h-full object-cover group-hover:scale-103 transition duration-300"
+                          />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 text-[11px] text-neutral-400 mb-2">
+                              <span className="font-medium text-neutral-900">{post.category}</span>
+                              <span>•</span>
+                              <span>{formatThaiDate(post.created_at)}</span>
+                            </div>
+                            <h4 className="font-semibold text-base text-neutral-950 group-hover:text-neutral-600 transition leading-snug line-clamp-2">
+                              {post.title}
+                            </h4>
+                            <p className="text-xs text-neutral-500 mt-2 line-clamp-2 leading-relaxed font-normal">
+                              {post.summary || post.content}
+                            </p>
                           </div>
-                          <h4 className="font-semibold text-base text-neutral-950 group-hover:text-neutral-600 transition leading-snug line-clamp-2">
-                            {post.title}
-                          </h4>
-                          <p className="text-xs text-neutral-500 mt-2 line-clamp-2 leading-relaxed font-normal">
-                            {post.summary || post.content}
-                          </p>
+                          <div className="mt-4 pt-3 border-t border-neutral-100 text-xs font-medium text-neutral-900 flex items-center justify-between">
+                            <span className="flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">อ่านต่อ <ArrowRight className="w-3.5 h-3.5" /></span>
+                            <span className="text-neutral-400 font-normal flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
+                          </div>
                         </div>
-                        <div className="mt-4 pt-3 border-t border-neutral-100 text-xs font-medium text-neutral-900 flex items-center justify-between">
-                          <span className="flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">อ่านต่อ <ArrowRight className="w-3.5 h-3.5" /></span>
-                          <span className="text-neutral-400 font-normal flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> {post.views || 0}</span>
-                        </div>
+                      </article>
+                    ))}
+                  </div>
+
+                  {/* News Pagination Bar */}
+                  {totalNewsPages > 1 && (
+                    <div className="mt-12 pt-8 border-t border-neutral-200/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="text-xs text-neutral-500">
+                        แสดง <span className="font-medium text-neutral-900">{(newsCurrentPage - 1) * postsPerPage + 1}</span> ถึง{' '}
+                        <span className="font-medium text-neutral-900">{Math.min(newsCurrentPage * postsPerPage, filteredPosts.length)}</span> จากทั้งหมด{' '}
+                        <span className="font-medium text-neutral-900">{filteredPosts.length}</span> ข่าว
                       </div>
-                    </article>
-                  ))}
-                </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setNewsCurrentPage(p => Math.max(1, p - 1));
+                            window.scrollTo({ top: 350, behavior: 'smooth' });
+                          }}
+                          disabled={newsCurrentPage === 1}
+                          className="px-3 py-1.5 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                          <span>ก่อนหน้า</span>
+                        </button>
+
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalNewsPages }, (_, i) => i + 1).map((page) => {
+                            if (
+                              totalNewsPages > 7 &&
+                              page !== 1 &&
+                              page !== totalNewsPages &&
+                              Math.abs(page - newsCurrentPage) > 1
+                            ) {
+                              if (page === 2 || page === totalNewsPages - 1) {
+                                return <span key={page} className="px-1 text-xs text-neutral-400">...</span>;
+                              }
+                              return null;
+                            }
+                            return (
+                              <button
+                                key={page}
+                                onClick={() => {
+                                  setNewsCurrentPage(page);
+                                  window.scrollTo({ top: 350, behavior: 'smooth' });
+                                }}
+                                className={`w-8 h-8 rounded-lg text-xs font-medium transition cursor-pointer flex items-center justify-center ${
+                                  newsCurrentPage === page
+                                    ? 'bg-neutral-950 text-white font-semibold shadow-xs'
+                                    : 'text-neutral-600 hover:bg-neutral-100 border border-transparent hover:border-neutral-200'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            setNewsCurrentPage(p => Math.min(totalNewsPages, p + 1));
+                            window.scrollTo({ top: 350, behavior: 'smooth' });
+                          }}
+                          disabled={newsCurrentPage === totalNewsPages}
+                          className="px-3 py-1.5 rounded-lg border border-neutral-200 text-xs font-medium text-neutral-700 hover:bg-neutral-100 disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>ถัดไป</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
             </div>
@@ -2194,10 +2340,7 @@ export default function App() {
           {currentPage === 'dynamic_page' && (
             <div className="min-h-[60vh] py-12 animate-in fade-in duration-200">
               {loadingDynamicPage ? (
-                <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-neutral-900 mx-auto mb-4" />
-                  <p className="text-xs font-medium text-neutral-500">กำลังโหลดเนื้อหาหน้าเพจ...</p>
-                </div>
+                <DynamicPageSkeleton />
               ) : activeDynamicPage ? (
                 <div>
                   {/* Page Breadcrumbs & Meta header */}
@@ -2248,7 +2391,7 @@ export default function App() {
         </main>
 
       {/* 6. Post Reader Modal (Adaptive: Full-width Bottom Sheet on Mobile, Centered Modal on Desktop) */}
-      {readingPost && (
+      {(readingPost || loadingPost) && (
         <div 
           className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex overflow-y-auto ${
             isMobile && !isForcedDesktop
@@ -2272,82 +2415,81 @@ export default function App() {
               </div>
             )}
 
-            {loadingPost && (
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 py-1 bg-white/95 backdrop-blur-md rounded-full text-xs text-neutral-700 border border-neutral-200 shadow-sm">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-neutral-900" />
-                กำลังโหลด...
-              </div>
-            )}
-
             <button 
               onClick={handleClosePost}
-              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-neutral-900/70 hover:bg-neutral-900 text-white flex items-center justify-center backdrop-blur-sm shadow-md transition cursor-pointer"
+              className="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-neutral-900/70 hover:bg-neutral-900 text-white flex items-center justify-center backdrop-blur-sm shadow-md transition cursor-pointer"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
             </button>
 
-            {readingPost.image_url && (
-              <div className="w-full max-h-[360px] sm:max-h-[440px] md:max-h-[480px] overflow-hidden bg-neutral-100 flex items-center justify-center">
-                <OptimizedImage 
-                  src={readingPost.image_url} 
-                  alt={readingPost.title} 
-                  width={1200}
-                  quality={85}
-                  priority={true}
-                  responsive={true}
-                  className="w-full h-full object-cover object-center"
-                />
-              </div>
-            )}
+            {loadingPost && (!readingPost || !readingPost.content) ? (
+              <PostDetailSkeleton />
+            ) : readingPost ? (
+              <>
+                {readingPost.image_url && (
+                  <div className="w-full max-h-[360px] sm:max-h-[440px] md:max-h-[480px] overflow-hidden bg-neutral-100 flex items-center justify-center">
+                    <OptimizedImage 
+                      src={readingPost.image_url} 
+                      alt={readingPost.title} 
+                      width={1200}
+                      quality={85}
+                      priority={true}
+                      responsive={true}
+                      className="w-full h-full object-cover object-center"
+                    />
+                  </div>
+                )}
 
-            <div className="p-6 sm:p-10 md:p-12 space-y-6 sm:space-y-8">
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
-                  <span className="text-neutral-900 font-semibold bg-neutral-100 px-3 py-1 rounded-full border border-neutral-200/60">
-                    {readingPost.category}
-                  </span>
-                  <span>•</span>
-                  <span>{formatThaiDate(readingPost.created_at)}</span>
-                  <span>•</span>
-                  <span>ผู้เขียน: {readingPost.author || 'โรงเรียนโพนงามพิทยานุกูล'}</span>
+                <div className="p-6 sm:p-10 md:p-12 space-y-6 sm:space-y-8">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                      <span className="text-neutral-900 font-semibold bg-neutral-100 px-3 py-1 rounded-full border border-neutral-200/60">
+                        {readingPost.category}
+                      </span>
+                      <span>•</span>
+                      <span>{formatThaiDate(readingPost.created_at)}</span>
+                      <span>•</span>
+                      <span>ผู้เขียน: {readingPost.author || 'โรงเรียนโพนงามพิทยานุกูล'}</span>
+                    </div>
+
+                    <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-950 leading-snug tracking-tight">
+                      {readingPost.title}
+                    </h3>
+                  </div>
+
+                  {readingPost.summary && (
+                    <div className="p-5 sm:p-6 rounded-2xl bg-neutral-50 border-l-4 border-amber-500 text-neutral-800 text-sm sm:text-base leading-relaxed">
+                      {readingPost.summary}
+                    </div>
+                  )}
+
+                  <div className="text-neutral-700 text-sm sm:text-base leading-relaxed sm:leading-loose whitespace-pre-line font-normal">
+                    {readingPost.content}
+                  </div>
+
+                  <div className="pt-6 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-neutral-400">
+                    <span>ยอดเข้าชม {readingPost.views || 0} ครั้ง</span>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={() => handleCopyPostLink(readingPost)}
+                        className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm flex items-center gap-1.5"
+                        title="คัดลอกลิงก์สำหรับแชร์บน Facebook, Line"
+                      >
+                        {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-emerald-600" />}
+                        <span>{copiedLink ? 'คัดลอกลิงก์แล้ว!' : 'แชร์ลิงก์'}</span>
+                      </button>
+                      <button 
+                        onClick={handleClosePost}
+                        className="px-6 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm"
+                      >
+                        ปิด (ESC)
+                      </button>
+                    </div>
+                  </div>
                 </div>
-
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-950 leading-snug tracking-tight">
-                  {readingPost.title}
-                </h3>
-              </div>
-
-              {readingPost.summary && (
-                <div className="p-5 sm:p-6 rounded-2xl bg-neutral-50 border-l-4 border-amber-500 text-neutral-800 text-sm sm:text-base leading-relaxed">
-                  {readingPost.summary}
-                </div>
-              )}
-
-              <div className="text-neutral-700 text-sm sm:text-base leading-relaxed sm:leading-loose whitespace-pre-line font-normal">
-                {readingPost.content}
-              </div>
-
-              <div className="pt-6 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-neutral-400">
-                <span>ยอดเข้าชม {readingPost.views || 0} ครั้ง</span>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => handleCopyPostLink(readingPost)}
-                    className="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm flex items-center gap-1.5"
-                    title="คัดลอกลิงก์สำหรับแชร์บน Facebook, Line"
-                  >
-                    {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-emerald-600" />}
-                    <span>{copiedLink ? 'คัดลอกลิงก์แล้ว!' : 'แชร์ลิงก์'}</span>
-                  </button>
-                  <button 
-                    onClick={handleClosePost}
-                    className="px-6 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-full font-medium transition cursor-pointer text-xs sm:text-sm"
-                  >
-                    ปิด (ESC)
-                  </button>
-                </div>
-              </div>
-            </div>
+              </>
+            ) : null}
           </div>
         </div>
       )}

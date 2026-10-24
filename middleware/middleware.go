@@ -130,6 +130,25 @@ func ValidateAgentKey(key string) bool {
 	return false
 }
 
+// MCPAgentAuth middleware verifies the X-Agent-Key or allows authenticated MCP session
+func MCPAgentAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		key := ExtractAgentKey(r)
+		if key != "" && ValidateAgentKey(key) {
+			next(w, r)
+			return
+		}
+
+		// For MCP message endpoint, allow active sessionId created via authenticated /mcp/sse
+		if r.URL.Query().Get("sessionId") != "" {
+			next(w, r)
+			return
+		}
+
+		http.Error(w, `{"error": "Unauthorized: Missing Agent Key"}`, http.StatusUnauthorized)
+	}
+}
+
 // AgentAuth middleware verifies the X-Agent-Key (from header, query param, or Bearer auth)
 func AgentAuth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

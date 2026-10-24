@@ -14,12 +14,13 @@ import (
 )
 
 // ListPosts handles GET /api/v1/posts
-// Query params: category, status, limit, search
+// Query params: category, status, limit, page, search, paginate
 func ListPosts(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	status := r.URL.Query().Get("status")
 	search := r.URL.Query().Get("search")
 	limitStr := r.URL.Query().Get("limit")
+	pageStr := r.URL.Query().Get("page")
 
 	limit := 50
 	if limitStr != "" {
@@ -49,9 +50,49 @@ func ListPosts(w http.ResponseWriter, r *http.Request) {
 		query = query.Where("title LIKE ? OR summary LIKE ? OR content LIKE ?", searchTerm, searchTerm, searchTerm)
 	}
 
-	var posts []models.Post
-	if err := query.Order("created_at DESC").Limit(limit).Find(&posts).Error; err != nil {
+	var total int64
+	query.Count(&total)
+
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	totalPages := 0
+	if limit > 0 {
+		totalPages = int((total + int64(limit) - 1) / int64(limit))
+	}
+
+	// Set pagination response headers
+	w.Header().Set("X-Total-Count", strconv.FormatInt(total, 10))
+	w.Header().Set("X-Total-Pages", strconv.Itoa(totalPages))
+	w.Header().Set("X-Current-Page", strconv.Itoa(page))
+	w.Header().Set("X-Page-Size", strconv.Itoa(limit))
+
+	posts := make([]models.Post, 0)
+	execQuery := query.Order("created_at DESC")
+	if pageStr != "" {
+		offset := (page - 1) * limit
+		execQuery = execQuery.Offset(offset)
+	}
+	if err := execQuery.Limit(limit).Find(&posts).Error; err != nil {
 		WriteError(w, http.StatusInternalServerError, "Failed to query posts: "+err.Error())
+		return
+	}
+
+	// If page parameter or paginate=true was requested, return structured envelope
+	if pageStr != "" || r.URL.Query().Get("paginate") == "true" {
+		WriteJSON(w, http.StatusOK, map[string]any{
+			"data": posts,
+			"pagination": map[string]any{
+				"page":        page,
+				"limit":       limit,
+				"total":       total,
+				"total_pages": totalPages,
+			},
+		})
 		return
 	}
 

@@ -19,6 +19,23 @@ type Post struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+type Category struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Name      string    `gorm:"uniqueIndex;not null" json:"name"`
+	Slug      string    `gorm:"uniqueIndex;not null" json:"slug"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type CategoryResponse struct {
+	ID         uint      `json:"id"`
+	Name       string    `json:"name"`
+	Slug       string    `json:"slug"`
+	PostsCount int64     `json:"posts_count"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
 type Page struct {
 	ID             uint      `gorm:"primaryKey" json:"id"`
 	Title          string    `gorm:"not null" json:"title"`
@@ -114,6 +131,16 @@ type UpdatePostRequest struct {
 	ImageURL string `json:"image_url"`
 	Author   string `json:"author"`
 	Status   string `json:"status"`
+}
+
+type CreateCategoryRequest struct {
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}
+
+type UpdateCategoryRequest struct {
+	Name string `json:"name"`
+	Slug string `json:"slug"`
 }
 
 type AgentCreatePostRequest struct {

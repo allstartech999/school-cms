@@ -66,6 +66,7 @@ func main() {
 	// --- Public APIs ---
 	mux.HandleFunc("GET /api/v1/posts", handlers.ListPosts)
 	mux.HandleFunc("GET /api/v1/posts/{id}", handlers.GetPost)
+	mux.HandleFunc("GET /api/v1/categories", handlers.ListCategories)
 	mux.HandleFunc("GET /api/v1/pages", handlers.ListPages)
 	mux.HandleFunc("GET /api/v1/pages/{slug}", handlers.GetPage)
 	mux.HandleFunc("GET /api/v1/stats", handlers.GetStats)
@@ -92,6 +93,9 @@ func main() {
 	mux.HandleFunc("POST /api/v1/posts", middleware.AdminAuth(handlers.CreatePost))
 	mux.HandleFunc("PUT /api/v1/posts/{id}", middleware.AdminAuth(handlers.UpdatePost))
 	mux.HandleFunc("DELETE /api/v1/posts/{id}", middleware.AdminAuth(handlers.DeletePost))
+	mux.HandleFunc("POST /api/v1/categories", middleware.AdminAuth(handlers.CreateCategory))
+	mux.HandleFunc("PUT /api/v1/categories/{id}", middleware.AdminAuth(handlers.UpdateCategory))
+	mux.HandleFunc("DELETE /api/v1/categories/{id}", middleware.AdminAuth(handlers.DeleteCategory))
 	mux.HandleFunc("POST /api/v1/pages", middleware.AdminAuth(handlers.CreatePage))
 	mux.HandleFunc("PUT /api/v1/pages/{id}", middleware.AdminAuth(handlers.UpdatePage))
 	mux.HandleFunc("DELETE /api/v1/pages/{id}", middleware.AdminAuth(handlers.DeletePage))
@@ -128,7 +132,7 @@ func main() {
 		mcpserver.WithMessageEndpoint("/mcp/messages"),
 	)
 	mux.HandleFunc("/mcp/sse", middleware.AgentAuth(sseServer.SSEHandler().ServeHTTP))
-	mux.HandleFunc("/mcp/messages", middleware.AgentAuth(sseServer.MessageHandler().ServeHTTP))
+	mux.HandleFunc("/mcp/messages", middleware.MCPAgentAuth(sseServer.MessageHandler().ServeHTTP))
 
 	// 3. Static Web Handler (SPA Fallback + Static files with Cache-Control)
 	var distFS fs.FS
@@ -145,7 +149,7 @@ func main() {
 		path := r.URL.Path
 
 		// Never fallback for API paths
-		if strings.HasPrefix(path, "/api/") {
+		if strings.HasPrefix(path, "/api/") || strings.HasPrefix(path, "/.well-known/") || strings.HasPrefix(path, "/mcp/") || path == "/register" {
 			handlers.WriteError(w, http.StatusNotFound, "API endpoint not found")
 			return
 		}

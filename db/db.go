@@ -63,7 +63,7 @@ func InitDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	// Auto-migrate tables on PostgreSQL
-	if err := database.AutoMigrate(&models.Post{}, &models.Page{}, &models.Setting{}, &models.Media{}, &models.User{}, &models.AgentKey{}); err != nil {
+	if err := database.AutoMigrate(&models.Post{}, &models.Page{}, &models.Setting{}, &models.Media{}, &models.User{}, &models.AgentKey{}, &models.Category{}); err != nil {
 		return nil, fmt.Errorf("failed to migrate tables: %w", err)
 	}
 
@@ -76,6 +76,12 @@ func InitDB() (*gorm.DB, error) {
 }
 
 func seedInitialData(database *gorm.DB) {
+	// If initial database seed was already executed once, do not re-seed deleted data
+	var seedFlag models.Setting
+	if err := database.Where("key = ?", "initial_seed_completed").First(&seedFlag).Error; err == nil && seedFlag.Value == "true" {
+		return
+	}
+
 	var postCount int64
 	database.Model(&models.Post{}).Count(&postCount)
 
@@ -222,4 +228,21 @@ func seedInitialData(database *gorm.DB) {
 			log.Println("Created initial default admin user in database.")
 		}
 	}
+
+	// Seed initial categories if empty
+	var catCount int64
+	database.Model(&models.Category{}).Count(&catCount)
+	if catCount == 0 {
+		defaultCategories := []models.Category{
+			{Name: "วิชาการ", Slug: "academic"},
+			{Name: "กิจกรรม", Slug: "activities"},
+			{Name: "ประชาสัมพันธ์", Slug: "announcements"},
+			{Name: "ทั่วไป", Slug: "general"},
+		}
+		database.Create(&defaultCategories)
+		log.Println("Created default categories in database.")
+	}
+
+	// Mark initial seed as completed so user deletions are respected permanently
+	database.Create(&models.Setting{Key: "initial_seed_completed", Value: "true"})
 }

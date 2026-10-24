@@ -81,6 +81,7 @@ export default function OptimizedImage({
   responsive = false,
   style,
   onLoad,
+  wrapperClassName = '',
   ...rest
 }) {
   const [imgSrc, setImgSrc] = useState(() => {
@@ -88,6 +89,8 @@ export default function OptimizedImage({
     return getOptimizedImageUrl(src, { width, quality });
   });
   const [hasError, setHasError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const imgRef = React.useRef(null);
 
   // Update src when prop changes
   React.useEffect(() => {
@@ -96,34 +99,70 @@ export default function OptimizedImage({
       return;
     }
     setHasError(false);
+    setIsLoaded(false);
     setImgSrc(getOptimizedImageUrl(src, { width, quality }));
   }, [src, width, quality, fallbackSrc]);
 
-  const handleError = () => {
+  // Handle cached images that are already complete on mount
+  React.useEffect(() => {
+    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
+      setIsLoaded(true);
+    }
+  }, [imgSrc]);
+
+  const handleError = (e) => {
     if (!hasError && fallbackSrc && imgSrc !== fallbackSrc) {
       setHasError(true);
       setImgSrc(fallbackSrc);
+    } else {
+      setIsLoaded(true);
     }
+  };
+
+  const handleLoad = (e) => {
+    setIsLoaded(true);
+    if (onLoad) onLoad(e);
   };
 
   const srcSet = responsive && !hasError ? getOptimizedSrcSet(src, [384, 640, 750, 1080, 1200], quality) : undefined;
 
+  const isFullWidth = className.includes('w-full');
+  const isFullHeight = className.includes('h-full');
+  const roundedMatch = className.match(/\brounded(?:-[a-z0-9]+)?\b/g);
+  const roundedClass = roundedMatch ? roundedMatch.join(' ') : '';
+
   return (
-    <img
-      src={imgSrc}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      loading={priority ? 'eager' : 'lazy'}
-      decoding={priority ? 'sync' : 'async'}
-      fetchPriority={priority ? 'high' : 'auto'}
-      sizes={sizes || (responsive ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw' : undefined)}
-      srcSet={srcSet}
-      onError={handleError}
-      onLoad={onLoad}
-      style={style}
-      {...rest}
-    />
+    <div 
+      className={`relative overflow-hidden ${isFullWidth ? 'w-full' : ''} ${isFullHeight ? 'h-full' : ''} ${roundedClass} ${wrapperClassName}`}
+      style={{
+        aspectRatio: !isFullHeight && width && height ? `${width} / ${height}` : undefined,
+        ...style
+      }}
+    >
+      {/* Skeleton Shimmer Loading Placeholder (smooth cross-fade on load) */}
+      <div 
+        className={`absolute inset-0 skeleton-shimmer z-10 pointer-events-none transition-opacity duration-300 ${
+          isLoaded ? 'opacity-0' : 'opacity-100'
+        }`}
+        aria-hidden="true"
+      />
+
+      <img
+        ref={imgRef}
+        src={imgSrc}
+        alt={alt}
+        width={width}
+        height={height}
+        className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        loading={priority ? 'eager' : 'lazy'}
+        decoding={priority ? 'sync' : 'async'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        sizes={sizes || (responsive ? '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw' : undefined)}
+        srcSet={srcSet}
+        onError={handleError}
+        onLoad={handleLoad}
+        {...rest}
+      />
+    </div>
   );
 }

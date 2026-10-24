@@ -224,6 +224,56 @@ export async function deletePost(id, token) {
   return res.json();
 }
 
+export async function fetchCategories() {
+  const res = await fetch(`${API_BASE}/categories`);
+  if (!res.ok) throw new Error('Failed to fetch categories');
+  return res.json();
+}
+
+export async function createCategory(catData, token) {
+  const res = await fetch(`${API_BASE}/categories`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token,
+    },
+    body: JSON.stringify(catData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to create category');
+  }
+  return res.json();
+}
+
+export async function updateCategory(id, catData, token) {
+  const res = await fetch(`${API_BASE}/categories/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Token': token,
+    },
+    body: JSON.stringify(catData),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update category');
+  }
+  return res.json();
+}
+
+export async function deleteCategory(id, token) {
+  const res = await fetch(`${API_BASE}/categories/${id}`, {
+    method: 'DELETE',
+    headers: { 'X-Admin-Token': token },
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete category');
+  }
+  return res.json();
+}
+
 export async function createPage(pageData, token) {
   const res = await fetch(`${API_BASE}/pages`, {
     method: 'POST',

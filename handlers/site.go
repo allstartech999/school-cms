@@ -81,16 +81,14 @@ func UpdateHomepageConfig(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetNavigationMenu handles GET /api/v1/menu
-// Combines base site pages with dynamic pages marked show_in_menu=true
-func GetNavigationMenu(w http.ResponseWriter, r *http.Request) {
+// GetNavigationMenuInternal returns the current active navigation menu items
+func GetNavigationMenuInternal() []models.MenuItem {
 	// 1. Check if there is an explicit nav_menu override
 	var customMenuSetting models.Setting
 	if err := db.DB.Where("key = ?", "nav_menu").First(&customMenuSetting).Error; err == nil && strings.TrimSpace(customMenuSetting.Value) != "" {
 		var customItems []models.MenuItem
 		if err := json.Unmarshal([]byte(customMenuSetting.Value), &customItems); err == nil && len(customItems) > 0 {
-			WriteJSON(w, http.StatusOK, customItems)
-			return
+			return customItems
 		}
 	}
 
@@ -207,6 +205,28 @@ func GetNavigationMenu(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	return menu
+}
+
+// SaveNavigationMenuInternal saves custom menu items to the database
+func SaveNavigationMenuInternal(items []models.MenuItem) error {
+	b, err := json.Marshal(items)
+	if err != nil {
+		return err
+	}
+
+	setting := models.Setting{
+		Key:   "nav_menu",
+		Value: string(b),
+	}
+
+	return db.DB.Save(&setting).Error
+}
+
+// GetNavigationMenu handles GET /api/v1/menu
+// Combines base site pages with dynamic pages marked show_in_menu=true
+func GetNavigationMenu(w http.ResponseWriter, r *http.Request) {
+	menu := GetNavigationMenuInternal()
 	WriteJSON(w, http.StatusOK, menu)
 }
 
@@ -218,18 +238,7 @@ func UpdateNavigationMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := json.Marshal(items)
-	if err != nil {
-		WriteError(w, http.StatusInternalServerError, "Failed to marshal menu items: "+err.Error())
-		return
-	}
-
-	setting := models.Setting{
-		Key:   "nav_menu",
-		Value: string(b),
-	}
-
-	if err := db.DB.Save(&setting).Error; err != nil {
+	if err := SaveNavigationMenuInternal(items); err != nil {
 		WriteError(w, http.StatusInternalServerError, "Failed to save navigation menu: "+err.Error())
 		return
 	}

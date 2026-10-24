@@ -3,7 +3,7 @@ import { Lock, Eye, EyeOff, Loader2, ArrowLeft, ShieldCheck, KeyRound, User } fr
 import { adminLogin } from '../../api';
 
 export default function AdminLogin({ onLoginSuccess, onClose, schoolInfo }) {
-  const [username, setUsername] = useState('admin');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -93,6 +93,7 @@ export default function AdminLogin({ onLoginSuccess, onClose, schoolInfo }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="กรอกชื่อผู้ใช้งาน..."
+                autoFocus
                 className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 hover:bg-neutral-100/70 focus:bg-white rounded-xl border border-neutral-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm text-neutral-900 transition outline-none"
               />
             </div>
@@ -111,7 +112,6 @@ export default function AdminLogin({ onLoginSuccess, onClose, schoolInfo }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="กรอกรหัสผ่าน..."
-                autoFocus
                 className="w-full pl-10 pr-11 py-2.5 bg-neutral-50 hover:bg-neutral-100/70 focus:bg-white rounded-xl border border-neutral-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm text-neutral-900 transition outline-none"
               />
               <button

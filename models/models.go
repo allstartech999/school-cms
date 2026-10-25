@@ -44,12 +44,14 @@ type Page struct {
 	LayoutData     string    `gorm:"type:text" json:"layout_data"`       // JSON Array of blocks
 	Content        string    `gorm:"not null" json:"content"`            // fallback/searchable text
 	Status         string    `gorm:"default:'published'" json:"status"`
-	ShowInMenu     bool      `gorm:"default:false" json:"show_in_menu"`
-	MenuTitle      string    `json:"menu_title"`                         // Label shown on navbar
-	MenuOrder      int       `gorm:"default:0" json:"menu_order"`        // Sorting order
-	MenuParent     string    `json:"menu_parent"`                        // Parent dropdown grouping (optional)
-	CreatedByAgent bool      `gorm:"default:false" json:"created_by_agent"`
-	AgentName      string    `json:"agent_name,omitempty"`
+	ShowInMenu      bool      `gorm:"default:false" json:"show_in_menu"`
+	MenuTitle       string    `json:"menu_title"`                         // Label shown on navbar
+	MenuOrder       int       `gorm:"default:0" json:"menu_order"`        // Sorting order
+	MenuParent      string    `json:"menu_parent"`                        // Parent dropdown grouping (optional)
+	ShowInBottomNav bool      `gorm:"default:false" json:"show_in_bottom_nav"`
+	MenuIcon        string    `json:"menu_icon"`
+	CreatedByAgent  bool      `gorm:"default:false" json:"created_by_agent"`
+	AgentName       string    `json:"agent_name,omitempty"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 }
@@ -154,30 +156,34 @@ type AgentCreatePostRequest struct {
 }
 
 type CreatePageRequest struct {
-	Title      string `json:"title"`
-	Slug       string `json:"slug"`
-	LayoutType string `json:"layout_type"`
-	LayoutData string `json:"layout_data"`
-	Content    string `json:"content"`
-	Status     string `json:"status"`
-	ShowInMenu bool   `json:"show_in_menu"`
-	MenuTitle  string `json:"menu_title"`
-	MenuOrder  int    `json:"menu_order"`
-	MenuParent string `json:"menu_parent"`
+	Title           string `json:"title"`
+	Slug            string `json:"slug"`
+	LayoutType      string `json:"layout_type"`
+	LayoutData      string `json:"layout_data"`
+	Content         string `json:"content"`
+	Status          string `json:"status"`
+	ShowInMenu      bool   `json:"show_in_menu"`
+	MenuTitle       string `json:"menu_title"`
+	MenuOrder       int    `json:"menu_order"`
+	MenuParent      string `json:"menu_parent"`
+	ShowInBottomNav bool   `json:"show_in_bottom_nav"`
+	MenuIcon        string `json:"menu_icon"`
 }
 
 type AgentCreatePageRequest struct {
-	Title      string `json:"title"`
-	Slug       string `json:"slug"`
-	LayoutType string `json:"layout_type"`
-	LayoutData any    `json:"layout_data"` // Accepts string or JSON structure
-	Content    string `json:"content"`
-	AgentName  string `json:"agent_name"`
-	Publish    bool   `json:"publish"`
-	ShowInMenu bool   `json:"show_in_menu"`
-	MenuTitle  string `json:"menu_title"`
-	MenuOrder  int    `json:"menu_order"`
-	MenuParent string `json:"menu_parent"`
+	Title           string `json:"title"`
+	Slug            string `json:"slug"`
+	LayoutType      string `json:"layout_type"`
+	LayoutData      any    `json:"layout_data"` // Accepts string or JSON structure
+	Content         string `json:"content"`
+	AgentName       string `json:"agent_name"`
+	Publish         bool   `json:"publish"`
+	ShowInMenu      bool   `json:"show_in_menu"`
+	MenuTitle       string `json:"menu_title"`
+	MenuOrder       int    `json:"menu_order"`
+	MenuParent      string `json:"menu_parent"`
+	ShowInBottomNav bool   `json:"show_in_bottom_nav"`
+	MenuIcon        string `json:"menu_icon"`
 }
 
 type AgentFetchMediaRequest struct {
@@ -231,13 +237,16 @@ type UpdateSiteSettingsRequest struct {
 
 // Navigation Menu item definition
 type MenuItem struct {
-	ID         string     `json:"id"`
-	Title      string     `json:"title"`
-	Path       string     `json:"path"`        // e.g. "home", "about", or "/page/ai-robotics"
-	Type       string     `json:"type"`        // "route", "page", "link"
-	IsExternal bool       `json:"is_external"` // if true, opens in new tab
-	Order      int        `json:"order"`
-	Children   []MenuItem `json:"children,omitempty"`
+	ID              string     `json:"id"`
+	Title           string     `json:"title"`
+	Path            string     `json:"path"`        // e.g. "home", "about", or "/page/ai-robotics"
+	Type            string     `json:"type"`        // "route", "page", "link"
+	IsExternal      bool       `json:"is_external"` // if true, opens in new tab
+	Order           int        `json:"order"`
+	ShowInMenu      bool       `json:"show_in_menu"`
+	ShowInBottomNav bool       `json:"show_in_bottom_nav"`
+	Icon            string     `json:"icon,omitempty"`
+	Children        []MenuItem `json:"children,omitempty"`
 }
 
 // Homepage Configuration for AI Site Editor

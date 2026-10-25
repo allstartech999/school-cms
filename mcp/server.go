@@ -475,6 +475,8 @@ func handleCreateOrUpdatePage(ctx context.Context, request mcp.CallToolRequest) 
 	content := request.GetString("content", title)
 	publish := request.GetBool("publish", false)
 	showInMenu := request.GetBool("show_in_menu", false)
+	showInBottomNav := request.GetBool("show_in_bottom_nav", false)
+	menuIcon := request.GetString("menu_icon", "")
 	menuTitle := request.GetString("menu_title", "")
 	menuOrder := request.GetInt("menu_order", 0)
 	menuParent := request.GetString("menu_parent", "")
@@ -495,6 +497,10 @@ func handleCreateOrUpdatePage(ctx context.Context, request mcp.CallToolRequest) 
 		existing.Content = content
 		existing.Status = status
 		existing.ShowInMenu = showInMenu
+		existing.ShowInBottomNav = showInBottomNav
+		if menuIcon != "" {
+			existing.MenuIcon = menuIcon
+		}
 		if menuTitle != "" {
 			existing.MenuTitle = menuTitle
 		}
@@ -512,23 +518,25 @@ func handleCreateOrUpdatePage(ctx context.Context, request mcp.CallToolRequest) 
 			return mcp.NewToolResultError("Failed to update page: " + err.Error()), nil
 		}
 
-		return mcp.NewToolResultText(fmt.Sprintf("Page updated successfully!\nID: %d\nSlug: %s\nStatus: %s\nShowInMenu: %t\nURL: /page/%s", existing.ID, existing.Slug, existing.Status, existing.ShowInMenu, existing.Slug)), nil
+		return mcp.NewToolResultText(fmt.Sprintf("Page updated successfully!\nID: %d\nSlug: %s\nStatus: %s\nShowInMenu: %t\nShowInBottomNav: %t\nURL: /page/%s", existing.ID, existing.Slug, existing.Status, existing.ShowInMenu, existing.ShowInBottomNav, existing.Slug)), nil
 	}
 
 	// Create new
 	page := models.Page{
-		Title:          title,
-		Slug:           slug,
-		LayoutType:     layoutType,
-		LayoutData:     layoutData,
-		Content:        content,
-		Status:         status,
-		ShowInMenu:     showInMenu,
-		MenuTitle:      menuTitle,
-		MenuOrder:      menuOrder,
-		MenuParent:     menuParent,
-		CreatedByAgent: true,
-		AgentName:      agentName,
+		Title:           title,
+		Slug:            slug,
+		LayoutType:      layoutType,
+		LayoutData:      layoutData,
+		Content:         content,
+		Status:          status,
+		ShowInMenu:      showInMenu,
+		MenuTitle:       menuTitle,
+		MenuOrder:       menuOrder,
+		MenuParent:      menuParent,
+		ShowInBottomNav: showInBottomNav,
+		MenuIcon:        menuIcon,
+		CreatedByAgent:  true,
+		AgentName:       agentName,
 	}
 
 	if err := db.DB.Create(&page).Error; err != nil {

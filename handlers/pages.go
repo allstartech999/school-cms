@@ -89,16 +89,18 @@ func CreatePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := models.Page{
-		Title:      req.Title,
-		Slug:       req.Slug,
-		LayoutType: req.LayoutType,
-		LayoutData: req.LayoutData,
-		Content:    req.Content,
-		Status:     req.Status,
-		ShowInMenu: req.ShowInMenu,
-		MenuTitle:  req.MenuTitle,
-		MenuOrder:  req.MenuOrder,
-		MenuParent: req.MenuParent,
+		Title:           req.Title,
+		Slug:            req.Slug,
+		LayoutType:      req.LayoutType,
+		LayoutData:      req.LayoutData,
+		Content:         req.Content,
+		Status:          req.Status,
+		ShowInMenu:      req.ShowInMenu,
+		MenuTitle:       req.MenuTitle,
+		MenuOrder:       req.MenuOrder,
+		MenuParent:      req.MenuParent,
+		ShowInBottomNav: req.ShowInBottomNav,
+		MenuIcon:        req.MenuIcon,
 	}
 
 	if err := db.DB.Create(&page).Error; err != nil {
@@ -139,16 +141,18 @@ func UpdatePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	updates := map[string]any{
-		"title":        req.Title,
-		"content":      req.Content,
-		"status":       req.Status,
-		"layout_type":  req.LayoutType,
-		"layout_data":  req.LayoutData,
-		"show_in_menu": req.ShowInMenu,
-		"menu_title":   req.MenuTitle,
-		"menu_order":   req.MenuOrder,
-		"menu_parent":  req.MenuParent,
-		"updated_at":   time.Now(),
+		"title":              req.Title,
+		"content":            req.Content,
+		"status":             req.Status,
+		"layout_type":        req.LayoutType,
+		"layout_data":        req.LayoutData,
+		"show_in_menu":       req.ShowInMenu,
+		"menu_title":         req.MenuTitle,
+		"menu_order":         req.MenuOrder,
+		"menu_parent":        req.MenuParent,
+		"show_in_bottom_nav": req.ShowInBottomNav,
+		"menu_icon":          req.MenuIcon,
+		"updated_at":         time.Now(),
 	}
 	if req.Slug != "" {
 		updates["slug"] = req.Slug

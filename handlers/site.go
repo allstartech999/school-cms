@@ -95,68 +95,86 @@ func GetNavigationMenuInternal() []models.MenuItem {
 	// 2. Build default navigation menu structure
 	menu := []models.MenuItem{
 		{
-			ID:    "home",
-			Title: "หน้าแรก",
-			Path:  "home",
-			Type:  "route",
-			Order: 10,
+			ID:              "home",
+			Title:           "หน้าแรก",
+			Path:            "home",
+			Type:            "route",
+			Order:           10,
+			ShowInMenu:      true,
+			ShowInBottomNav: true,
+			Icon:            "Home",
 		},
 		{
-			ID:    "about",
-			Title: "เกี่ยวกับโรงเรียน",
-			Path:  "about",
-			Type:  "route",
-			Order: 20,
+			ID:              "about",
+			Title:           "เกี่ยวกับโรงเรียน",
+			Path:            "about",
+			Type:            "route",
+			Order:           20,
+			ShowInMenu:      true,
+			ShowInBottomNav: true,
+			Icon:            "Building2",
 			Children: []models.MenuItem{
 				{
-					ID:    "about-history",
-					Title: "ประวัติความเป็นมาและวิสัยทัศน์",
-					Path:  "history",
-					Type:  "route",
-					Order: 1,
+					ID:         "about-history",
+					Title:      "ประวัติความเป็นมาและวิสัยทัศน์",
+					Path:       "history",
+					Type:       "route",
+					Order:      1,
+					ShowInMenu: true,
 				},
 				{
-					ID:    "about-basic-info",
-					Title: "ข้อมูลพื้นฐานโรงเรียน",
-					Path:  "/page/basic-info",
-					Type:  "page",
-					Order: 2,
+					ID:         "about-basic-info",
+					Title:      "ข้อมูลพื้นฐานโรงเรียน",
+					Path:       "/page/basic-info",
+					Type:       "page",
+					Order:      2,
+					ShowInMenu: true,
 				},
 				{
-					ID:    "about-personnel",
-					Title: "โครงสร้างและบุคลากร",
-					Path:  "about",
-					Type:  "route",
-					Order: 3,
+					ID:         "about-personnel",
+					Title:      "โครงสร้างและบุคลากร",
+					Path:       "about",
+					Type:       "route",
+					Order:      3,
+					ShowInMenu: true,
 				},
 			},
 		},
 		{
-			ID:    "eservice",
-			Title: "ระบบ E-Service",
-			Path:  "eservice",
-			Type:  "route",
-			Order: 30,
+			ID:              "eservice",
+			Title:           "ระบบ E-Service",
+			Path:            "eservice",
+			Type:            "route",
+			Order:           30,
+			ShowInMenu:      true,
+			ShowInBottomNav: true,
+			Icon:            "Sparkles",
 		},
 		{
-			ID:    "news",
-			Title: "ข่าวและประกาศ",
-			Path:  "news",
-			Type:  "route",
-			Order: 40,
+			ID:              "news",
+			Title:           "ข่าวและประกาศ",
+			Path:            "news",
+			Type:            "route",
+			Order:           40,
+			ShowInMenu:      true,
+			ShowInBottomNav: true,
+			Icon:            "Newspaper",
 		},
 		{
-			ID:    "contact",
-			Title: "ติดต่อเรา",
-			Path:  "contact",
-			Type:  "route",
-			Order: 50,
+			ID:              "contact",
+			Title:           "ติดต่อเรา",
+			Path:            "contact",
+			Type:            "route",
+			Order:           50,
+			ShowInMenu:      true,
+			ShowInBottomNav: false,
+			Icon:            "Phone",
 		},
 	}
 
-	// 3. Query pages marked with show_in_menu = true
+	// 3. Query pages marked with show_in_menu = true OR show_in_bottom_nav = true
 	var dynamicPages []models.Page
-	_ = db.DB.Where("show_in_menu = ? AND status = ?", true, "published").
+	_ = db.DB.Where("(show_in_menu = ? OR show_in_bottom_nav = ?) AND status = ?", true, true, "published").
 		Order("menu_order ASC, id ASC").
 		Find(&dynamicPages).Error
 
@@ -167,11 +185,14 @@ func GetNavigationMenuInternal() []models.MenuItem {
 		}
 
 		item := models.MenuItem{
-			ID:    "page-" + p.Slug,
-			Title: title,
-			Path:  "/page/" + p.Slug,
-			Type:  "page",
-			Order: p.MenuOrder,
+			ID:              "page-" + p.Slug,
+			Title:           title,
+			Path:            "/page/" + p.Slug,
+			Type:            "page",
+			Order:           p.MenuOrder,
+			ShowInMenu:      p.ShowInMenu,
+			ShowInBottomNav: p.ShowInBottomNav,
+			Icon:            p.MenuIcon,
 		}
 
 		// Check if it belongs to a parent (e.g. "about" or "eservice")

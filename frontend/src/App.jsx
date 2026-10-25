@@ -703,8 +703,9 @@ export default function App() {
         />
       );
     }
-    return (
-      <>
+
+    const adminContent = (
+      <div className={`flex flex-col flex-1 ${isForcedDesktop ? 'w-[1200px] min-w-[1200px] mx-auto' : 'w-full'}`}>
         <AdminDashboard
           onLogout={handleAdminLogout}
           onViewSite={() => {
@@ -721,8 +722,56 @@ export default function App() {
           token={adminToken}
           initialMustChangePassword={mustChangePassword}
         />
+        <AdaptiveBottomNav
+          menuItems={menuItems}
+          currentPage={currentPage}
+          activeDynamicPage={activeDynamicPage}
+          onNavigate={navigateTo}
+          isAdminLoggedIn={isAdminLoggedIn}
+          newsCount={posts?.length || 0}
+        />
+      </div>
+    );
+
+    if (isForcedMobile) {
+      return (
+        <div className="min-h-screen bg-slate-900/10 py-6 px-3 flex flex-col items-center justify-start overflow-y-auto selection:bg-[#D1FAE5] selection:text-[#065F46]">
+          <div className="w-full max-w-[430px] mb-3 bg-emerald-950 text-emerald-100 text-xs py-2 px-4 rounded-2xl flex items-center justify-between shadow-md border border-emerald-800/80">
+            <div className="flex items-center gap-2">
+              <span>📱</span>
+              <span className="font-semibold">จำลอง "มุมมองมือถือ (Mobile View)"</span>
+            </div>
+            <button
+              onClick={() => setMode('auto')}
+              className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold transition cursor-pointer border border-emerald-500/50"
+            >
+              กลับสู่โหมดอัตโนมัติ
+            </button>
+          </div>
+          <div className="w-full max-w-[430px] min-h-[90vh] bg-[#F4F8F5] text-[#334155] rounded-3xl shadow-2xl border border-slate-300/80 overflow-hidden relative flex flex-col">
+            {adminContent}
+          </div>
+          <AdaptiveModeSwitcher />
+        </div>
+      );
+    }
+
+    if (isForcedDesktop) {
+      return (
+        <div className="min-h-screen bg-slate-900/5 overflow-x-auto selection:bg-[#D1FAE5] selection:text-[#065F46]">
+          <div className="w-[1200px] min-w-[1200px] mx-auto min-h-screen bg-[#F4F8F5] text-[#334155] flex flex-col shadow-xl">
+            {adminContent}
+          </div>
+          <AdaptiveModeSwitcher />
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-[#F4F8F5] text-[#334155] flex flex-col font-sans selection:bg-[#D1FAE5] selection:text-[#065F46]">
+        {adminContent}
         <AdaptiveModeSwitcher />
-      </>
+      </div>
     );
   }
 
@@ -831,7 +880,7 @@ export default function App() {
               { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
               { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
               { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
-            ]).map((item) => {
+            ]).filter(item => item.show_in_menu !== false).map((item) => {
               const active = currentPage === item.path || 
                 (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, '')) ||
                 (item.children && item.children.some(child => 
@@ -953,7 +1002,7 @@ export default function App() {
               { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
               { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
               { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
-            ]).map((item) => {
+            ]).filter(item => item.show_in_menu !== false).map((item) => {
               const active = currentPage === item.path || 
                 (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, '')) ||
                 (item.children && item.children.some(child => 
@@ -2562,7 +2611,9 @@ export default function App() {
 
       {/* Adaptive Mobile Bottom Navigation Bar (Thumb Zone) */}
       <AdaptiveBottomNav
+        menuItems={menuItems}
         currentPage={currentPage}
+        activeDynamicPage={activeDynamicPage}
         onNavigate={navigateTo}
         isAdminLoggedIn={isAdminLoggedIn}
         newsCount={posts?.length || 0}

@@ -161,6 +161,10 @@ func AgentCreateOrUpdatePage(w http.ResponseWriter, r *http.Request) {
 		existing.MenuTitle = req.MenuTitle
 		existing.MenuOrder = req.MenuOrder
 		existing.MenuParent = req.MenuParent
+		existing.ShowInBottomNav = req.ShowInBottomNav
+		if req.MenuIcon != "" {
+			existing.MenuIcon = req.MenuIcon
+		}
 		existing.CreatedByAgent = true
 		existing.AgentName = agentName
 		existing.UpdatedAt = time.Now()
@@ -190,18 +194,20 @@ func AgentCreateOrUpdatePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := models.Page{
-		Title:          req.Title,
-		Slug:           slug,
-		LayoutType:     layoutType,
-		LayoutData:     layoutDataStr,
-		Content:        content,
-		Status:         status,
-		ShowInMenu:     req.ShowInMenu,
-		MenuTitle:      req.MenuTitle,
-		MenuOrder:      req.MenuOrder,
-		MenuParent:     req.MenuParent,
-		CreatedByAgent: true,
-		AgentName:      agentName,
+		Title:           req.Title,
+		Slug:            slug,
+		LayoutType:      layoutType,
+		LayoutData:      layoutDataStr,
+		Content:         content,
+		Status:          status,
+		ShowInMenu:      req.ShowInMenu,
+		MenuTitle:       req.MenuTitle,
+		MenuOrder:       req.MenuOrder,
+		MenuParent:      req.MenuParent,
+		ShowInBottomNav: req.ShowInBottomNav,
+		MenuIcon:        req.MenuIcon,
+		CreatedByAgent:  true,
+		AgentName:       agentName,
 	}
 
 	if err := db.DB.Create(&page).Error; err != nil {

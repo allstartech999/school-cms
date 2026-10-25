@@ -326,6 +326,23 @@ func TestSiteSettingsAPI(t *testing.T) {
 	}
 }
 
+func getTestAdminToken(t *testing.T, app http.Handler) string {
+	loginJSON := `{"username":"admin","password":"` + handlers.GetAdminDefaultPassword() + `"}`
+	req := httptest.NewRequest("POST", "/api/v1/admin/login", bytes.NewReader([]byte(loginJSON)))
+	w := httptest.NewRecorder()
+	app.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("failed to login test admin: %d, body: %s", w.Code, w.Body.String())
+	}
+	var res map[string]any
+	_ = json.Unmarshal(w.Body.Bytes(), &res)
+	token, ok := res["token"].(string)
+	if !ok || token == "" {
+		t.Fatalf("failed to get valid JWT token from login: %v", res)
+	}
+	return token
+}
+
 func TestUserManagement(t *testing.T) {
 	app := setupTestApp(t)
 	if app == nil {
@@ -337,6 +354,8 @@ func TestUserManagement(t *testing.T) {
 		db.DB.Where("username = ?", testUsername).Delete(&models.User{})
 	})
 
+	adminToken := getTestAdminToken(t, app)
+
 	// 1. Create User
 	createUserJSON := `{
 		"username": "test_teacher_2026",
@@ -345,7 +364,7 @@ func TestUserManagement(t *testing.T) {
 		"role": "editor"
 	}`
 	reqCreate := httptest.NewRequest("POST", "/api/v1/users", bytes.NewReader([]byte(createUserJSON)))
-	reqCreate.Header.Set("X-Admin-Token", "authenticated-admin")
+	reqCreate.Header.Set("X-Admin-Token", adminToken)
 	wCreate := httptest.NewRecorder()
 	app.ServeHTTP(wCreate, reqCreate)
 
@@ -355,7 +374,7 @@ func TestUserManagement(t *testing.T) {
 
 	// 2. List Users
 	reqList := httptest.NewRequest("GET", "/api/v1/users", nil)
-	reqList.Header.Set("X-Admin-Token", "authenticated-admin")
+	reqList.Header.Set("X-Admin-Token", adminToken)
 	wList := httptest.NewRecorder()
 	app.ServeHTTP(wList, reqList)
 
@@ -383,13 +402,15 @@ func TestAgentKeyManagement(t *testing.T) {
 		return
 	}
 
+	adminToken := getTestAdminToken(t, app)
+
 	// 1. Create new Agent Key
 	createKeyJSON := `{
 		"name": "Integration Test Key",
 		"description": "API key created during automated test"
 	}`
 	reqCreate := httptest.NewRequest("POST", "/api/v1/agent-keys", bytes.NewReader([]byte(createKeyJSON)))
-	reqCreate.Header.Set("X-Admin-Token", "authenticated-admin")
+	reqCreate.Header.Set("X-Admin-Token", adminToken)
 	wCreate := httptest.NewRecorder()
 	app.ServeHTTP(wCreate, reqCreate)
 
@@ -413,7 +434,7 @@ func TestAgentKeyManagement(t *testing.T) {
 
 	// 2. List Agent Keys
 	reqList := httptest.NewRequest("GET", "/api/v1/agent-keys", nil)
-	reqList.Header.Set("X-Admin-Token", "authenticated-admin")
+	reqList.Header.Set("X-Admin-Token", adminToken)
 	wList := httptest.NewRecorder()
 	app.ServeHTTP(wList, reqList)
 
@@ -466,8 +487,8 @@ func TestMultiUserAuthAndSecurity(t *testing.T) {
 		t.Fatalf("failed to decode login response: %v", err)
 	}
 	adminToken := loginRes["token"].(string)
-	if adminToken != "authenticated-admin" {
-		t.Fatalf("expected token authenticated-admin, got %s", adminToken)
+	if adminToken == "" || strings.Count(adminToken, ".") != 2 {
+		t.Fatalf("expected valid 3-part signed JWT token, got %s", adminToken)
 	}
 
 	// 5. Test token verification with valid admin token
@@ -481,6 +502,7 @@ func TestMultiUserAuthAndSecurity(t *testing.T) {
 
 	// 6. Test token verification with forged / unknown user tokens -> must strictly be 401
 	bogusTokens := []string{
+		"authenticated-admin",
 		"authenticated-nonexistentuser",
 		"authenticated-",
 		"random_token_12345",
@@ -599,6 +621,8 @@ func TestAdminUserProtections(t *testing.T) {
 		return
 	}
 
+	adminToken := getTestAdminToken(t, app)
+
 	var rootAdmin models.User
 	if err := db.DB.Where("LOWER(username) = LOWER(?)", "admin").First(&rootAdmin).Error; err != nil {
 		t.Fatalf("root admin user not found: %v", err)
@@ -606,7 +630,7 @@ func TestAdminUserProtections(t *testing.T) {
 
 	// 1. Attempt to delete root admin (should fail with 400 Bad Request)
 	reqDeleteRoot := httptest.NewRequest("DELETE", fmt.Sprintf("/api/v1/users/%d", rootAdmin.ID), nil)
-	reqDeleteRoot.Header.Set("X-Admin-Token", "authenticated-admin")
+	reqDeleteRoot.Header.Set("X-Admin-Token", adminToken)
 	wDeleteRoot := httptest.NewRecorder()
 	app.ServeHTTP(wDeleteRoot, reqDeleteRoot)
 	if wDeleteRoot.Code != http.StatusBadRequest {
@@ -616,7 +640,7 @@ func TestAdminUserProtections(t *testing.T) {
 	// 2. Attempt to demote root admin role to editor (should fail with 400 Bad Request)
 	demoteJSON := []byte(`{"name": "Admin", "role": "editor"}`)
 	reqDemoteRoot := httptest.NewRequest("PUT", fmt.Sprintf("/api/v1/users/%d", rootAdmin.ID), bytes.NewReader(demoteJSON))
-	reqDemoteRoot.Header.Set("X-Admin-Token", "authenticated-admin")
+	reqDemoteRoot.Header.Set("X-Admin-Token", adminToken)
 	wDemoteRoot := httptest.NewRecorder()
 	app.ServeHTTP(wDemoteRoot, reqDemoteRoot)
 	if wDemoteRoot.Code != http.StatusBadRequest {
@@ -629,6 +653,8 @@ func TestSEORoutesAndSettings(t *testing.T) {
 	if app == nil {
 		return
 	}
+
+	adminToken := getTestAdminToken(t, app)
 
 	// 1. Test GET /robots.txt
 	reqRobots := httptest.NewRequest("GET", "/robots.txt", nil)
@@ -664,7 +690,7 @@ func TestSEORoutesAndSettings(t *testing.T) {
 		"google_site_verification": "google-test-token"
 	}`)
 	reqPutSEO := httptest.NewRequest("PUT", "/api/v1/settings", bytes.NewReader(seoUpdateJSON))
-	reqPutSEO.Header.Set("X-Admin-Token", "authenticated-admin")
+	reqPutSEO.Header.Set("X-Admin-Token", adminToken)
 	wPutSEO := httptest.NewRecorder()
 	app.ServeHTTP(wPutSEO, reqPutSEO)
 

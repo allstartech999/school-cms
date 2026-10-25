@@ -38,8 +38,8 @@ func ListPosts(w http.ResponseWriter, r *http.Request) {
 	if status != "" {
 		query = query.Where("status = ?", status)
 	} else {
-		// By default public API only shows published posts unless admin
-		isAdmin := r.Header.Get("X-Admin-Token") == "authenticated-admin"
+		// By default public API only shows published posts unless authenticated admin
+		isAdmin := GetAuthenticatedUser(r) != nil
 		if !isAdmin {
 			query = query.Where("status = ?", "published")
 		}

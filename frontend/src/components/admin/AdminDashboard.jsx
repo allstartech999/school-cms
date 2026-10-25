@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import PostContent from '../PostContent';
 import {
   LayoutDashboard,
   FileText,
@@ -125,6 +126,11 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
   // Modals
   const [postModalOpen, setPostModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState(null); // null = create new
+  const [postContentTab, setPostContentTab] = useState('write'); // 'write' | 'preview'
+  const [uploadingPostPdf, setUploadingPostPdf] = useState(false);
+  const [uploadingPostImg, setUploadingPostImg] = useState(false);
+  const pdfFileInputRef = useRef(null);
+  const imgFileInputRef = useRef(null);
   const [postFormData, setPostFormData] = useState({
     title: '',
     slug: '',
@@ -276,6 +282,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
   // Handle Post Modal Open
   const handleOpenCreatePost = () => {
     setEditingPost(null);
+    setPostContentTab('write');
     setPostFormData({
       title: '',
       slug: '',
@@ -291,6 +298,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
 
   const handleOpenEditPost = (post) => {
     setEditingPost(post);
+    setPostContentTab('write');
     setPostFormData({
       title: post.title || '',
       slug: post.slug || '',
@@ -337,6 +345,62 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
       showNotification(err.message || 'บันทึกข่าวสารไม่สำเร็จ', 'error');
     } finally {
       setSubmittingPost(false);
+    }
+  };
+
+  const handlePdfUploadToPost = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPostPdf(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('alt_text', file.name);
+      const res = await uploadMedia(formData, token);
+
+      const docTitle = file.name.replace(/\.pdf$/i, '');
+      const markdownTag = `\n\n[${docTitle}.pdf](${res.url})\n\n`;
+
+      setPostFormData((prev) => ({
+        ...prev,
+        content: (prev.content ? prev.content.trimEnd() : '') + markdownTag
+      }));
+      showNotification(`แนบไฟล์ PDF "${file.name}" สำเร็จแล้ว`);
+      fetchMedia(100).then(setMediaList).catch(() => {});
+    } catch (err) {
+      console.error('Failed to upload PDF:', err);
+      showNotification(err.message || 'อัปโหลดไฟล์ PDF ล้มเหลว', 'error');
+    } finally {
+      setUploadingPostPdf(false);
+      if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleImgUploadToPost = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPostImg(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('alt_text', file.name);
+      const res = await uploadMedia(formData, token);
+
+      const imgAlt = file.name.replace(/\.[^/.]+$/, '');
+      const markdownTag = `\n\n![${imgAlt}](${res.url})\n\n`;
+
+      setPostFormData((prev) => ({
+        ...prev,
+        content: (prev.content ? prev.content.trimEnd() : '') + markdownTag
+      }));
+      showNotification(`แทรกรูปภาพ "${file.name}" สำเร็จแล้ว`);
+      fetchMedia(100).then(setMediaList).catch(() => {});
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+      showNotification(err.message || 'อัปโหลดรูปภาพล้มเหลว', 'error');
+    } finally {
+      setUploadingPostImg(false);
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -1889,16 +1953,23 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                       className="group rounded-xl border border-neutral-200 bg-neutral-50 overflow-hidden relative flex flex-col justify-between hover:shadow-md transition"
                     >
                       <div className="aspect-square bg-neutral-200/60 overflow-hidden relative flex items-center justify-center">
-                        <img
-                          src={media.url}
-                          alt={media.alt_text || ''}
-                          className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
-                          }}
-                        />
+                        {media.mime_type?.includes('pdf') || media.url?.toLowerCase().includes('.pdf') ? (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-red-50 text-red-600 p-2 text-center group-hover:bg-red-100/70 transition">
+                            <FileText className="w-9 h-9 mb-1" />
+                            <span className="text-[10px] font-bold tracking-wider uppercase text-red-700">PDF DOC</span>
+                          </div>
+                        ) : (
+                          <img
+                            src={media.url}
+                            alt={media.alt_text || ''}
+                            className="w-full h-full object-cover group-hover:scale-105 transition duration-200"
+                            loading="lazy"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/uploads/2026/10/1792825601083477305-ai.png';
+                            }}
+                          />
+                        )}
                       </div>
 
                       <div className="p-2 text-[10px] space-y-1.5 bg-white">
@@ -2971,15 +3042,111 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
               </div>
 
               <div>
-                <label className="block font-semibold text-neutral-700 mb-1">เนื้อหาข่าวฉบับเต็ม *</label>
-                <textarea
-                  rows="6"
-                  required
-                  value={postFormData.content}
-                  onChange={(e) => setPostFormData({ ...postFormData, content: e.target.value })}
-                  placeholder="เขียนเนื้อหาข่าว รายละเอียด วันที่ สถานที่..."
-                  className="w-full py-2.5 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none leading-relaxed"
-                />
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <label className="block font-semibold text-neutral-700 text-xs">
+                    เนื้อหาข่าวฉบับเต็ม *
+                  </label>
+
+                  {/* Editorial Helper Toolbar */}
+                  <div className="flex items-center gap-1.5">
+                    {/* Hidden file inputs */}
+                    <input
+                      type="file"
+                      ref={pdfFileInputRef}
+                      accept=".pdf,application/pdf"
+                      className="hidden"
+                      onChange={handlePdfUploadToPost}
+                    />
+                    <input
+                      type="file"
+                      ref={imgFileInputRef}
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImgUploadToPost}
+                    />
+
+                    {/* Button: Attach PDF */}
+                    <button
+                      type="button"
+                      disabled={uploadingPostPdf}
+                      onClick={() => pdfFileInputRef.current?.click()}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-50 text-red-700 hover:bg-red-100 border border-red-200/80 transition cursor-pointer disabled:opacity-50"
+                      title="อัปโหลดและฝังเอกสาร PDF ลงในเนื้อหาข่าว"
+                    >
+                      {uploadingPostPdf ? (
+                        <Loader2 className="w-3 h-3 animate-spin text-red-600" />
+                      ) : (
+                        <FileText className="w-3 h-3 text-red-600" />
+                      )}
+                      <span>{uploadingPostPdf ? 'กำลังอัปโหลด...' : 'แนบเอกสาร PDF'}</span>
+                    </button>
+
+                    {/* Button: Attach Image */}
+                    <button
+                      type="button"
+                      disabled={uploadingPostImg}
+                      onClick={() => imgFileInputRef.current?.click()}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200/80 transition cursor-pointer disabled:opacity-50"
+                      title="อัปโหลดและแทรกรูปภาพประกอบ"
+                    >
+                      {uploadingPostImg ? (
+                        <Loader2 className="w-3 h-3 animate-spin text-emerald-600" />
+                      ) : (
+                        <ImageIcon className="w-3 h-3 text-emerald-600" />
+                      )}
+                      <span>{uploadingPostImg ? 'กำลังอัปโหลด...' : 'แทรกรูป'}</span>
+                    </button>
+
+                    {/* Write / Preview Tabs */}
+                    <div className="flex items-center bg-neutral-100 p-0.5 rounded-lg border border-neutral-200 text-[11px] ml-1">
+                      <button
+                        type="button"
+                        onClick={() => setPostContentTab('write')}
+                        className={`px-2 py-0.5 rounded-md font-medium transition cursor-pointer ${
+                          postContentTab === 'write' ? 'bg-white text-neutral-900 shadow-2xs font-semibold' : 'text-neutral-500 hover:text-neutral-900'
+                        }`}
+                      >
+                        แก้ไข
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPostContentTab('preview')}
+                        className={`px-2 py-0.5 rounded-md font-medium transition cursor-pointer ${
+                          postContentTab === 'preview' ? 'bg-white text-emerald-700 shadow-2xs font-semibold' : 'text-neutral-500 hover:text-neutral-900'
+                        }`}
+                      >
+                        ดูตัวอย่าง
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {postContentTab === 'write' ? (
+                  <>
+                    <textarea
+                      rows="7"
+                      required
+                      value={postFormData.content}
+                      onChange={(e) => setPostFormData({ ...postFormData, content: e.target.value })}
+                      placeholder="เขียนเนื้อหาข่าว... สามารถกดปุ่ม 'แนบเอกสาร PDF' ด้านบนเพื่อฝังไฟล์เอกสารได้ทันที"
+                      className="w-full py-2.5 px-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs focus:bg-white focus:border-emerald-500 outline-none leading-relaxed font-mono"
+                    />
+                    <div className="mt-1 flex items-center justify-between text-[11px] text-neutral-400">
+                      <span>รองรับ Markdown เช่น <code>[ชื่อเอกสาร.pdf](url)</code> หรือ <code>![รูป](url)</code></span>
+                      <span>{postFormData.content?.length || 0} ตัวอักษร</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="p-4 bg-neutral-50/70 rounded-xl border border-neutral-200 min-h-[180px] max-h-[380px] overflow-y-auto">
+                    {postFormData.content ? (
+                      <PostContent content={postFormData.content} />
+                    ) : (
+                      <div className="text-center py-8 text-neutral-400 text-xs">
+                        ยังไม่มีเนื้อหาข่าวสำหรับแสดงตัวอย่าง
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-4 border-t border-neutral-100">

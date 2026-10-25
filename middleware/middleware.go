@@ -3,6 +3,7 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"school-cms/auth"
 	"school-cms/db"
 	"school-cms/models"
 	"strings"
@@ -15,6 +16,16 @@ func Logging(next http.Handler) http.Handler {
 		start := time.Now()
 		next.ServeHTTP(w, r)
 		log.Printf("[%s] %s (%v)", r.Method, r.URL.Path, time.Since(start))
+	})
+}
+
+// SecurityHeaders middleware sets defensive HTTP response headers
+func SecurityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "SAMEORIGIN")
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		next.ServeHTTP(w, r)
 	})
 }
 
@@ -34,41 +45,19 @@ func CORS(next http.Handler) http.Handler {
 	})
 }
 
-func extractUserToken(r *http.Request) string {
-	token := r.Header.Get("X-Admin-Token")
-	if token == "" {
-		authHeader := r.Header.Get("Authorization")
-		if strings.HasPrefix(authHeader, "Bearer ") {
-			token = strings.TrimPrefix(authHeader, "Bearer ")
-		} else {
-			token = authHeader
-		}
-	}
-	return strings.TrimSpace(token)
-}
-
 func validateUserToken(r *http.Request) bool {
-	token := extractUserToken(r)
+	token := auth.ExtractUserToken(r)
 	if token == "" {
 		return false
 	}
 
-	var username string
-	if token == "authenticated" || token == "authenticated-admin" {
-		username = "admin"
-	} else if strings.HasPrefix(token, "authenticated-") {
-		username = strings.TrimPrefix(token, "authenticated-")
-	} else {
-		return false
-	}
-
-	username = strings.TrimSpace(username)
-	if username == "" {
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
 		return false
 	}
 
 	var user models.User
-	if err := db.DB.Where("LOWER(username) = LOWER(?)", username).First(&user).Error; err == nil {
+	if err := db.DB.Where("id = ? AND LOWER(username) = LOWER(?)", claims.UserID, claims.Username).First(&user).Error; err == nil {
 		return true
 	}
 	return false

@@ -25,7 +25,10 @@ export default function AdminLogin({ onLoginSuccess, onClose, schoolInfo }) {
 
     try {
       const res = await adminLogin(password, username.trim());
-      const token = res.token || 'authenticated-admin';
+      if (!res.token) {
+        throw new Error('ไม่ได้รับ Token ยืนยันตัวตนจากเซิร์ฟเวอร์');
+      }
+      const token = res.token;
       localStorage.setItem('school_admin_token', token);
       if (res.user) {
         localStorage.setItem('school_admin_user', JSON.stringify(res.user));

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"school-cms/auth"
 	"school-cms/db"
 	"school-cms/models"
 	"strings"
@@ -25,36 +26,18 @@ func GetAdminDefaultPassword() string {
 
 // GetAuthenticatedUser extracts the User from X-Admin-Token or Authorization header
 func GetAuthenticatedUser(r *http.Request) *models.User {
-	token := r.Header.Get("X-Admin-Token")
-	if token == "" {
-		authHeader := r.Header.Get("Authorization")
-		if strings.HasPrefix(authHeader, "Bearer ") {
-			token = strings.TrimPrefix(authHeader, "Bearer ")
-		} else {
-			token = authHeader
-		}
-	}
-	token = strings.TrimSpace(token)
+	token := auth.ExtractUserToken(r)
 	if token == "" {
 		return nil
 	}
 
-	var username string
-	if token == "authenticated" || token == "authenticated-admin" {
-		username = "admin"
-	} else if strings.HasPrefix(token, "authenticated-") {
-		username = strings.TrimPrefix(token, "authenticated-")
-	} else {
-		return nil
-	}
-
-	username = strings.TrimSpace(username)
-	if username == "" {
+	claims, err := auth.ValidateToken(token)
+	if err != nil {
 		return nil
 	}
 
 	var user models.User
-	if err := db.DB.Where("LOWER(username) = LOWER(?)", username).First(&user).Error; err == nil {
+	if err := db.DB.Where("id = ? AND LOWER(username) = LOWER(?)", claims.UserID, claims.Username).First(&user).Error; err == nil {
 		return &user
 	}
 	return nil
@@ -128,7 +111,11 @@ func AdminLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	mustChange := IsPasswordChangeRequiredForUser(&user)
-	token := "authenticated-" + user.Username
+	token, err := auth.GenerateToken(user.ID, user.Username, user.Role, 0)
+	if err != nil {
+		WriteError(w, http.StatusInternalServerError, "ไม่สามารถสร้าง Token ยืนยันตัวตนได้: "+err.Error())
+		return
+	}
 
 	WriteJSON(w, http.StatusOK, map[string]any{
 		"token":                token,
@@ -248,14 +235,12 @@ func GetStats(w http.ResponseWriter, r *http.Request) {
 	previewKey := ""
 	fullKey := ""
 
-	// Fetch most recent active agent key
-	var firstActiveKey models.AgentKey
-	if err := db.DB.Where("is_active = ?", true).Order("created_at desc").First(&firstActiveKey).Error; err == nil {
-		if isAdmin {
+	// Fetch active agent key ONLY if requester is an authenticated admin
+	if isAdmin {
+		var firstActiveKey models.AgentKey
+		if err := db.DB.Where("is_active = ?", true).Order("created_at desc").First(&firstActiveKey).Error; err == nil {
 			fullKey = firstActiveKey.Key
 			previewKey = firstActiveKey.Key
-		} else if len(firstActiveKey.Key) > 12 {
-			previewKey = firstActiveKey.Key[:12] + "..."
 		}
 	}
 

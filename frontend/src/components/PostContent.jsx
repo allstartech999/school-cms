@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ExternalLink, ZoomIn, X } from 'lucide-react';
+import { ExternalLink, ZoomIn, X, FileText } from 'lucide-react';
+import PdfViewerBlock from './PdfViewerBlock';
 
 /**
  * PostContent Component
@@ -28,6 +29,43 @@ export default function PostContent({ content }) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
+
+    // PDF Embed block: @[pdf:Title](url) or ![pdf:Title](url) or @[pdf](url)
+    const explicitPdfMatch = trimmed.match(/^[@!]\[pdf(?::(.*?))?\]\((.*?)\)$/i);
+    if (explicitPdfMatch) {
+      flushParagraph();
+      rawBlocks.push({
+        type: 'pdf',
+        title: explicitPdfMatch[1] ? explicitPdfMatch[1].trim() : '',
+        url: explicitPdfMatch[2].trim()
+      });
+      continue;
+    }
+
+    // Standalone PDF link on its own line: [Title](...pdf) or [Title.pdf](url)
+    const standalonePdfLink = trimmed.match(/^\[(.*?)\]\((.*?\.pdf(?:\?[^)]*)?)\)$/i) || 
+                              trimmed.match(/^\[(.*?\.pdf)\]\((.*?)\)$/i);
+    if (standalonePdfLink) {
+      flushParagraph();
+      rawBlocks.push({
+        type: 'pdf',
+        title: standalonePdfLink[1].trim(),
+        url: standalonePdfLink[2].trim()
+      });
+      continue;
+    }
+
+    // Raw standalone PDF URL on its own line: https://...something.pdf or /uploads/...something.pdf
+    const rawPdfUrlMatch = trimmed.match(/^(https?:\/\/[^\s]+?\.pdf(?:\?[^\s]*)?|\/uploads\/[^\s]+?\.pdf(?:\?[^\s]*)?)$/i);
+    if (rawPdfUrlMatch) {
+      flushParagraph();
+      rawBlocks.push({
+        type: 'pdf',
+        title: '',
+        url: rawPdfUrlMatch[1].trim()
+      });
+      continue;
+    }
 
     // Markdown Image: ![alt](url)
     const imgMatch = trimmed.match(/^!\[(.*?)\]\((.*?)\)$/);
@@ -107,14 +145,23 @@ export default function PostContent({ content }) {
       if (tokenStr.startsWith('[')) {
         const linkM = tokenStr.match(/^\[(.*?)\]\((.*?)\)$/);
         if (linkM) {
+          const isPdf = /\.pdf(?:\?.*)?$/i.test(linkM[2]) || /\.pdf$/i.test(linkM[1]);
+          const href = linkM[2].trim();
+          // Sanitize href to prevent javascript: or data: XSS
+          const isSafeUrl = /^(https?:\/\/|\/|mailto:|tel:)/i.test(href);
+          const safeHref = isSafeUrl ? href : '#';
           tokens.push(
             <a 
               key={`link-${keyIdx++}`} 
-              href={linkM[2]} 
+              href={safeHref} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="text-emerald-700 hover:text-emerald-800 underline font-medium inline-flex items-center gap-1 transition"
+              className={isPdf
+                ? "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-700 font-medium transition border border-red-200/60 text-xs sm:text-sm mx-1 align-baseline shadow-2xs"
+                : "text-emerald-700 hover:text-emerald-800 underline font-medium inline-flex items-center gap-1 transition"
+              }
             >
+              {isPdf && <FileText className="w-3.5 h-3.5 text-red-600 shrink-0" />}
               <span>{linkM[1]}</span>
               <ExternalLink className="w-3.5 h-3.5 inline-block opacity-75 shrink-0" />
             </a>
@@ -180,6 +227,17 @@ export default function PostContent({ content }) {
                 </div>
               ))}
             </div>
+          );
+        }
+
+        // Embedded PDF Block
+        if (block.type === 'pdf') {
+          return (
+            <PdfViewerBlock
+              key={`pdf-${idx}`}
+              url={block.url}
+              title={block.title}
+            />
           );
         }
 

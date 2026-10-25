@@ -197,8 +197,8 @@ func main() {
 		handlers.ServeSEOPage(w, r, nil)
 	})
 
-	// Wrap router with CORS and Logging middlewares
-	handler := middleware.CORS(middleware.Logging(mux))
+	// Wrap router with SecurityHeaders, CORS and Logging middlewares
+	handler := middleware.SecurityHeaders(middleware.CORS(middleware.Logging(mux)))
 
 	port := os.Getenv("PORT")
 	if port == "" {

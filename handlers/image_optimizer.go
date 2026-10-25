@@ -168,6 +168,8 @@ func determineFormat(r *http.Request, explicitFormat, srcExt string) string {
 func ServeOptimizedUpload(w http.ResponseWriter, r *http.Request) {
 	relPath := r.URL.Path
 
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+
 	// If no image processing queries are present, serve directly with caching headers
 	q := r.URL.Query()
 	if q.Get("w") == "" && q.Get("width") == "" && q.Get("q") == "" && q.Get("quality") == "" && q.Get("format") == "" {

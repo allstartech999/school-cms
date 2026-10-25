@@ -1,5 +1,19 @@
 const API_BASE = '/api/v1';
 
+export function getAuthToken(token) {
+  if (token) return token;
+  try {
+    return localStorage.getItem('school_admin_token') || '';
+  } catch {
+    return '';
+  }
+}
+
+export function authHeaders(token) {
+  const t = getAuthToken(token);
+  return t ? { 'X-Admin-Token': t, 'Authorization': `Bearer ${t}` } : {};
+}
+
 export async function fetchPosts(params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = query ? `${API_BASE}/posts?${query}` : `${API_BASE}/posts`;
@@ -64,7 +78,7 @@ export async function adminVerify(token) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -78,7 +92,7 @@ export async function adminChangePassword(oldPassword, newPassword, token) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
   });
@@ -92,7 +106,7 @@ export async function adminChangePassword(oldPassword, newPassword, token) {
 export async function fetchAdminStats(token) {
   const res = await fetch(`${API_BASE}/stats`, {
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) throw new Error('Failed to fetch admin stats');
@@ -109,7 +123,7 @@ export async function uploadMedia(formData, token) {
   const res = await fetch(`${API_BASE}/media/upload`, {
     method: 'POST',
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: formData,
   });
@@ -124,7 +138,7 @@ export async function deleteMedia(id, token) {
   const res = await fetch(`${API_BASE}/media/${id}`, {
     method: 'DELETE',
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -139,7 +153,7 @@ export async function updateHomepageConfig(config, token) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify(config),
   });
@@ -155,7 +169,7 @@ export async function updateNavigationMenu(menu, token) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify(menu),
   });
@@ -170,7 +184,7 @@ export async function resetNavigationMenu(token) {
   const res = await fetch(`${API_BASE}/menu/reset`, {
     method: 'POST',
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -185,7 +199,7 @@ export async function createPost(postData, token) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token,
+      ...authHeaders(token),
     },
     body: JSON.stringify(postData),
   });
@@ -201,7 +215,7 @@ export async function updatePost(id, postData, token) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token,
+      ...authHeaders(token),
     },
     body: JSON.stringify(postData),
   });
@@ -215,7 +229,7 @@ export async function updatePost(id, postData, token) {
 export async function deletePost(id, token) {
   const res = await fetch(`${API_BASE}/posts/${id}`, {
     method: 'DELETE',
-    headers: { 'X-Admin-Token': token },
+    headers: { ...authHeaders(token) },
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -235,7 +249,7 @@ export async function createCategory(catData, token) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token,
+      ...authHeaders(token),
     },
     body: JSON.stringify(catData),
   });
@@ -251,7 +265,7 @@ export async function updateCategory(id, catData, token) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token,
+      ...authHeaders(token),
     },
     body: JSON.stringify(catData),
   });
@@ -265,7 +279,7 @@ export async function updateCategory(id, catData, token) {
 export async function deleteCategory(id, token) {
   const res = await fetch(`${API_BASE}/categories/${id}`, {
     method: 'DELETE',
-    headers: { 'X-Admin-Token': token },
+    headers: { ...authHeaders(token) },
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -279,7 +293,7 @@ export async function createPage(pageData, token) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify(pageData),
   });
@@ -295,7 +309,7 @@ export async function updatePage(id, pageData, token) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify(pageData),
   });
@@ -310,7 +324,7 @@ export async function deletePage(id, token) {
   const res = await fetch(`${API_BASE}/pages/${id}`, {
     method: 'DELETE',
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -341,7 +355,7 @@ export async function agentCreateOrUpdatePage(pageData, agentKey) {
 export async function fetchUsers(token) {
   const res = await fetch(`${API_BASE}/users`, {
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -356,7 +370,7 @@ export async function createUser(userData, token) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify(userData),
   });
@@ -372,7 +386,7 @@ export async function updateUser(id, userData, token) {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify(userData),
   });
@@ -387,7 +401,7 @@ export async function deleteUser(id, token) {
   const res = await fetch(`${API_BASE}/users/${id}`, {
     method: 'DELETE',
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -401,7 +415,7 @@ export async function deleteUser(id, token) {
 export async function fetchAgentKeys(token) {
   const res = await fetch(`${API_BASE}/agent-keys`, {
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -416,7 +430,7 @@ export async function createAgentKey(keyData, token) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
     body: JSON.stringify(keyData),
   });
@@ -431,7 +445,7 @@ export async function deleteAgentKey(id, token) {
   const res = await fetch(`${API_BASE}/agent-keys/${id}`, {
     method: 'DELETE',
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {
@@ -445,7 +459,7 @@ export async function toggleAgentKey(id, token) {
   const res = await fetch(`${API_BASE}/agent-keys/${id}/toggle`, {
     method: 'PUT',
     headers: {
-      'X-Admin-Token': token || 'authenticated-admin',
+      ...authHeaders(token),
     },
   });
   if (!res.ok) {

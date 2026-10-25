@@ -40,8 +40,10 @@ import {
   Building2,
   Newspaper,
   Phone,
-  GraduationCap
+  GraduationCap,
+  Puzzle
 } from 'lucide-react';
+import AdminExtensions from './AdminExtensions';
 import {
   fetchPosts,
   createPost,
@@ -917,6 +919,20 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
               <span>คลังภาพและสื่อ ({mediaList.length})</span>
             </button>
 
+            {(!currentUser || !currentUser.role || currentUser.role === 'admin' || currentUser.role === 'administrator') && (
+              <button
+                onClick={() => setActiveTab('extensions')}
+                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition cursor-pointer whitespace-nowrap ${
+                  activeTab === 'extensions'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-neutral-400 hover:text-white hover:bg-neutral-800/60'
+                }`}
+              >
+                <Puzzle className="w-3.5 h-3.5" />
+                <span>ปลั๊กอิน & ส่วนเสริม (Plugins)</span>
+              </button>
+            )}
+
             <button
               onClick={() => setActiveTab('customizer')}
               className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition cursor-pointer whitespace-nowrap ${
@@ -1059,7 +1075,7 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <button
                     onClick={handleOpenCreatePost}
                     className="p-3.5 sm:p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/60 text-emerald-800 transition text-left cursor-pointer group flex sm:block items-center gap-3 sm:gap-0"
@@ -1096,6 +1112,19 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
                     <div>
                       <div className="font-semibold text-xs">อัปโหลดรูปภาพ</div>
                       <div className="text-[11px] text-purple-600/80 mt-0.5">คลังสื่อและรูปภาพโรงเรียน</div>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab('extensions')}
+                    className="p-3.5 sm:p-4 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-100/60 text-amber-900 transition text-left cursor-pointer group flex sm:block items-center gap-3 sm:gap-0"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center sm:mb-2.5 shadow-sm group-hover:scale-105 transition shrink-0">
+                      <Puzzle className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-xs">ปลั๊กอิน & Storage (Plugins)</div>
+                      <div className="text-[11px] text-amber-700/80 mt-0.5">Cloudflare R2, S3 & ส่วนเสริม</div>
                     </div>
                   </button>
                 </div>
@@ -1777,6 +1806,29 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
         {/* ================= TAB 4: MEDIA LIBRARY ================= */}
         {activeTab === 'media' && (
           <div className="space-y-4 sm:space-y-6">
+            {/* Storage Provider Status Banner */}
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                  <Puzzle className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white">ระบบจัดเก็บไฟล์และปลั๊กอิน (Storage & Plugins)</h4>
+                  <p className="text-[11px] text-neutral-400 mt-0.5">
+                    สามารถเชื่อมต่อ Cloudflare R2, AWS S3, MinIO หรือจัดการส่วนเสริมของระบบได้ที่นี่
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('extensions')}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0"
+              >
+                <span>เปิดหน้าตั้งค่าปลั๊กอิน (Plugins)</span>
+                <span>→</span>
+              </button>
+            </div>
+
             {/* Upload Box */}
             <div className="bg-white rounded-2xl p-4 sm:p-6 border border-neutral-200/80 shadow-xs">
               <h3 className="text-sm font-bold text-neutral-900 mb-1">อัปโหลดรูปภาพใหม่ (Media Upload)</h3>
@@ -2325,6 +2377,11 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
           </div>
         )}
 
+        {/* ================= TAB: EXTENSIONS & STORAGE PLUGINS ================= */}
+        {activeTab === 'extensions' && (
+          <AdminExtensions token={token} showNotification={showNotification} />
+        )}
+
         {/* ================= TAB 7: SETTINGS & SECURITY ================= */}
         {activeTab === 'settings' && (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -2496,6 +2553,34 @@ export default function AdminDashboard({ onLogout, onViewSite, token, initialMus
 
             {/* Change Password & Security */}
             <div className="space-y-4 sm:space-y-6">
+              {/* Plugins & Storage Extension Shortcut Card */}
+              <div className="bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-2xl p-4 sm:p-5 text-white border border-neutral-700/80 shadow-xs">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
+                      <Puzzle className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-white">ปลั๊กอินและส่วนเสริมระบบ (Plugins & Storage)</h4>
+                      <p className="text-[11px] text-neutral-300 mt-0.5">
+                        ติดตั้งส่วนเสริม, เชื่อมต่อ Cloud Storage (Cloudflare R2, AWS S3, MinIO), สถิติ และ SEO
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 pt-3 border-t border-neutral-700/60 flex items-center justify-between">
+                  <span className="text-[11px] text-neutral-400">ระบบจัดเก็บไฟล์และ Extensions</span>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('extensions')}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+                  >
+                    <span>เปิดหน้าปลั๊กอิน (Plugins)</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+
               <div className="bg-white rounded-2xl p-4 sm:p-6 border border-neutral-200/80 shadow-xs">
                 <div className="flex items-center gap-2 mb-1">
                   <Key className="w-4 h-4 text-emerald-600" />

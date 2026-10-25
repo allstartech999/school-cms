@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"school-cms/db"
 	"testing"
 )
 
@@ -47,5 +48,9 @@ func TestListPostsPaginationLogic(t *testing.T) {
 }
 
 func testDBAvailable() bool {
-	return false // DB setup is handled in main_test.go
+	if db.DB != nil {
+		return true
+	}
+	_, err := db.InitTestDB()
+	return err == nil
 }

@@ -39,13 +39,6 @@ type PageMeta struct {
 
 // GetBaseURL resolves the canonical base domain for the current request
 func GetBaseURL(r *http.Request) string {
-	if siteURL := strings.TrimRight(os.Getenv("SITE_URL"), "/"); siteURL != "" {
-		return siteURL
-	}
-	if appURL := strings.TrimRight(os.Getenv("APP_URL"), "/"); appURL != "" {
-		return appURL
-	}
-
 	scheme := "http"
 	if r != nil {
 		if r.TLS != nil || strings.HasPrefix(strings.ToLower(r.Header.Get("X-Forwarded-Proto")), "https") || r.Header.Get("X-Forwarded-Ssl") == "on" {
@@ -57,9 +50,21 @@ func GetBaseURL(r *http.Request) string {
 			// In case of multiple comma-separated proxy hosts, pick the first
 			host = strings.TrimSpace(strings.Split(fHost, ",")[0])
 		}
-		if host != "" {
+		// If request has a valid host that is not a local dev port, use it directly
+		if host != "" && !strings.HasPrefix(host, "localhost") && !strings.HasPrefix(host, "127.0.0.1") {
 			return scheme + "://" + host
 		}
+	}
+
+	if siteURL := strings.TrimRight(os.Getenv("SITE_URL"), "/"); siteURL != "" {
+		return siteURL
+	}
+	if appURL := strings.TrimRight(os.Getenv("APP_URL"), "/"); appURL != "" {
+		return appURL
+	}
+
+	if r != nil && r.Host != "" {
+		return scheme + "://" + r.Host
 	}
 
 	return scheme + "://localhost:8080"
@@ -358,6 +363,16 @@ func InjectMetaTags(rawHTML []byte, meta PageMeta) []byte {
 		sb.WriteString(fmt.Sprintf("    <meta property=\"og:image\" content=\"%s\" />\n", html.EscapeString(meta.OgImage)))
 		if strings.HasPrefix(meta.OgImage, "https://") {
 			sb.WriteString(fmt.Sprintf("    <meta property=\"og:image:secure_url\" content=\"%s\" />\n", html.EscapeString(meta.OgImage)))
+		}
+		sb.WriteString("    <meta property=\"og:image:width\" content=\"1200\" />\n")
+		sb.WriteString("    <meta property=\"og:image:height\" content=\"630\" />\n")
+		if strings.HasSuffix(strings.ToLower(meta.OgImage), ".png") {
+			sb.WriteString("    <meta property=\"og:image:type\" content=\"image/png\" />\n")
+		} else {
+			sb.WriteString("    <meta property=\"og:image:type\" content=\"image/jpeg\" />\n")
+		}
+		if meta.Title != "" {
+			sb.WriteString(fmt.Sprintf("    <meta property=\"og:image:alt\" content=\"%s\" />\n", html.EscapeString(meta.Title)))
 		}
 	}
 	sb.WriteString("    <meta property=\"og:locale\" content=\"th_TH\" />\n")

@@ -17,10 +17,15 @@ export default defineConfig(({ mode }) => {
       emptyOutDir: true,
     },
     server: {
+      host: true,
       port: 3000,
       allowedHosts: true,
       proxy: {
         '/api': {
+          target: `http://localhost:${env.PORT || 8080}`,
+          changeOrigin: true,
+        },
+        '/uploads': {
           target: `http://localhost:${env.PORT || 8080}`,
           changeOrigin: true,
         },

@@ -19,11 +19,12 @@ import (
 )
 
 func setupTestApp(t *testing.T) http.Handler {
+	_ = os.Setenv("APP_ENV", "test")
 	_ = godotenv.Load()
 
-	_, err := db.InitDB()
+	_, err := db.InitTestDB()
 	if err != nil {
-		t.Skipf("skipping test: database not reachable: %v", err)
+		t.Fatalf("failed to initialize test database: %v", err)
 		return nil
 	}
 

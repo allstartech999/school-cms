@@ -17,6 +17,11 @@ var DB *gorm.DB
 
 // InitDB initializes PostgreSQL connection exclusively
 func InitDB() (*gorm.DB, error) {
+	if isTestEnvironment() && os.Getenv("ALLOW_LIVE_DB_TEST") != "true" {
+		log.Println("[SAFETY GUARD] Running in test mode! Diverting InitDB() to isolated In-Memory SQLite to protect live database.")
+		return InitTestDB()
+	}
+
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		host := os.Getenv("DB_HOST")
@@ -63,7 +68,7 @@ func InitDB() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	// Auto-migrate tables on PostgreSQL
-	if err := database.AutoMigrate(&models.Post{}, &models.Page{}, &models.Setting{}, &models.Media{}, &models.User{}, &models.AgentKey{}, &models.Category{}); err != nil {
+	if err := database.AutoMigrate(&models.Post{}, &models.Page{}, &models.Setting{}, &models.Media{}, &models.User{}, &models.AgentKey{}, &models.Category{}, &models.Extension{}); err != nil {
 		return nil, fmt.Errorf("failed to migrate tables: %w", err)
 	}
 

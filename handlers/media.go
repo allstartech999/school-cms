@@ -1,15 +1,16 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
 	"school-cms/db"
 	"school-cms/models"
+	"school-cms/storage"
 	"strconv"
 	"strings"
 	"time"
@@ -58,22 +59,12 @@ func SaveMediaFromURL(sourceURL, altText, agentName string) (*models.Media, erro
 		ext = ".pdf"
 	}
 
-	subDir := EnsureUploadDir()
 	uniqueName := fmt.Sprintf("%d-%s%s", time.Now().UnixNano(), "ai", ext)
-	diskPath := filepath.Join(UploadBaseDir, subDir, uniqueName)
-
-	out, err := os.Create(diskPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create local file: %w", err)
-	}
-	defer out.Close()
-
-	size, err := io.Copy(out, resp.Body)
+	provider := storage.GetActiveProvider()
+	publicURL, size, err := provider.Save(context.Background(), uniqueName, resp.Body, resp.ContentLength, contentType)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save media content: %w", err)
 	}
-
-	publicURL := fmt.Sprintf("/uploads/%s/%s", filepath.ToSlash(subDir), uniqueName)
 
 	if altText == "" {
 		altText = "ภาพประกอบจาก AI Agent"
@@ -120,29 +111,18 @@ func UploadMedia(w http.ResponseWriter, r *http.Request) {
 		ext = ".bin"
 	}
 
-	subDir := EnsureUploadDir()
 	uniqueName := fmt.Sprintf("%d-%s%s", time.Now().UnixNano(), "upload", ext)
-	diskPath := filepath.Join(UploadBaseDir, subDir, uniqueName)
-
-	dst, err := os.Create(diskPath)
-	if err != nil {
-		WriteError(w, http.StatusInternalServerError, "Failed to save file on disk: "+err.Error())
-		return
-	}
-	defer dst.Close()
-
-	size, err := io.Copy(dst, file)
-	if err != nil {
-		WriteError(w, http.StatusInternalServerError, "Failed to write file data: "+err.Error())
-		return
-	}
-
 	mimeType := handler.Header.Get("Content-Type")
 	if mimeType == "" {
 		mimeType = mime.TypeByExtension(ext)
 	}
 
-	publicURL := fmt.Sprintf("/uploads/%s/%s", filepath.ToSlash(subDir), uniqueName)
+	provider := storage.GetActiveProvider()
+	publicURL, size, err := provider.Save(r.Context(), uniqueName, file, handler.Size, mimeType)
+	if err != nil {
+		WriteError(w, http.StatusInternalServerError, "Failed to save media: "+err.Error())
+		return
+	}
 
 	media := models.Media{
 		Filename:       uniqueName,
@@ -216,7 +196,11 @@ func DeleteMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Delete from local disk if exists
+	// Delete file using storage provider
+	provider := storage.GetActiveProvider()
+	_ = provider.Delete(r.Context(), media.URL)
+
+	// Fallback delete from local disk if it was stored locally
 	if strings.HasPrefix(media.URL, "/uploads/") {
 		trimmed := strings.TrimPrefix(media.URL, "/uploads/")
 		localPath := filepath.Join(UploadBaseDir, filepath.FromSlash(trimmed))

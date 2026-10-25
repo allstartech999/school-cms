@@ -74,6 +74,78 @@ type Setting struct {
 	Value string `gorm:"not null" json:"value"`
 }
 
+type Extension struct {
+	ID           string    `gorm:"primaryKey" json:"id"` // e.g. "storage-local", "storage-r2", "storage-s3"
+	Name         string    `gorm:"not null" json:"name"`
+	Category     string    `gorm:"not null;default:'storage'" json:"category"` // "storage", "analytics", "seo", "utility"
+	Description  string    `json:"description"`
+	Version      string    `json:"version"`
+	Author       string    `json:"author"`
+	Icon         string    `json:"icon"` // icon name e.g. "HardDrive", "Cloud", "Server"
+	Installed    bool      `gorm:"default:false" json:"installed"`
+	Enabled      bool      `gorm:"default:false" json:"enabled"`
+	Config       string    `gorm:"type:text" json:"config"`        // JSON string of config key-values
+	ConfigSchema string    `gorm:"type:text" json:"config_schema"` // JSON string of field definitions
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type ExtensionCatalogItem struct {
+	ID              string                 `json:"id"`
+	Name            string                 `json:"name"`
+	Category        string                 `json:"category"`
+	Description     string                 `json:"description"`
+	Version         string                 `json:"version"`
+	Author          string                 `json:"author"`
+	Icon            string                 `json:"icon"`
+	Installed       bool                   `json:"installed"`
+	Enabled         bool                   `json:"enabled"`
+	IsActiveStorage bool                   `json:"is_active_storage"`
+	Config          map[string]interface{} `json:"config"`
+	ConfigSchema    []ExtensionFieldSchema `json:"config_schema"`
+	CreatedAt       *time.Time             `json:"created_at,omitempty"`
+	UpdatedAt       *time.Time             `json:"updated_at,omitempty"`
+}
+
+type ExtensionFieldSchema struct {
+	Key         string   `json:"key"`
+	Label       string   `json:"label"`
+	Type        string   `json:"type"` // "text", "password", "number", "select", "textarea", "boolean"
+	Placeholder string   `json:"placeholder,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Required    bool     `json:"required"`
+	Default     string   `json:"default,omitempty"`
+	Options     []string `json:"options,omitempty"`
+}
+
+type ExtensionInstallRequest struct {
+	ID           string                 `json:"id"`
+	Name         string                 `json:"name,omitempty"`
+	Category     string                 `json:"category,omitempty"`
+	Description  string                 `json:"description,omitempty"`
+	Version      string                 `json:"version,omitempty"`
+	Author       string                 `json:"author,omitempty"`
+	Icon         string                 `json:"icon,omitempty"`
+	Config       map[string]interface{} `json:"config,omitempty"`
+	ConfigSchema []ExtensionFieldSchema `json:"config_schema,omitempty"`
+	ManifestJSON string                 `json:"manifest_json,omitempty"`
+}
+
+type ExtensionConfigUpdateRequest struct {
+	Config  map[string]interface{} `json:"config"`
+	Enabled *bool                  `json:"enabled,omitempty"`
+}
+
+type ExtensionTestRequest struct {
+	Config map[string]interface{} `json:"config"`
+}
+
+type ExtensionTestResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+	Details string `json:"details,omitempty"`
+}
+
 type User struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Username  string    `gorm:"uniqueIndex;not null" json:"username"`

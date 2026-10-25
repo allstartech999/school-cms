@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { fetchPosts, fetchPost, fetchStats, fetchHomepageConfig, fetchMenu, fetchPage, fetchCategories } from './api';
 import BlockRenderer from './components/BlockRenderer';
+import PostContent from './components/PostContent';
 import OptimizedImage from './components/OptimizedImage';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminLogin from './components/admin/AdminLogin';
@@ -1403,13 +1404,13 @@ export default function App() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {loadingPosts ? (
-                    <NewsCardSkeleton count={3} variant="akat" />
+                    <NewsCardSkeleton count={6} variant="akat" />
                   ) : posts.length === 0 ? (
                     <div className="col-span-full py-12 text-center text-xs text-neutral-400 bg-white rounded-2xl border border-neutral-100">
                       ยังไม่มีบทความในขณะนี้
                     </div>
                   ) : (
-                    posts.slice(0, 3).map((post) => (
+                    posts.slice(0, 6).map((post) => (
                       <article 
                         key={post.id}
                         onClick={() => handleOpenPost(post)}
@@ -2513,9 +2514,7 @@ export default function App() {
                     </div>
                   )}
 
-                  <div className="text-neutral-700 text-sm sm:text-base leading-relaxed sm:leading-loose whitespace-pre-line font-normal">
-                    {readingPost.content}
-                  </div>
+                  <PostContent content={readingPost.content} />
 
                   <div className="pt-6 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-neutral-400">
                     <span>ยอดเข้าชม {readingPost.views || 0} ครั้ง</span>

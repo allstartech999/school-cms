@@ -114,6 +114,20 @@ func main() {
 	mux.HandleFunc("DELETE /api/v1/agent-keys/{id}", middleware.AdminAuth(handlers.DeleteAgentKey))
 	mux.HandleFunc("PUT /api/v1/agent-keys/{id}/toggle", middleware.AdminAuth(handlers.ToggleAgentKey))
 
+	// --- Extension & Plugin Management APIs (Protected by AdminAuth) ---
+	// Extensions support Filo Storage, Google Drive OAuth, R2/S3/MinIO, analytics, SEO plugins
+	mux.HandleFunc("GET /api/v1/extensions", middleware.AdminAuth(handlers.ListExtensions))
+	mux.HandleFunc("POST /api/v1/extensions/install", middleware.AdminAuth(handlers.InstallExtension))
+	mux.HandleFunc("POST /api/v1/extensions/{id}/uninstall", middleware.AdminAuth(handlers.UninstallExtension))
+	mux.HandleFunc("PUT /api/v1/extensions/{id}/toggle", middleware.AdminAuth(handlers.ToggleExtension))
+	mux.HandleFunc("PUT /api/v1/extensions/{id}/config", middleware.AdminAuth(handlers.UpdateExtensionConfig))
+	mux.HandleFunc("POST /api/v1/extensions/{id}/test", middleware.AdminAuth(handlers.TestExtension))
+
+	// Google Drive OAuth 2.0 flow
+	mux.HandleFunc("GET /api/v1/extensions/google-drive/oauth/url", middleware.AdminAuth(handlers.GetGoogleDriveOAuthURL))
+	mux.HandleFunc("GET /api/v1/extensions/google-drive/oauth/callback", handlers.HandleGoogleDriveOAuthCallback)
+	mux.HandleFunc("POST /api/v1/extensions/google-drive/disconnect", middleware.AdminAuth(handlers.DisconnectGoogleDrive))
+
 	// --- AI Agent APIs (Protected by AgentAuth: X-Agent-Key) ---
 	mux.HandleFunc("GET /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentListPosts))
 	mux.HandleFunc("POST /api/v1/agent/posts", middleware.AgentAuth(handlers.AgentCreatePost))

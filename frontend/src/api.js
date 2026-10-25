@@ -496,4 +496,126 @@ export function getOptimizedImageUrl(src, { width, quality = 75, format } = {}) 
   return `/api/v1/images?${params.toString()}`;
 }
 
+// ==========================================
+// Extensions & Storage Plugins APIs
+// ==========================================
+
+export async function fetchExtensions(token) {
+  const headers = {};
+  if (token) headers['X-Admin-Token'] = token;
+  const res = await fetch(`${API_BASE}/extensions`, { headers });
+  if (!res.ok) throw new Error('Failed to fetch extensions');
+  return res.json();
+}
+
+export async function installExtension(data, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['X-Admin-Token'] = token;
+  const res = await fetch(`${API_BASE}/extensions/install`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to install extension');
+  }
+  return res.json();
+}
+
+export async function uninstallExtension(id, token) {
+  const headers = {};
+  if (token) headers['X-Admin-Token'] = token;
+  const res = await fetch(`${API_BASE}/extensions/${id}/uninstall`, {
+    method: 'POST',
+    headers,
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to uninstall extension');
+  }
+  return res.json();
+}
+
+export async function toggleExtension(id, token) {
+  const headers = {};
+  if (token) headers['X-Admin-Token'] = token;
+  const res = await fetch(`${API_BASE}/extensions/${id}/toggle`, {
+    method: 'PUT',
+    headers,
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to toggle extension');
+  }
+  return res.json();
+}
+
+export async function updateExtensionConfig(id, config, enabled, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['X-Admin-Token'] = token;
+  const body = { config };
+  if (typeof enabled === 'boolean') body.enabled = enabled;
+  const res = await fetch(`${API_BASE}/extensions/${id}/config`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to update extension configuration');
+  }
+  return res.json();
+}
+
+export async function testExtension(id, config, token) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['X-Admin-Token'] = token;
+  const res = await fetch(`${API_BASE}/extensions/${id}/test`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ config }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to test extension connection');
+  }
+  return res.json();
+}
+
+export async function fetchGoogleDriveOAuthURL(clientId, extId, token) {
+  const headers = {};
+  if (token) headers['X-Admin-Token'] = token;
+  const params = new URLSearchParams();
+  if (clientId) params.set('client_id', clientId);
+  if (extId) params.set('ext_id', extId);
+  // Pass current origin redirect URI
+  const origin = window.location.origin;
+  params.set('redirect_uri', `${origin}/api/v1/extensions/google-drive/oauth/callback`);
+  const res = await fetch(`${API_BASE}/extensions/google-drive/oauth/url?${params.toString()}`, { headers });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to get Google OAuth URL');
+  }
+  return res.json();
+}
+
+export async function disconnectGoogleDrive(extId, token) {
+  const headers = {};
+  if (token) headers['X-Admin-Token'] = token;
+  const params = new URLSearchParams();
+  if (extId) params.set('ext_id', extId);
+  const res = await fetch(`${API_BASE}/extensions/google-drive/disconnect?${params.toString()}`, {
+    method: 'POST',
+    headers,
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || 'Failed to disconnect Google Drive');
+  }
+  return res.json();
+}
+
+
+
 

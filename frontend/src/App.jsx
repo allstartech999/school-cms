@@ -371,7 +371,7 @@ export default function App() {
       name: 'นายดนุพล คำชมภู',
       role: 'หัวหน้ากลุ่มบริหารงานวิชาการ',
       position: 'ครูชำนาญการพิเศษ',
-      photo: '/uploads/2026/10/1792825707114914547-ai.jfif',
+      photo: 'https://lh3.googleusercontent.com/d/1ZtrK9xN5PWOs8q3o3mKKVhr27z1uR1jE',
       group: 'กลุ่มบริหารงานวิชาการ',
       badge: 'ฝ่ายวิชาการ',
       duties: [
@@ -385,7 +385,7 @@ export default function App() {
       name: 'นายปรมินทร์ อัตตะเนย์',
       role: 'หัวหน้ากลุ่มบริหารงานบุคคล',
       position: 'ครูชำนาญการ',
-      photo: '/uploads/2026/10/1792825720471807597-ai.jfif',
+      photo: 'https://lh3.googleusercontent.com/d/1yAelLsHVAtH0LZj46MUAze8YxPgU40rZ',
       group: 'กลุ่มบริหารงานบุคคล',
       badge: 'ฝ่ายบุคคล',
       duties: [
@@ -399,7 +399,7 @@ export default function App() {
       name: 'นายโยธิน อสุริยิน',
       role: 'หัวหน้ากลุ่มบริหารงบประมาณ',
       position: 'ครูชำนาญการพิเศษ',
-      photo: '/uploads/2026/10/1792825720240762293-ai.jfif',
+      photo: 'https://lh3.googleusercontent.com/d/1NxZnDVN1P6rrFWaIsbt1kCpEiTFvQ2tU',
       group: 'กลุ่มบริหารงบประมาณ',
       badge: 'ฝ่ายงบประมาณ',
       duties: [
@@ -413,7 +413,7 @@ export default function App() {
       name: 'นางสาวรัตนาภรณ์ พลกำแหง',
       role: 'หัวหน้ากลุ่มบริหารทั่วไป',
       position: 'ครูชำนาญการ',
-      photo: '/uploads/2026/10/1792825718445051488-ai.jfif',
+      photo: 'https://lh3.googleusercontent.com/d/1VljoUUEydUorcpgsq5Dyn4MSQ1tpnrGP',
       group: 'กลุ่มบริหารงานทั่วไป',
       badge: 'ฝ่ายทั่วไป',
       duties: [
@@ -433,7 +433,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี', 
       subject: 'กลุ่มสาระวิทยาศาสตร์ฯ (ฟิสิกส์)',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825707114914547-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/1ZtrK9xN5PWOs8q3o3mKKVhr27z1uR1jE' 
     },
     { 
       name: 'นายโยธิน อสุริยิน', 
@@ -441,7 +441,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี', 
       subject: 'กลุ่มสาระวิทยาศาสตร์ฯ (ชีววิทยา)',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825720240762293-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/1NxZnDVN1P6rrFWaIsbt1kCpEiTFvQ2tU' 
     },
     { 
       name: 'นางสาวรัตนาภรณ์ พลกำแหง', 
@@ -449,7 +449,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี', 
       subject: 'กลุ่มสาระวิทยาศาสตร์ฯ (เคมี)',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825718445051488-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/1VljoUUEydUorcpgsq5Dyn4MSQ1tpnrGP' 
     },
     { 
       name: 'นายปรมินทร์ อัตตะเนย์', 
@@ -457,7 +457,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี', 
       subject: 'กลุ่มสาระวิทยาศาสตร์ฯ (คอมพิวเตอร์)',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825720471807597-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/1yAelLsHVAtH0LZj46MUAze8YxPgU40rZ' 
     },
     { 
       name: 'นายพงษ์ธนิต โถทอง', 
@@ -465,7 +465,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้คณิตศาสตร์', 
       subject: 'กลุ่มสาระคณิตศาสตร์',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825719806958850-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/18nuEMOe5gwvFiEgq6mpbE5cej8lT5sWO' 
     },
     { 
       name: 'นางปริญญาพร อัตตะเนย์', 
@@ -473,7 +473,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้ภาษาไทย', 
       subject: 'กลุ่มสาระภาษาไทย',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825721062810425-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/1EZ0hZo-Pv9zuFNgBt2_xnaWqMA4sEZlZ' 
     },
     { 
       name: 'นายเกียรติยศ ชมเชย', 
@@ -481,7 +481,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้สุขศึกษาและพลศึกษา', 
       subject: 'กลุ่มสาระสุขศึกษาและพลศึกษา',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825721246164453-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/1ur7WNxXOLPa8exYdg7DwcuHz0VJe8mDn' 
     },
     { 
       name: 'นายณัฏฐ์วัฒน์ นิลพุฒวรกุล', 
@@ -489,7 +489,7 @@ export default function App() {
       department: 'กลุ่มสาระการเรียนรู้ศิลปะ', 
       subject: 'กลุ่มสาระศิลปะ (ดนตรีศึกษา)',
       category: 'teacher',
-      photo: '/uploads/2026/10/1792825721472141397-ai.jfif' 
+      photo: 'https://lh3.googleusercontent.com/d/15kdu2w-4v-Oi_cBFbh4cRlDMyYRe0lLK' 
     },
     { 
       name: 'นางสาวอโนทัย พึ่งเปี่ยม', 
@@ -505,7 +505,7 @@ export default function App() {
       department: 'ฝ่ายสนับสนุนการศึกษา', 
       subject: 'งานสารบรรณ ธุรการ และสารสนเทศ',
       category: 'staff',
-      photo: '/uploads/2026/10/1792825601083477305-ai.png' 
+      photo: 'https://lh3.googleusercontent.com/d/1U8zqfFv2yb7LMpm0GcZ0QLQSa3soRv-Y' 
     },
     { 
       name: 'นายบุญเรือง ดวงสุฤทธิ์', 
@@ -1275,7 +1275,7 @@ export default function App() {
                     <div className="relative w-full max-w-sm rounded-[32px] overflow-hidden bg-white shadow-xl border border-[#E2E8F0] p-3">
                       <div className="rounded-[24px] overflow-hidden aspect-4/5 bg-[#F0FDF4]">
                         <OptimizedImage 
-                          src="/uploads/2026/10/1792823594077728192-ai.jfif" 
+                          src="https://lh3.googleusercontent.com/d/1WakMg6J8vVUHvdQeh8m4XQUV8Ivss0If" 
                           alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการ"
                           width={400}
                           quality={80}
@@ -1552,7 +1552,7 @@ export default function App() {
                 <div className="max-w-2xl mx-auto akat-card p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center sm:text-left relative z-10 shadow-lg border-2 border-[#D1FAE5]">
                   <div className="w-36 h-48 sm:w-44 sm:h-56 rounded-2xl overflow-hidden bg-[#F0FDF4] border-2 border-[#10B981]/40 shadow-md shrink-0">
                     <img 
-                      src="/uploads/2026/10/1792823594077728192-ai.jfif" 
+                      src="https://lh3.googleusercontent.com/d/1WakMg6J8vVUHvdQeh8m4XQUV8Ivss0If" 
                       alt="นายวัชรินทร์ ติดวงษา ผู้อำนวยการโรงเรียน" 
                       className="w-full h-full object-cover object-top"
                     />

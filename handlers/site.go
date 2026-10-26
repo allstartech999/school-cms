@@ -88,6 +88,25 @@ func GetNavigationMenuInternal() []models.MenuItem {
 	if err := db.DB.Where("key = ?", "nav_menu").First(&customMenuSetting).Error; err == nil && strings.TrimSpace(customMenuSetting.Value) != "" {
 		var customItems []models.MenuItem
 		if err := json.Unmarshal([]byte(customMenuSetting.Value), &customItems); err == nil && len(customItems) > 0 {
+			// Auto-heal legacy or invalid data where ShowInMenu is missing/false for all items
+			hasAnyVisible := false
+			for i := range customItems {
+				if customItems[i].ShowInMenu {
+					hasAnyVisible = true
+					break
+				}
+			}
+			if !hasAnyVisible {
+				for i := range customItems {
+					customItems[i].ShowInMenu = true
+					if i < 4 {
+						customItems[i].ShowInBottomNav = true
+					}
+					for j := range customItems[i].Children {
+						customItems[i].Children[j].ShowInMenu = true
+					}
+				}
+			}
 			return customItems
 		}
 	}

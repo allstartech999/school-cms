@@ -82,6 +82,27 @@ export default function App() {
     };
   });
   const [menuItems, setMenuItems] = useState([]);
+  const defaultNavItems = [
+    { id: 'home', title: 'หน้าแรก', path: 'home' },
+    { 
+      id: 'about', 
+      title: 'เกี่ยวกับโรงเรียน', 
+      path: 'about',
+      children: [
+        { id: 'about-history', title: 'ประวัติความเป็นมาและวิสัยทัศน์', path: 'history' },
+        { id: 'about-basic-info', title: 'ข้อมูลพื้นฐานโรงเรียน', path: '/page/basic-info' },
+        { id: 'about-personnel', title: 'โครงสร้างและบุคลากร', path: 'about' },
+      ]
+    },
+    { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
+    { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
+    { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
+  ];
+  const visibleMenuItems = (() => {
+    const list = Array.isArray(menuItems) && menuItems.length > 0 ? menuItems : defaultNavItems;
+    const filtered = list.filter(item => item && item.show_in_menu !== false);
+    return filtered.length > 0 ? filtered : defaultNavItems;
+  })();
   const [activeDynamicPage, setActiveDynamicPage] = useState(null);
   const [loadingDynamicPage, setLoadingDynamicPage] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
@@ -890,22 +911,7 @@ export default function App() {
           {/* Desktop Navigation Links & Action Button Group */}
           <div className={`${showMobileNav ? 'hidden' : 'flex'} items-center gap-3 xl:gap-5 shrink-0`}>
             <nav className="flex items-center gap-1 xl:gap-1.5">
-            {(menuItems && menuItems.length > 0 ? menuItems : [
-              { id: 'home', title: 'หน้าแรก', path: 'home' },
-              { 
-                id: 'about', 
-                title: 'เกี่ยวกับโรงเรียน', 
-                path: 'about',
-                children: [
-                  { id: 'about-history', title: 'ประวัติความเป็นมาและวิสัยทัศน์', path: 'history' },
-                  { id: 'about-basic-info', title: 'ข้อมูลพื้นฐานโรงเรียน', path: '/page/basic-info' },
-                  { id: 'about-personnel', title: 'โครงสร้างและบุคลากร', path: 'about' },
-                ]
-              },
-              { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
-              { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
-              { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
-            ]).filter(item => item.show_in_menu !== false).map((item) => {
+            {visibleMenuItems.map((item) => {
               const active = currentPage === item.path || 
                 (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, '')) ||
                 (item.children && item.children.some(child => 
@@ -1012,22 +1018,7 @@ export default function App() {
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
           <div className={`${showMobileNav ? 'block' : 'hidden'} border-t border-[#E2E8F0] bg-white px-6 py-4 space-y-1.5 shadow-lg`}>
-            {(menuItems && menuItems.length > 0 ? menuItems : [
-              { id: 'home', title: 'หน้าแรก', path: 'home' },
-              { 
-                id: 'about', 
-                title: 'เกี่ยวกับโรงเรียน', 
-                path: 'about',
-                children: [
-                  { id: 'about-history', title: 'ประวัติความเป็นมาและวิสัยทัศน์', path: 'history' },
-                  { id: 'about-basic-info', title: 'ข้อมูลพื้นฐานโรงเรียน', path: '/page/basic-info' },
-                  { id: 'about-personnel', title: 'โครงสร้างและบุคลากร', path: 'about' },
-                ]
-              },
-              { id: 'eservice', title: 'ระบบ E-Service', path: 'eservice' },
-              { id: 'news', title: 'ข่าวและประกาศ', path: 'news' },
-              { id: 'contact', title: 'ติดต่อเรา', path: 'contact' },
-            ]).filter(item => item.show_in_menu !== false).map((item) => {
+            {visibleMenuItems.map((item) => {
               const active = currentPage === item.path || 
                 (currentPage === 'dynamic_page' && activeDynamicPage?.slug === item.path?.replace(/^\/?page\//, '')) ||
                 (item.children && item.children.some(child => 
